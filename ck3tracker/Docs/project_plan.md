@@ -12,6 +12,24 @@ This document defines the architecture, providers, data flow, dashboard requirem
 Use this file as a **project map**.  
 Check off items as you complete them.
 
+## 📖 Living Journal Goal
+The app is the living journal of a run, beginning with the tracked ruler's birth and continuing until the player decides the run is dead. It must retain the run's history, goals, realm changes, and observations so the current dashboard is only the latest view of a longer story.
+
+The run lifecycle is:
+
+- `active`: accepts observations, goal changes, and holdings updates
+- `dead`: player-declared end state; history remains visible but updates are blocked
+
+The existing seeded data and dead-run placeholder are the initial implementation of this lifecycle and should remain useful while real parquet integration is developed.
+
+### Journal Requirements
+- stable playthrough and ruler identity from birth through death
+- dated run observations and state changes
+- historical goal records, including the duchies populated for each goal
+- current-state views derived from the latest journal state
+- readable completed journals after a run is declared dead
+- no destructive deletion when a run ends
+
 ---
 
 ## 📂 Data Sources
@@ -170,6 +188,30 @@ The dashboard needs:
 - `low_control_count`  
 - `avg_development`  
 - `terrain_distribution`  
+
+### Goal-Driven Duchy Summary Table
+The dashboard includes a goal-driven, county-derived duchy summary table. The user first selects a playthrough goal, such as forming the Kingdom of Sicily. The selected goal identifies the target title and automatically populates the duchies that contribute toward that title.
+
+The table is a worklist for achieving the goal. It answers the practical question: how many counties are held in each target duchy, how many counties exist in that duchy, and how close is the player to satisfying the duchy title requirement?
+
+| Column | Meaning |
+| --- | --- |
+| `Duchy` | Target duchy name, automatically populated from the selected goal title |
+| `Have` | Counties currently held by the player in that duchy |
+| `Count` | Total counties belonging to the duchy |
+| `Title` | Current title-state or availability marker for the duchy |
+
+The table includes a final target-title summary row with the total counties held, total counties in the selected goal scope, and the held percentage. The sample table is illustrative only; its duchies must change when the user selects a different goal. The `Title` marker is presentation data and must retain the source value until title-state codes are formalized.
+
+Required derived fields:
+- `goal_title_id`
+- `goal_title_name`
+- `target_duchy_ids`
+- `duchy_name`
+- `counties_held`
+- `county_count`
+- `title_state`
+- `counties_held_percent` for the target-title summary row
 
 ---
 

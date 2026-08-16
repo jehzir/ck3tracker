@@ -46,6 +46,7 @@ def create_updater_panel(selected_row=None, selected_holding=None):
                                         {"label": "Gifted", "value": "gifted"},
                                     ],
                                     value=selected_holding.get("Status", "domain"),
+                                    className="updater-status-dropdown",
                                     style={"width": "100%"},
                                 )
                             ],

@@ -21,7 +21,7 @@ def layout():
                 page_size=20,
                 filter_action="native",
                 sort_action="native",
-                row_selectable="multi",
+                   row_selectable="single",
                 selected_rows=[],
                 style_table={
                     "overflowX": "auto",

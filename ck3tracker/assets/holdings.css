@@ -1,0 +1,101 @@
+.updater-status-dropdown .Select-control {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    color: #e0e0e0;
+}
+
+.updater-status-dropdown .Select-value-label,
+.updater-status-dropdown .Select-placeholder,
+.updater-status-dropdown .Select-input > input {
+    color: #e0e0e0 !important;
+}
+
+.updater-status-dropdown .Select-arrow {
+    border-color: #b8b8b8 transparent transparent;
+}
+
+.updater-status-dropdown .Select-menu-outer {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    color: #e0e0e0;
+    z-index: 10;
+}
+
+.updater-status-dropdown .VirtualizedSelectOption,
+.updater-status-dropdown .Select-option {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+.updater-status-dropdown .VirtualizedSelectFocusedOption,
+.updater-status-dropdown .Select-option.is-focused {
+    background-color: #4a5f6f;
+    color: #ffffff;
+}
+
+.updater-status-dropdown .Select-option.is-selected {
+    background-color: #4a7c7e;
+    color: #ffffff;
+}
+
+.updater-status-dropdown {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    color: #e0e0e0;
+}
+
+.updater-status-dropdown .dash-dropdown-grid-container,
+.updater-status-dropdown .dash-dropdown-value,
+.updater-status-dropdown .dash-dropdown-value-item {
+    color: #e0e0e0;
+}
+
+.updater-status-dropdown .dash-dropdown-trigger-icon,
+.updater-status-dropdown .dash-dropdown-clear {
+    color: #b8b8b8;
+}
+
+.dash-dropdown-menu {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    color: #e0e0e0;
+}
+
+.dash-dropdown-menu-item {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+.dash-dropdown-menu-item:hover,
+.dash-dropdown-menu-item[aria-selected="true"] {
+    background-color: #4a5f6f;
+    color: #ffffff;
+}
+
+.dash-dropdown-content {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    color: #e0e0e0;
+}
+
+.dash-dropdown-search-container,
+.dash-dropdown-search-container input {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+.dash-dropdown-option {
+    background-color: #2b2b2b;
+    color: #e0e0e0 !important;
+}
+
+.dash-dropdown-option * {
+    color: #e0e0e0 !important;
+}
+
+.dash-dropdown-option:hover,
+.dash-dropdown-option[data-highlighted="true"] {
+    background-color: #4a5f6f;
+    color: #ffffff;
+}
