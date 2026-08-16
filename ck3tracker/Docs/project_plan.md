@@ -213,8 +213,8 @@ Dashboard reads the dictionary and updates:
 - [x] Step 9.7 — Update imports to match scaffolding
 - [x] Step 9.8 — Verify dashboard runs successfully
 
-### **Phase 1: Provider Implementation** — NEXT
-- [ ] Step 10 — Create Holding dataclass
+### **Phase 1: Provider Implementation** — IN PROGRESS
+- [x] Step 10 — Create Holding dataclass
 - [ ] Step 11 — Create County dataclass
 - [ ] Step 12 — Create Duchy dataclass
 - [ ] Step 13 — Create Character dataclass
@@ -232,6 +232,13 @@ Dashboard reads the dictionary and updates:
 - [ ] Step 25 — Implement CountiesProvider `get_counties()`
 - [ ] Step 26 — Implement DuchiesProvider `get_duchies()`
 - [ ] Step 27 — Implement CharacterProvider `get_character()`
+
+### **Current Working State (Holdings First Build)**
+- [x] Holdings provider seeded with realistic dummy rows so the UI renders and remains functional.
+- [x] Holdings table is active and displays a working dark-theme grid.
+- [x] Dead-run placeholder playthroughs are visible as explicit "dead" entries.
+- [ ] New-run creation is deferred as an admin task until the holdings section is assembled.
+- [ ] Real parquet-backed provider replacement is next once the UI shell is stable.
 
 ### **Phase 2: Dashboard Service**
 - [ ] Step 28 — Implement DashboardService `get_dashboard_metrics()`

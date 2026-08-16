@@ -18,6 +18,10 @@ def layout():
                 columns=holdings_columns,
                 data=holdings,
                 page_size=20,
+                filter_action="native",
+                sort_action="native",
+                row_selectable="multi",
+                selected_rows=[],
                 style_table={
                     "overflowX": "auto",
                     "borderRadius": "8px",
@@ -40,7 +44,18 @@ def layout():
                     "minWidth": "90px",
                     "maxWidth": "180px",
                 },
+                style_cell_conditional=[
+                    {
+                        "if": {"column_id": "Barony_Name"},
+                        "fontWeight": "bold",
+                    }
+                ],
                 style_data_conditional=[
+                    {
+                        "if": {"state": "selected"},
+                        "backgroundColor": "#4a5f6f",
+                        "border": "1px solid #6a8f9f",
+                    },
                     {
                         "if": {"filter_query": "{Status} eq 'domain'"},
                         "backgroundColor": "#1f2d2d",

@@ -2,19 +2,21 @@
 from schemas.playthrough_schema import Playthrough
 
 
-# Seed data - initial playthroughs
+# Seed data - placeholder dead runs
 SEED_PLAYTHROUGHS = [
     Playthrough(
-        playthrough_id="crt_mallorca_867",
-        ruler_name="CarthageRunMallorca",
+        playthrough_id="dummy_dead_mallorca_867",
+        ruler_name="Dead Run Placeholder",
         start_year=867,
-        starting_domain_capital="Mallorca"
+        starting_domain_capital="Mallorca",
+        status="dead"
     ),
     Playthrough(
-        playthrough_id="byzant_867",
-        ruler_name="Byzantine Emperor",
+        playthrough_id="dummy_dead_byzant_867",
+        ruler_name="Dead Run Placeholder",
         start_year=867,
-        starting_domain_capital="Constantinople"
+        starting_domain_capital="Constantinople",
+        status="dead"
     ),
 ]
 
@@ -32,13 +34,27 @@ def get_playthrough(playthrough_id):
     return _playthroughs.get(playthrough_id)
 
 
-def create_playthrough(playthrough_id, ruler_name, start_year, starting_domain_capital):
+def create_playthrough(playthrough_id, ruler_name, start_year, starting_domain_capital, status="active"):
     """Create a new playthrough."""
     playthrough = Playthrough(
         playthrough_id=playthrough_id,
         ruler_name=ruler_name,
         start_year=start_year,
-        starting_domain_capital=starting_domain_capital
+        starting_domain_capital=starting_domain_capital,
+        status=status,
     )
     _playthroughs[playthrough_id] = playthrough
     return playthrough
+
+
+def create_default_playthrough():
+    """Create a new clean playthrough and make it active."""
+    index = len(_playthroughs) + 1
+    playthrough_id = f"clean_run_{index}_{__import__('time').time_ns()}"
+    return create_playthrough(
+        playthrough_id=playthrough_id,
+        ruler_name=f"Fresh Campaign {index}",
+        start_year=867,
+        starting_domain_capital="New Realm",
+        status="active",
+    )

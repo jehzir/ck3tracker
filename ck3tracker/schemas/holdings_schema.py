@@ -1,7 +1,7 @@
 # Holdings Schema
 holdings_columns = [
-    {"name": "County", "id": "County_Name"},
     {"name": "Barony", "id": "Barony_Name"},
+    {"name": "County", "id": "County_Name"},
     {"name": "Type", "id": "Holding_Type"},
     {"name": "Duchy", "id": "Duchy_Name"},
     {"name": "Terrain", "id": "Terrain_Type"},

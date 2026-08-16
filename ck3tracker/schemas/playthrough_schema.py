@@ -9,6 +9,7 @@ class Playthrough:
     ruler_name: str
     start_year: int
     starting_domain_capital: str
-    
+    status: str = "active"
+
     def __repr__(self):
-        return f"{self.ruler_name} ({self.start_year}) - {self.starting_domain_capital}"
+        return f"{self.ruler_name} [{self.status}] ({self.start_year}) - {self.starting_domain_capital}"
