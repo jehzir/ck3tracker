@@ -11,6 +11,6 @@ holdings_columns = [
     {"name": "Tax", "id": "Tax"},
     {"name": "Levies", "id": "Levies"},
     {"name": "Buildings", "id": "Buildings_Count"},
-    {"name": "Open Slots", "id": "Open_Building_Slots"},
+    {"name": "Open Bld Slots", "id": "Open_Building_Slots"},
     {"name": "Special", "id": "Special"},
 ]

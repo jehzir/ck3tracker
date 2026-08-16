@@ -1,8 +1,9 @@
 # Holdings Page
 import dash
-from dash import html, dash_table
+from dash import html, dash_table, Input, Output, callback
 from schemas.holdings_schema import holdings_columns
 from logic.holdings_provider import get_holdings
+from pages.holdings.updater_ui import create_updater_panel
 
 dash.register_page(__name__, path="/holdings", name="Holdings")
 
@@ -75,8 +76,30 @@ def layout():
                 ],
             ),
 
-            html.Hr(style={"marginTop": "1.5rem"}),
-            html.Div("Holding summary is active and ready for real data wiring.", style={"color": "#d0d0d0"})
+            # Updater Panel Container
+            html.Div(id="holdings-updater-container", style={"marginTop": "1.5rem"}),
         ],
         style={"padding": "2rem", "backgroundColor": "#1e1e1e", "color": "#e0e0e0", "minHeight": "100vh"}
     )
+
+
+@callback(
+    Output("holdings-updater-container", "children"),
+    Input("holdings-table", "selected_rows"),
+    prevent_initial_call=True
+)
+def update_holding_updater(selected_rows):
+    """Update the updater panel when a row is selected."""
+    holdings = get_holdings()
+    
+    if not selected_rows or len(selected_rows) == 0:
+        # No row selected
+        return create_updater_panel(selected_row=None, selected_holding=None)
+    
+    # Get the first selected row (single selection for now)
+    row_index = selected_rows[0]
+    if row_index < len(holdings):
+        selected_holding = holdings[row_index]
+        return create_updater_panel(selected_row=row_index, selected_holding=selected_holding)
+    
+    return create_updater_panel(selected_row=None, selected_holding=None)
