@@ -1,0 +1,912 @@
+duchy_name,kingdom_name_867,empire_name_867,county_count_867,barony_count_867,average_development_867,special_buildings,alternative_names,capital_county_name,duchy_id,start_date,source
+Essex,England,Britannia,5,19,6,The Tower of LondonLondon Bridge,"East Seaxe (Anglo-Saxon, Old Saxon)",Middlesex,d_bedford,867,CK3 Wiki List of duchies
+Northumbria,England,Britannia,3,11,6,Hadrian's WallHadrian's WallHadrian's WallHadrian's Wall,"Northumberland (1178)Bryneich (Breton, Cornish, Cumbrian, Pictish, Welsh)Norroy (Norman, French, Outremer, Occitan)",Northumberland,d_northumberland,867,CK3 Wiki List of duchies
+Lancaster,England,Britannia,4,11,5,Offa's Dyke,"Rheged (Breton, Cornish, Cumbrian, Welsh, Pictish)",Lancashire,d_lancaster,867,CK3 Wiki List of duchies
+York,England,Britannia,4,19,6,Walls of YorkGrand Temple,"Jórvík (Norse, Norwegian, Swedish, Danish)Deira (Anglo-Saxon)Deifr (Breton, Cornish, Cumbrian, Welsh, Pictish)",North Riding,d_york,867,CK3 Wiki List of duchies
+East Anglia,England,Britannia,3,12,5,University,"Jarnamóða (Norse, Norwegian)",Norfolk,d_norfolk,867,CK3 Wiki List of duchies
+Mercia,England,Britannia,9,28,5,Offa's DykeOffa's DykeOffa's DykeOffa's DykeOffa's Dyke,Hereford (1178),Warwickshire,d_hereford,867,CK3 Wiki List of duchies
+Hwicce,England,Britannia,4,14,5,Forest of Dean Mining SettlementStonehengeUniversity,Gloucester (1178),Gloucestershire,d_gloucester,867,CK3 Wiki List of duchies
+Kent,England,Britannia,3,12,5,Canterbury Basilica,,Kent,d_canterbury,867,CK3 Wiki List of duchies
+Wessex,England,Britannia,4,14,6,,,Hampshire,d_somerset,867,CK3 Wiki List of duchies
+Cornwall,England,Britannia,2,7,5,,,Devon,d_cornwall,867,CK3 Wiki List of duchies
+Gwynedd,Wales,Britannia,5,12,4,,,Ceredigion,d_gwynedd,867,CK3 Wiki List of duchies
+Powys,Wales,Britannia,2,4,4,,,Penllyn,d_powys,867,CK3 Wiki List of duchies
+Deheubarth,Wales,Britannia,5,12,4,,,Sir Gaerfyrddin,d_deheubarth,867,CK3 Wiki List of duchies
+Albany,Scotland,Britannia,6,17,2,,"Circinn (Irish, Gaelic, Pictish, Welsh, Cumbrian, Cornish, Breton)",Gowrie,d_albany,867,CK3 Wiki List of duchies
+Mann,Scotland,Britannia,1,2,2,,"Mön (Norse, Norwegian)",Isle of Man,d_the_isles,867,CK3 Wiki List of duchies
+Strathclyde,Scotland,Britannia,5,13,2,University,"Galloway (1178)Galloway (Gaelic, Irish)Galvei (Norse, Norwegian)",Lennox,d_galloway,867,CK3 Wiki List of duchies
+Isles,Scotland,Britannia,3,10,2,Grand Cathedral,"Suðreyjar (Norse, Norwegian)",Inner Hebrides,d_western_isles,867,CK3 Wiki List of duchies
+Lothian,Scotland,Britannia,5,15,2,,"Gododdin (Breton, Cornish, Cumbrian, Welsh)",Lothian,d_lothian,867,CK3 Wiki List of duchies
+Moray,Scotland,Britannia,6,20,2,,"Katanes (Norse, Norwegian)",Moray,d_moray,867,CK3 Wiki List of duchies
+Meath,Ireland,Britannia,2,8,3,,,Dublin,d_meath,867,CK3 Wiki List of duchies
+Ulster,Ireland,Britannia,3,13,2,Grand Cathedral,,Ulster,d_ulster,867,CK3 Wiki List of duchies
+Connacht,Ireland,Britannia,3,13,2,,,Mayo,d_connacht,867,CK3 Wiki List of duchies
+Leinster,Ireland,Britannia,2,8,2,,,Leinster,d_leinster,867,CK3 Wiki List of duchies
+Munster,Ireland,Britannia,4,13,2,,,Thomond,d_munster,867,CK3 Wiki List of duchies
+Angria,East Francia,Germania,7,22,5,,,Minden,d_angria,867,CK3 Wiki List of duchies
+Westfalen,East Francia,Germania,5,19,5,Grand Temple,,Osnabrück,d_westfalen,867,CK3 Wiki List of duchies
+Ostfalen,East Francia,Germania,5,15,6,,,Lüneburg,d_ostfalen,867,CK3 Wiki List of duchies
+Holstein,East Francia,Germania,3,9,5,,,Lübeck,d_holstein,867,CK3 Wiki List of duchies
+Holland,Frisia,Germania,3,11,5,,,Holland,d_holland,867,CK3 Wiki List of duchies
+Gelre,Frisia,Germania,3,9,5,,,Guelders,d_gelre,867,CK3 Wiki List of duchies
+Utrecht,Frisia,Germania,3,11,7,,,Nedersticht,d_utrecht,867,CK3 Wiki List of duchies
+Frisia,Frisia,Germania,3,10,5,,,Dokkum,d_frisia,867,CK3 Wiki List of duchies
+Luxembourg,Lotharingia,Germania,4,15,5,,,Luxembourg,d_luxembourg,867,CK3 Wiki List of duchies
+Brabant,Lotharingia,Germania,4,12,6,,,Brabant,d_brabant,867,CK3 Wiki List of duchies
+Jülich,Lotharingia,Germania,3,12,5,Palace of Aachen,,Aachen,d_julich,867,CK3 Wiki List of duchies
+Upper Lotharingia,Lotharingia,Germania,6,20,8,,"Upper Lorraine (French, Norman)",Trier,d_upper_lorraine,867,CK3 Wiki List of duchies
+Lower Lotharingia,Lotharingia,Germania,7,21,8,Cologne Cathedral,"Lower Lorraine (French, Norman)",Cologne,d_lower_lorraine,867,CK3 Wiki List of duchies
+Bar,Lotharingia,Germania,3,7,5,,,Bar,d_bar,867,CK3 Wiki List of duchies
+Bavaria,Bavaria,Germania,9,27,7,,,Regensburg,d_bavaria,867,CK3 Wiki List of duchies
+Nordgau,Bavaria,Germania,4,13,5,,,Eichstätt,d_nordgau,867,CK3 Wiki List of duchies
+Salzburg,Bavaria,Germania,5,17,5,,,Salzburg,d_salzburg,867,CK3 Wiki List of duchies
+Augsburg,Bavaria,Germania,5,14,5,,,Augsburg,d_augsburg,867,CK3 Wiki List of duchies
+Steyermark,Bavaria,Germania,4,12,5,,,Graz,d_steyermark,867,CK3 Wiki List of duchies
+Austria,Bavaria,Germania,6,21,5,University,,Wien,d_osterreich,867,CK3 Wiki List of duchies
+Tyrol,Bavaria,Germania,3,8,6,Schwaz Mining Settlement,,Innsbruck,d_tyrol,867,CK3 Wiki List of duchies
+Carinthia,Bavaria,Germania,4,13,6,,,Kärnten,d_carinthia,867,CK3 Wiki List of duchies
+Krain,Bavaria,Germania,2,7,5,,,Kranj,d_krain,867,CK3 Wiki List of duchies
+Istria,Bavaria,Germania,1,4,5,,,Pula,d_istria,867,CK3 Wiki List of duchies
+West Franconia,East Francia,Germania,9,33,8,University,,Frankfurt,d_west_franconia,867,CK3 Wiki List of duchies
+East Franconia,East Francia,Germania,8,24,5,,,Würzburg,d_east_franconia,867,CK3 Wiki List of duchies
+Hesse,East Francia,Germania,4,14,5,,,Kassel,d_hesse,867,CK3 Wiki List of duchies
+Currezia,East Francia,Germania,3,10,5,,,Grisons,d_currezia,867,CK3 Wiki List of duchies
+Alsace,East Francia,Germania,4,13,5,,,Strassburg,d_alsace,867,CK3 Wiki List of duchies
+Swabia,East Francia,Germania,7,23,5,,,Ulm,d_swabia,867,CK3 Wiki List of duchies
+Anhalt,East Francia,Germania,6,15,6,University,,Dessau,d_anhalt,867,CK3 Wiki List of duchies
+Thüringia,East Francia,Germania,5,14,5,WartburgRammelsberg Mining Settlement,,Schmalkalden,d_thuringia,867,CK3 Wiki List of duchies
+Thrace,Thessalonika,Byzantine Empire,3,12,12,Hagia Sophia Cathedral,,Byzantion,d_thrace,867,CK3 Wiki List of duchies
+Strymon,Thessalonika,Byzantine Empire,2,10,6,,,Mosynopolis,d_strymon,867,CK3 Wiki List of duchies
+Aegean Islands,Thessalonika,Byzantine Empire,5,18,6,,,Naxos,d_aegean_islands,867,CK3 Wiki List of duchies
+Thessalonika,Thessalonika,Byzantine Empire,3,13,6,Hagios DemetriosSiderokausia Mining SettlementMount Athos,,Thessalonika,d_thessalonika,867,CK3 Wiki List of duchies
+Thessali,Thessalonika,Byzantine Empire,4,15,6,Grand TempleMeteora,,Thessalia,d_thessaly,867,CK3 Wiki List of duchies
+Epirus,Epirus,Byzantine Empire,4,15,6,,,Nicopolis,d_epirus,867,CK3 Wiki List of duchies
+Dyrrachion,Epirus,Byzantine Empire,5,16,6,,,Dyrrachion,d_dyrrachion,867,CK3 Wiki List of duchies
+Cephalonia,Epirus,Byzantine Empire,2,4,6,Kassiopi Castle,,Cephalonia,d_cephalonia,867,CK3 Wiki List of duchies
+Athens,Hellas,Byzantine Empire,3,9,10,Temple of the TheotokosHosios Loukas,,Attica,d_athens,867,CK3 Wiki List of duchies
+Achaia,Hellas,Byzantine Empire,4,15,6,Patras CastleDespots' Palace,,Achaia,d_achaia,867,CK3 Wiki List of duchies
+Krete,Krete,Byzantine Empire,2,6,6,,Candia (Italian),Chandax,d_krete,867,CK3 Wiki List of duchies
+Dalmatia,Croatia,Byzantine Empire,3,10,8,,,Zadar,d_dalmatia,867,CK3 Wiki List of duchies
+Croatia,Croatia,Byzantine Empire,4,13,5,,,Gacka,d_croatia,867,CK3 Wiki List of duchies
+Slavonia,Croatia,Byzantine Empire,4,15,5,,"Pannonia (Roman, Greek)",Zagreb,d_slavonia,867,CK3 Wiki List of duchies
+Upper Bosnia,Croatia,Byzantine Empire,4,18,5,Grand CathedralSrebrenica Mining Settlement,,Rama,d_bosna,867,CK3 Wiki List of duchies
+Lower Bosnia,Croatia,Byzantine Empire,4,12,5,,,Soli,d_lower_bosna,867,CK3 Wiki List of duchies
+Zachlumia,Croatia,Byzantine Empire,4,15,5,,"Zahumlje (Serbian, Croatian, Bosnian)",Zachlumia,d_usora,867,CK3 Wiki List of duchies
+Dubrovnik,Croatia,Byzantine Empire,1,2,8,Grand Cathedral,,Ragusa,d_ragusa,867,CK3 Wiki List of duchies
+Raška,Serbia,Byzantine Empire,5,21,5,Trepča Mining Settlement,,Raška,d_rashka,867,CK3 Wiki List of duchies
+Mačva,Serbia,Byzantine Empire,2,8,6,Rudnik Mining Settlement,,Mačva,d_macva,867,CK3 Wiki List of duchies
+Duklja,Serbia,Byzantine Empire,3,12,5,,,Duklja,d_duklja,867,CK3 Wiki List of duchies
+Vidin,Bulgaria,Byzantine Empire,2,8,5,,,Vidin,d_vidin,867,CK3 Wiki List of duchies
+Moesia,Bulgaria,Byzantine Empire,6,26,6,Grand Temple,,Tarnovgrad,d_turnovo,867,CK3 Wiki List of duchies
+Dobrudja,Bulgaria,Byzantine Empire,2,7,6,,Scythia Minor (Greek),Constanta,d_dobrudja,867,CK3 Wiki List of duchies
+Bulgaria,Bulgaria,Byzantine Empire,7,28,5,Church of Saint Sophia,,Naissos,d_bulgaria,867,CK3 Wiki List of duchies
+Philippopolis,Bulgaria,Byzantine Empire,7,26,5,,,Philippopolis,d_philippopolis,867,CK3 Wiki List of duchies
+Cyprus,Cyprus,Byzantine Empire,2,6,7,Church of Saint Lazarus,Kıbrıs (Turkish),Nicosia,d_cyprus,867,CK3 Wiki List of duchies
+Opsikion,Nikaea,Byzantine Empire,4,19,7,,,Nikaea,d_opsikion,867,CK3 Wiki List of duchies
+Ephesos,Nikaea,Byzantine Empire,2,9,7,Phocaea Mining Settlement,Ephesos (Greek)Efes (Turkish),Ionia,d_ephese,867,CK3 Wiki List of duchies
+Thracesia,Nikaea,Byzantine Empire,4,17,6,,Thrakesion (Greek)Trakya (Turkish),Lydia,d_thracesia,867,CK3 Wiki List of duchies
+Optimatoi,Nikaea,Byzantine Empire,2,7,7,Maiden's Tower,Optimatoi (Turkish),Bithynia,d_optimatoi,867,CK3 Wiki List of duchies
+Bucellaria,Nikaea,Byzantine Empire,3,14,7,,Boukellarion (Greek)Bukellarion (Turkish),Honorias,d_bucellaria,867,CK3 Wiki List of duchies
+Cilicia,Anatolia,Byzantine Empire,4,17,7,,Kilikia (Greek)Kilikya (Turkish),Cilicia,d_cilicia,867,CK3 Wiki List of duchies
+Cibyrrhaeot,Anatolia,Byzantine Empire,3,15,7,,Kibyrrhaiotai (Greek)Kibirreoton (Turkish),Lycia,d_cibyrrhaeot,867,CK3 Wiki List of duchies
+Anatolia,Anatolia,Byzantine Empire,7,29,6,,Anatolikon (Greek)Anadolu (Turkish),Lycaonia,d_anatolia,867,CK3 Wiki List of duchies
+Cappadocia,Anatolia,Byzantine Empire,2,8,6,Cilician Gates,Kappadokia (Greek)Kapadokya (Turkish),Cappadocia,d_cappadocia,867,CK3 Wiki List of duchies
+Charsianon,Anatolia,Byzantine Empire,3,12,6,Troglodytic Settlements,Rum (Turkish),Charsianon,d_charsianon,867,CK3 Wiki List of duchies
+Paphlagonia,Pontus,Byzantine Empire,2,8,6,,Paflagonya (Turkish),Paphlagonia,d_paphlagonia,867,CK3 Wiki List of duchies
+Armeniac,Pontus,Byzantine Empire,4,14,6,,,Helenopontus,d_armeniac,867,CK3 Wiki List of duchies
+Sebasteia,Pontus,Byzantine Empire,3,12,6,,Sivas (Turkish),Sebasteia,d_sebasteia,867,CK3 Wiki List of duchies
+Chaldia,Pontus,Byzantine Empire,4,18,6,Sumela MonasteryGrand Cathedral,Khaldia (Greek),Trebizond,d_chaldia,867,CK3 Wiki List of duchies
+Mesopotamia,Armenia,Byzantine Empire,3,11,5,,,Theodosiopolis,d_mesopotamia,867,CK3 Wiki List of duchies
+Vaspurakan,Armenia,Byzantine Empire,3,13,5,,Vasburagan (Turkish),Vaspurakan,d_vaspurakan,867,CK3 Wiki List of duchies
+Greater Armenia,Armenia,Byzantine Empire,6,24,5,Great Fire TempleCathedral of VagarshapatGrand Cathedral,Mets Hayk' (Armenian),Hayk,d_greater_armenia,867,CK3 Wiki List of duchies
+Tao-Klarjeti,Georgia,Byzantine Empire,4,12,5,,,Tao,d_tao-klarjeti,867,CK3 Wiki List of duchies
+Abkhazia,Georgia,Byzantine Empire,4,16,5,,,Abkhazia,d_abkhazia,867,CK3 Wiki List of duchies
+Georgia,Georgia,Byzantine Empire,4,16,6,Jvari Monastery,,Tbilisi,d_georgia,867,CK3 Wiki List of duchies
+Sicily,Sicily,Byzantine Empire,5,14,8,University,"Siqilliya (Bedouin, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Palermo,d_sicily,867,CK3 Wiki List of duchies
+Benevento,Sicily,Byzantine Empire,2,8,5,,,Benevento,d_benevento,867,CK3 Wiki List of duchies
+Capua,Sicily,Byzantine Empire,2,6,10,University,,Capua,d_capua,867,CK3 Wiki List of duchies
+Apulia,Sicily,Byzantine Empire,3,10,8,,,Apulia,d_apulia,867,CK3 Wiki List of duchies
+Salerno,Sicily,Byzantine Empire,2,6,10,,,Salerno,d_salerno,867,CK3 Wiki List of duchies
+Calabria,Sicily,Byzantine Empire,3,9,5,Cattolica di Stilo,,Reggio Calabria,d_calabria,867,CK3 Wiki List of duchies
+Venice,Venice,Byzantine Empire,2,4,9,Doge's Palace,,Venezia,d_venice,867,CK3 Wiki List of duchies
+Friuli,Italy,Italia,3,9,5,,,Aquileia,d_friuli,867,CK3 Wiki List of duchies
+Verona,Italy,Italia,4,12,5,University,,Verona,d_verona,867,CK3 Wiki List of duchies
+Piedmonte,Italy,Italia,4,12,5,University,,Monferrato,d_piedmonte,867,CK3 Wiki List of duchies
+Lombardy,Italy,Italia,8,25,8,University,,Lombardia,d_lombardia,867,CK3 Wiki List of duchies
+Genoa,Italy,Italia,2,5,7,Walls of Genoa,,Genoa,d_genoa,867,CK3 Wiki List of duchies
+Emilia,Italy,Italia,2,7,5,,,Modena,d_emilia,867,CK3 Wiki List of duchies
+Pisa,Italy,Italia,1,3,8,University,,Pisa,d_pisa,867,CK3 Wiki List of duchies
+Tuscany,Italy,Italia,5,17,8,Santa ReparataThe University of Siena,,Firenze,d_toscana,867,CK3 Wiki List of duchies
+Corsica,Sardinia,Italia,3,6,4,,,Ajaccio,d_corsica,867,CK3 Wiki List of duchies
+Sardinia,Sardinia,Italia,5,13,4,Argentiera Mining Settlement,,Cagliari,d_sardinia,867,CK3 Wiki List of duchies
+Romagna,Romagna,Italia,4,13,7,Sant'Apollinare NuovoUniversityUniversity,,Ravenna,d_romagna,867,CK3 Wiki List of duchies
+Ancona,Romagna,Italia,3,10,7,,,Ancona,d_ancona,867,CK3 Wiki List of duchies
+Spoleto,Romagna,Italia,5,12,7,University,,Spoleto,d_spoleto,867,CK3 Wiki List of duchies
+Latium,Romagna,Italia,3,13,15,The ColosseumGrand Cathedral,,Roma,d_latium,867,CK3 Wiki List of duchies
+Uppland,Sweden,Scandinavia,4,14,2,Temple of UppsalaUniversity,,Uppland,d_svealand,867,CK3 Wiki List of duchies
+Bergslagen,Sweden,Scandinavia,4,16,2,Falun Mining Settlement,,Västmannaland,d_bergslagen,867,CK3 Wiki List of duchies
+Västergötland,Sweden,Scandinavia,4,13,2,,,Västergötland,d_vastergotland,867,CK3 Wiki List of duchies
+Östergötland,Sweden,Scandinavia,3,10,2,,,Östergötland,d_ostergotland,867,CK3 Wiki List of duchies
+Småland,Sweden,Scandinavia,6,19,2,,,Möre,d_smaland,867,CK3 Wiki List of duchies
+Norrland,Sweden,Scandinavia,3,12,2,,,Halsingland,d_norrland,867,CK3 Wiki List of duchies
+Visby,Sweden,Scandinavia,1,4,3,Visby Ringmur,,Gotland,d_gotland,867,CK3 Wiki List of duchies
+Åarjetje,Sápmi,Scandinavia,4,12,0,,"Lapland (English, Scottish, Anglo-Saxon)Lappland (Norwegian, Swedish, Norse)",Sjeltie,d_aarjetje,867,CK3 Wiki List of duchies
+Vuovdisámieana,Sápmi,Scandinavia,4,12,0,,"Västerbotten (Norwegian, Swedish, Norse)",Biton,d_vuovdisamieana,867,CK3 Wiki List of duchies
+Duortnoseatnu,Sápmi,Scandinavia,5,13,0,,"Finnmörk (Norse, Norwegian, Swedish)Ruija (Finnish)",Siggevara,d_duortnoseatnu,867,CK3 Wiki List of duchies
+Giemajohka,Sápmi,Scandinavia,7,22,0,Grand Temple,"Leporie (Swedish, Norwegian, Norse, Russian)",Peäccam,d_giemajohka,867,CK3 Wiki List of duchies
+Guoládat,Sápmi,Scandinavia,4,13,0,,"Kola (Norwegian, Swedish, Norse, Russian)Kuola (Finnish)",Ter,d_guoldat,867,CK3 Wiki List of duchies
+Sjælland,Denmark,Scandinavia,3,10,3,,,Sjælland,d_sjaelland,867,CK3 Wiki List of duchies
+Skåne,Denmark,Scandinavia,4,13,4,Lund Cathedral,,Skåne,d_skane,867,CK3 Wiki List of duchies
+Jylland,Denmark,Scandinavia,4,12,2,,,Aarhus,d_jylland,867,CK3 Wiki List of duchies
+Slesvig,Denmark,Scandinavia,3,9,2,DanevirkeDanevirke,,Slesvig,d_slesvig,867,CK3 Wiki List of duchies
+Víkin,Norway,Scandinavia,4,15,2,Heddal Stave Church,,Vingulmörk,d_viken,867,CK3 Wiki List of duchies
+Egðafylki,Norway,Scandinavia,2,6,2,,,Austr Agðir,d_agder,867,CK3 Wiki List of duchies
+Gulaþingslög,Norway,Scandinavia,3,13,2,,,Rogaland,d_vestlandi,867,CK3 Wiki List of duchies
+Þrændalög,Norway,Scandinavia,3,9,2,Grand Temple,,Þrándheimr,d_trandalog,867,CK3 Wiki List of duchies
+Upplönd,Norway,Scandinavia,4,11,2,,,Heiðmörk,d_dalir,867,CK3 Wiki List of duchies
+Hálogaland,Norway,Scandinavia,3,11,2,,,Lófótr,d_halogaland,867,CK3 Wiki List of duchies
+Iceland,Norway,Scandinavia,4,9,0,,"Ísland (Norse, Norwegian)",Vestrland,d_iceland,867,CK3 Wiki List of duchies
+Northern Isles,Norway,Scandinavia,3,3,2,,Norðreyjar (Norse),Orkney,d_northern_isles,867,CK3 Wiki List of duchies
+Jamtaland,Norway,Scandinavia,4,15,2,,Jämtland (Swedish),Jamtaland,d_jamtland,867,CK3 Wiki List of duchies
+Finland,Finland,Scandinavia,5,16,1,,,Finland,d_finland,867,CK3 Wiki List of duchies
+Savo,Finland,Scandinavia,3,10,1,,,Savo,d_savo,867,CK3 Wiki List of duchies
+Pohjanmaa,Finland,Scandinavia,4,11,1,,,Oulu,d_pohjanmaa,867,CK3 Wiki List of duchies
+Karelia,Finland,Scandinavia,7,22,1,Grand Temple,,Kakisalmi,d_karelia,867,CK3 Wiki List of duchies
+Pomerania,Pomerania,Baltic Empire,6,19,2,,,Szczecin,d_pommerania,867,CK3 Wiki List of duchies
+Veletia,Pomerania,Baltic Empire,5,13,2,Grand TempleUniversity,Veletia (Polabian),Mecklenburg,d_nordmark,867,CK3 Wiki List of duchies
+Pomerelia,Pomerania,Baltic Empire,4,14,2,,,Gdańsk,d_pomerelia,867,CK3 Wiki List of duchies
+Nordmark,Pomerania,Baltic Empire,5,16,2,,Luticia (Polabian),Brandenburg,d_ostmark,867,CK3 Wiki List of duchies
+Lithuania,Lithuania,Baltic Empire,4,15,2,Grand Temple,,Kernave,d_lithuanians,867,CK3 Wiki List of duchies
+Prussia,Lithuania,Baltic Empire,5,16,2,,,Pomesania,d_prussia,867,CK3 Wiki List of duchies
+Masuria,Lithuania,Baltic Empire,4,12,2,Grand Temple,,Chełmno,d_masuria,867,CK3 Wiki List of duchies
+Courland,Lithuania,Baltic Empire,4,14,2,Grand Temple,"Curonia (Prussian, Lithuanian, Latgalian, Estonian)Kurland (Franconian, Saxon, Swabian, Bavarian, Swedish, Norse, Danish, Norwegian)",Semigallia,d_courland,867,CK3 Wiki List of duchies
+Samogitia,Lithuania,Baltic Empire,5,14,2,,,Raseiniai,d_samogitia,867,CK3 Wiki List of duchies
+Latgalia,Lithuania,Baltic Empire,4,12,2,,,Talava,d_latgalians,867,CK3 Wiki List of duchies
+Estonia,Estonia,Baltic Empire,4,12,2,Grand Temple,,Rävala,d_esthonia,867,CK3 Wiki List of duchies
+Livonia,Estonia,Baltic Empire,3,9,2,,,Metsepole,d_livonia,867,CK3 Wiki List of duchies
+Vistulania,Poland,West-Slavia,7,29,2,University,,Kraków,d_lesser_poland,867,CK3 Wiki List of duchies
+Polania,Poland,West-Slavia,6,22,2,,"Großpolen (Franconian, Saxon, Swabian, Bavarian)",Poznań,d_wielkopolska,867,CK3 Wiki List of duchies
+Mazovia,Poland,West-Slavia,5,20,2,Grand Temple,,Płock,d_mazovia,867,CK3 Wiki List of duchies
+Opolania,Poland,West-Slavia,6,15,3,,,Opole,d_upper_silesia,867,CK3 Wiki List of duchies
+Silesia,Poland,West-Slavia,7,19,3,,,Breslau,d_lower_silesia,867,CK3 Wiki List of duchies
+Kuyavia,Poland,West-Slavia,5,16,2,Collegiate Church of St Mary and St Alexius,,Kujawy,d_kuyavia,867,CK3 Wiki List of duchies
+Bohemia,Bohemia,West-Slavia,8,35,3,UniversityKutná Hora Mining Settlement,,Praha,d_bohemia,867,CK3 Wiki List of duchies
+Moravia,Great Moravia,West-Slavia,6,18,5,,,Olomouc,d_moravia,867,CK3 Wiki List of duchies
+Volhynia,Galicia-Volhynia,West-Slavia,4,15,2,,Wołyń (Polish),Volodymyr,d_volhynia,867,CK3 Wiki List of duchies
+Halych,Galicia-Volhynia,West-Slavia,4,15,2,,"Halicz (Polish)Halytsch (Franconian, Saxon, Swabian, Bavarian)Halici (Vlach)",Halych,d_halych,867,CK3 Wiki List of duchies
+Cherven Cities,Galicia-Volhynia,West-Slavia,3,10,2,,,Cherven,d_cherven_cities,867,CK3 Wiki List of duchies
+Meissen,Sorbia,West-Slavia,8,25,4,,Milcenia (Polabian),Meissen,d_meissen,867,CK3 Wiki List of duchies
+Lausitz,Sorbia,West-Slavia,5,11,4,,Lusatia (Polabian),Jüterbog,d_lausitz,867,CK3 Wiki List of duchies
+Kyiv,Ruthenia,Russia,6,22,2,Golden Gate of Kyiv,"Könugarðr (Norse)Könugård (Swedish)Kønugård (Norwegian, Danish)Kijów (Polish)Kijevas (Lithuanian)",Kyiv,d_kiev,867,CK3 Wiki List of duchies
+Turov,Ruthenia,Russia,3,11,2,,Turów (Polish)Turava (Lithuanian),Turov,d_turov,867,CK3 Wiki List of duchies
+Pereyaslavl,Ruthenia,Russia,4,14,2,,,Pereyaslavl,d_pereyaslavl,867,CK3 Wiki List of duchies
+Chernigov,Ruthenia,Russia,5,19,2,,,Chernigov,d_chernigov,867,CK3 Wiki List of duchies
+Karachev,Ruthenia,Russia,3,9,2,,,Karachev,d_karachev,867,CK3 Wiki List of duchies
+Novosil,Ruthenia,Russia,2,4,2,,,Novosil,d_novosil,867,CK3 Wiki List of duchies
+Novgorod,Novgorod,Russia,5,21,0,Holy Wisdom of GodGrand Temple,"Holmgarðr (Norse, Swedish, Danish, Norwegian)Naugardas (Lithuanian)",Novgorod,d_novgorod,867,CK3 Wiki List of duchies
+Vepsia,Novgorod,Russia,3,10,0,,,Beloozero,d_vepsia,867,CK3 Wiki List of duchies
+Luki,Novgorod,Russia,3,9,0,,,Luki,d_luki,867,CK3 Wiki List of duchies
+Grodno,White Rus',Russia,3,7,2,,Hrodna (Russian)Gardinas (Lithuanian),Grodno,d_grodno,867,CK3 Wiki List of duchies
+Pinsk,White Rus',Russia,4,12,2,,Pinskas (Lithuanian)Pińsk (Polish),Pinsk,d_pinsk,867,CK3 Wiki List of duchies
+Minsk,White Rus',Russia,2,7,2,,Minskas (Lithuanian)Mińsk (Polish),Minsk,d_minsk,867,CK3 Wiki List of duchies
+Polotsk,White Rus',Russia,3,8,2,,"Polockas (Lithuanian)Połock (Polish)Pallteskja (Swedish, Norse, Danish, Norwegian)",Polotsk,d_polotsk,867,CK3 Wiki List of duchies
+Smolensk,White Rus',Russia,5,17,2,,,Smolensk,d_smolensk,867,CK3 Wiki List of duchies
+Opolye,Vladimir,Russia,5,23,3,,Vladimir (1178),Yaroslavl,d_opolye,867,CK3 Wiki List of duchies
+Ryazan,Vladimir,Russia,3,12,1,,,Ryazan,d_ryazan,867,CK3 Wiki List of duchies
+Obran Osh,Vladimir,Russia,3,11,1,,Nizhny Novgorod (Russian),Obran Osh,d_nizhny_novgorod,867,CK3 Wiki List of duchies
+Biarmia,Bjarmaland,Russia,4,16,1,,,Kholmogory,d_biarmia,867,CK3 Wiki List of duchies
+Chudia,Bjarmaland,Russia,3,10,0,,,Kargopol,d_chudia,867,CK3 Wiki List of duchies
+Vologda,Bjarmaland,Russia,4,14,0,,,Vologda,d_vologda,867,CK3 Wiki List of duchies
+Ustyug,Bjarmaland,Russia,4,14,0,,,Ustyug,d_ustyug,867,CK3 Wiki List of duchies
+Karayedisan,Zaporizhia,Khazaria,4,12,0,,"Jedisan (Franconian, Saxon, Swabian, Bavarian)Jedysan (Polish)Edisan (Vlach)Borysthenes (Greek)",Cherkassy,d_yedisan,867,CK3 Wiki List of duchies
+Kizilyedisan,Zaporizhia,Khazaria,3,9,0,Grand Temple,"South Jedisan (Franconian, Saxon, Swabian, Bavarian)South Jedysan (Polish)South Edisan (Vlach)South Borysthenes (Greek)",Kara-Kerman,d_kizilyedisan,867,CK3 Wiki List of duchies
+Levedia,Zaporizhia,Khazaria,3,9,0,,Scythia (Greek),Samar,d_levedia,867,CK3 Wiki List of duchies
+Red Levedia,Zaporizhia,Khazaria,2,7,0,,South Scythia (Greek),Yilki Su,d_red_levedia,867,CK3 Wiki List of duchies
+Don Valley,Zaporizhia,Khazaria,4,12,0,Grand Temple,,Sarysyn,d_don_valley,867,CK3 Wiki List of duchies
+Tana,Zaporizhia,Khazaria,2,4,0,,Tanais (Greek),Tana,d_tana,867,CK3 Wiki List of duchies
+Crimea,Zaporizhia,Khazaria,3,8,2,Grand Temple,,Kerch,d_crimea,867,CK3 Wiki List of duchies
+Khazaria,Caucasus,Khazaria,3,9,3,,,Sarkel,d_khazaria,867,CK3 Wiki List of duchies
+Azov,Caucasus,Khazaria,3,11,0,,,Tmutarakan,d_azov,867,CK3 Wiki List of duchies
+Alania,Caucasus,Khazaria,4,11,0,,,Maghas,d_alania,867,CK3 Wiki List of duchies
+Ciscaucasia,Caucasus,Khazaria,4,12,2,,,Derbent,d_ciscaucasia,867,CK3 Wiki List of duchies
+Itil,Caspian Steppe,Khazaria,4,12,3,Grand Temple,,Itil,d_itil,867,CK3 Wiki List of duchies
+Pecheneg,Caspian Steppe,Khazaria,4,11,0,,,Pecheneg,d_pecheneg,867,CK3 Wiki List of duchies
+Mugodzhar Hills,Caspian Steppe,Khazaria,4,11,0,,,Mugodzhar Hills,d_mugodzhar_hills,867,CK3 Wiki List of duchies
+Aqtobe,Caspian Steppe,Khazaria,5,12,0,,,Aqtobe,d_aqtobe,867,CK3 Wiki List of duchies
+Atyrau,Caspian Steppe,Khazaria,4,12,0,,,Atyrau,d_atyrau,867,CK3 Wiki List of duchies
+Manatau,Caspian Steppe,Khazaria,3,7,0,,,Manatau,d_manatau,867,CK3 Wiki List of duchies
+Volga-Bulgaria,Volga Bulgaria,Volga-Ural,5,17,1,,,Bolghar,d_volga_bulgaria,867,CK3 Wiki List of duchies
+Kazan,Volga Bulgaria,Volga-Ural,5,14,0,,,Kazan,d_kazan,867,CK3 Wiki List of duchies
+Jalmat,Volga Bulgaria,Volga-Ural,3,8,0,,,Jalmat,d_jalmat,867,CK3 Wiki List of duchies
+Bugurslan,Volga Bulgaria,Volga-Ural,3,8,0,,,Bugurslan,d_bugurslan,867,CK3 Wiki List of duchies
+Martyuba,Volga Bulgaria,Volga-Ural,2,6,0,,,Martyuba,d_martyuba,867,CK3 Wiki List of duchies
+Mordvinia,Mordvinia,Volga-Ural,3,8,0,,,Cheboksary,d_mordvinia,867,CK3 Wiki List of duchies
+Saran,Mordvinia,Volga-Ural,3,7,0,,,Saran,d_saran,867,CK3 Wiki List of duchies
+Voronezh,Mordvinia,Volga-Ural,4,10,0,,"Voronej (Mordvin, Merya, Meshchera, Mari, Muroma)",Voronezh,d_voronezh,867,CK3 Wiki List of duchies
+Chuvashia,Mordvinia,Volga-Ural,4,13,0,,Burtasia (Turkish),Sar Atau,d_chuvashia,867,CK3 Wiki List of duchies
+Khopyor,Mordvinia,Volga-Ural,3,10,0,,,Khopyor,d_khopyor,867,CK3 Wiki List of duchies
+Tambov,Mordvinia,Volga-Ural,3,7,0,,,Tambov,d_tambov,867,CK3 Wiki List of duchies
+Perm,Permia,Volga-Ural,4,16,0,Grand Temple,,Perm,d_perm,867,CK3 Wiki List of duchies
+Ural,Permia,Volga-Ural,3,10,0,,,Ural,d_ural,867,CK3 Wiki List of duchies
+Udmurtia,Permia,Volga-Ural,4,14,0,,,Kargadan,d_udmurtia,867,CK3 Wiki List of duchies
+Bashkiria,Bashkiria,Volga-Ural,3,6,0,,,Bashkort,d_bashkiria,867,CK3 Wiki List of duchies
+Sakmara,Bashkiria,Volga-Ural,2,6,0,,,Sakmara,d_sakmara,867,CK3 Wiki List of duchies
+Uraltau,Bashkiria,Volga-Ural,4,12,0,,,Uraltau,d_uraltau,867,CK3 Wiki List of duchies
+Vogulia,Bashkiria,Volga-Ural,3,10,0,,,Yekaterinburg,d_vogulia,867,CK3 Wiki List of duchies
+Ostyaki,Yugra,Siberia,4,12,0,Grand Temple,,Tyumen,d_ostyaki,867,CK3 Wiki List of duchies
+Konda,Yugra,Siberia,3,8,0,,,Tselym Dalyn,d_konda,867,CK3 Wiki List of duchies
+Pelym,Yugra,Siberia,2,6,0,,,Pelym,d_pelym,867,CK3 Wiki List of duchies
+Kazym,Yugra,Siberia,3,8,0,Grand Temple,,Kazym,d_kazym,867,CK3 Wiki List of duchies
+Sibir,Sibir,Siberia,4,12,0,,,Sibir,d_sibir,867,CK3 Wiki List of duchies
+Ishim,Sibir,Siberia,2,8,0,,,Ishim,d_ishim,867,CK3 Wiki List of duchies
+Tara,Sibir,Siberia,3,10,0,,,Tara,d_tara,867,CK3 Wiki List of duchies
+Lanikaz,Sibir,Siberia,3,12,0,,,Om,d_lanikaz,867,CK3 Wiki List of duchies
+Salair,Ob,Siberia,5,16,0,Grand Temple,,Ob,d_salair,867,CK3 Wiki List of duchies
+Aley,Ob,Siberia,3,10,0,,,Aley,d_aley,867,CK3 Wiki List of duchies
+Altaishan,Ob,Siberia,2,6,0,Grand Temple,,Terektai,d_altaishan,867,CK3 Wiki List of duchies
+Ala Tau,Ob,Siberia,8,24,0,,,Eushta,d_ala_tau,867,CK3 Wiki List of duchies
+Vasyugan Mire,Ob,Siberia,4,13,0,,,Vasyugan,d_vasyugan_mire,867,CK3 Wiki List of duchies
+Baraba Steppe,Ob,Siberia,5,15,0,,,Kolyvan,d_baraba_steppe,867,CK3 Wiki List of duchies
+Kulyndy Steppe,Ob,Siberia,4,15,0,,,Kulunda,d_kulyndy_steppe,867,CK3 Wiki List of duchies
+Orkhon,Ötüken,Mongolia,4,17,2,Grand Temple,,Karakorum,d_orkhon,867,CK3 Wiki List of duchies
+Ögräsh,Ötüken,Mongolia,4,15,0,Burkhan Khaldun,,Örgöö,d_ogrash,867,CK3 Wiki List of duchies
+Selenga Valley,Ötüken,Mongolia,5,16,0,,,Selenga,d_selenga_valley,867,CK3 Wiki List of duchies
+Onon,Ötüken,Mongolia,4,14,0,,,Jiangbian,d_EM_onon,867,CK3 Wiki List of duchies
+Yujuelu,Ötüken,Mongolia,3,10,0,,,Yujuelu,d_EM_yujuelu,867,CK3 Wiki List of duchies
+Wajiezi,Ötüken,Mongolia,4,11,0,,,Shilka,d_EM_wajiezi,867,CK3 Wiki List of duchies
+Övörkhangai,Naimania,Mongolia,6,19,0,,,Tövkhön,d_ovorkhangai,867,CK3 Wiki List of duchies
+Arkhangai,Naimania,Mongolia,3,7,0,,,Tarvagatai,d_arkhangai,867,CK3 Wiki List of duchies
+Khövsgöl,Naimania,Mongolia,3,8,0,,,Darkhad Valley,d_khovsgol,867,CK3 Wiki List of duchies
+Gobi-Altai,Naimania,Mongolia,3,8,0,,,Tseel,d_gobi_altai,867,CK3 Wiki List of duchies
+Ubsunur Hollow,Naimania,Mongolia,3,9,0,,,Uvs Nuur,d_ubsunur_hollow,867,CK3 Wiki List of duchies
+Zavkhan,Naimania,Mongolia,3,9,0,,,Uliastai,d_zavkhan,867,CK3 Wiki List of duchies
+Khovd,Naimania,Mongolia,2,6,0,,,Harhiraa,d_khovd,867,CK3 Wiki List of duchies
+Togina,Tuva,Mongolia,3,9,0,,,Arzhan,d_togina,867,CK3 Wiki List of duchies
+Tannu-Ola,Tuva,Mongolia,3,7,0,,,Eastern Tannu,d_tannu_ola,867,CK3 Wiki List of duchies
+Katu-Yaryk,Tuva,Mongolia,2,4,0,,,Katu-Yaryk,d_katu_yaryk,867,CK3 Wiki List of duchies
+Aksayan,Tuva,Mongolia,3,8,0,,,Stoyanka,d_western_sayan,867,CK3 Wiki List of duchies
+Khakass Hollow,Khakassia,Mongolia,3,9,0,,,Abakan,d_khakass_hollow,867,CK3 Wiki List of duchies
+Blue Khakassia,Khakassia,Mongolia,3,10,0,,,Kizir,d_blue_khakassia,867,CK3 Wiki List of duchies
+Shoria,Khakassia,Mongolia,3,9,0,,,Kuzbas,d_shoria,867,CK3 Wiki List of duchies
+Kargassia,Khakassia,Mongolia,3,9,0,,,Burugu Aallar,d_kargassia,867,CK3 Wiki List of duchies
+Eastern Sayan,Khakassia,Mongolia,4,11,0,,,Karauda,d_eastern_sayan,867,CK3 Wiki List of duchies
+Uda Valley,Buryatia,Mongolia,2,7,0,,,Uda,d_uda_valley,867,CK3 Wiki List of duchies
+Dauria,Buryatia,Mongolia,4,12,0,,,Bargajan,d_dauria,867,CK3 Wiki List of duchies
+Bargujin Tukum,Buryatia,Mongolia,4,12,0,,,Kotera,d_bargujin_tukum,867,CK3 Wiki List of duchies
+Baigaluuls,Buryatia,Mongolia,2,7,0,,,Baigaluuls,d_baigaluuls,867,CK3 Wiki List of duchies
+Tsagaanbaigal,Buryatia,Mongolia,3,9,0,Grand Temple,,Olkhon,d_tsagaanbaigal,867,CK3 Wiki List of duchies
+Yenisei-Kan,Angara,Mongolia,5,15,0,,Gorlog (Buryat)Kim Sug (Uriankhai),Kyzyl Char,d_yenisei_kan,867,CK3 Wiki List of duchies
+Üd Valley,Angara,Mongolia,3,11,0,,Chuna Valley (Russian),Üd,d_chuna_valley,867,CK3 Wiki List of duchies
+Eülge,Angara,Mongolia,3,8,0,,Eülkhe (Buryat)Lena (Russian),Eülge,d_lena,867,CK3 Wiki List of duchies
+Angara,Angara,Mongolia,4,12,0,,"Angar (Mongol, Buryat, Oirat, Naiman, Kerait, Khitan, Jurchen, Uriankhai, Kirghiz, Uyghur)",Kitoï,d_angara,867,CK3 Wiki List of duchies
+Tataria,Gobi,Mongolia,4,14,0,,,Zhen,d_em_tataria,867,CK3 Wiki List of duchies
+Wuguguo,Gobi,Mongolia,4,13,0,,,Hepung,d_em_wuguguo,867,CK3 Wiki List of duchies
+Dadaels,Gobi,Mongolia,2,6,0,,,Dadaels,d_gobi_dadaels,867,CK3 Wiki List of duchies
+Shatuoguo,Gobi,Mongolia,5,10,0,,,Dorngovi,d_gobi_shatuoguo,867,CK3 Wiki List of duchies
+Ongi,Gobi,Mongolia,3,6,0,,,Ongi Gol,d_gobi_ongi,867,CK3 Wiki List of duchies
+Zhetysu,Zhetysu,Tartaria,6,20,0,Grand Temple,,Qayaliq,d_zhetysu,867,CK3 Wiki List of duchies
+Alakol,Zhetysu,Tartaria,5,14,0,,,Chuguchak,d_alakol,867,CK3 Wiki List of duchies
+Tarbagatai,Zhetysu,Tartaria,4,12,0,,,Emil,d_tarbagatai,867,CK3 Wiki List of duchies
+Ili-Alatau,Zhetysu,Tartaria,3,10,0,,,Iliq,d_ili-alatau,867,CK3 Wiki List of duchies
+Aqturgay,Uly Dala,Tartaria,4,9,0,,,Turgay,d_turgay,867,CK3 Wiki List of duchies
+Kökturgay,Uly Dala,Tartaria,3,7,0,,,Jilali,d_kokturgay,867,CK3 Wiki List of duchies
+Qarasaryarka,Uly Dala,Tartaria,4,11,0,,,Teniz,d_saryarka,867,CK3 Wiki List of duchies
+Qyzylsaryarka,Uly Dala,Tartaria,3,8,0,,,Eghiz Kara,d_qyzylsaryarka,867,CK3 Wiki List of duchies
+Kazakh,Uly Dala,Tartaria,4,11,0,,,Akmola,d_kazakh,867,CK3 Wiki List of duchies
+Atbasar,Qara Dala,Tartaria,3,6,0,,,Atbasar,d_atbasar,867,CK3 Wiki List of duchies
+Kurgan,Qara Dala,Tartaria,3,7,0,,,Kurgan,d_kurgan,867,CK3 Wiki List of duchies
+Kush-Murun,Qara Dala,Tartaria,3,7,0,,,Kush-Murun,d_kush-murun,867,CK3 Wiki List of duchies
+Tobol-Ishim,Qara Dala,Tartaria,2,6,0,,,Kyzylzhar,d_tobol-ishim,867,CK3 Wiki List of duchies
+Karkaraly,Saryarka,Tartaria,3,8,0,,,Karkaraly,d_karkaraly,867,CK3 Wiki List of duchies
+Tokumbay,Saryarka,Tartaria,3,6,0,,,Tokumbay,d_tokumbay,867,CK3 Wiki List of duchies
+Karabas,Saryarka,Tartaria,4,10,0,,,Karabas,d_karabas,867,CK3 Wiki List of duchies
+Betpa,Saryarka,Tartaria,4,9,0,,,Betpa,d_betpa,867,CK3 Wiki List of duchies
+Semey,Kipchak,Tartaria,4,10,0,,,Semey,d_semey,867,CK3 Wiki List of duchies
+Jinghiz,Kipchak,Tartaria,3,6,0,,,Jinghiz,d_jinghiz,867,CK3 Wiki List of duchies
+Degelen,Kipchak,Tartaria,3,6,0,,,Degelen,d_degelen,867,CK3 Wiki List of duchies
+Kentarlau,Kipchak,Tartaria,4,12,0,,,Kulan-Uynak,d_kentarlau,867,CK3 Wiki List of duchies
+Kara Khoja,Dzungaria,Tartaria,4,12,2,Grand Temple,Qocho (Uyghur)Gaochan (Han),Kara Khoja,d_kara_khoja,867,CK3 Wiki List of duchies
+Beshbalik,Dzungaria,Tartaria,4,12,2,,Ürümqi (Mongol)Yizhou (Han),Beshbalik,d_beshbalik,867,CK3 Wiki List of duchies
+Kökaltay,Dzungaria,Tartaria,4,11,0,,,Altay,d_altay,867,CK3 Wiki List of duchies
+Akaltay,Dzungaria,Tartaria,3,9,0,,,Agairik,d_akaltay,867,CK3 Wiki List of duchies
+Gurbantünggüt,Dzungaria,Tartaria,4,10,0,,,Hoboksar,d_gurbantunggut,867,CK3 Wiki List of duchies
+Naiman Gobi,Dzungaria,Tartaria,4,10,0,,,Balgun,d_naiman_gobi,867,CK3 Wiki List of duchies
+Khotan,Khotan,Turan,5,17,4,Khotan Mining SettlementGrand Temple,,Khotan,d_khotan,867,CK3 Wiki List of duchies
+Kashgar,Khotan,Turan,5,17,5,,,Kashgar,d_kashgar,867,CK3 Wiki List of duchies
+Karashar,Khotan,Turan,4,18,6,,,Karashar,d_karashar,867,CK3 Wiki List of duchies
+Charkliq,Khotan,Turan,3,7,2,Great Fire Temple,,Charkliq,d_charkliq,867,CK3 Wiki List of duchies
+Loulan,Khotan,Turan,3,8,2,,,Loulan,d_loulan,867,CK3 Wiki List of duchies
+Mangyshlak,Oghuz il,Turan,4,10,0,,,Mangyshlak,d_transcaspiana,867,CK3 Wiki List of duchies
+Garabogazkol,Oghuz il,Turan,3,6,0,,,Garabogazkol,d_garabogazkol,867,CK3 Wiki List of duchies
+Jemba,Oghuz il,Turan,6,14,0,,,Qoshagyl,d_jemba,867,CK3 Wiki List of duchies
+Aral il,Oghuz il,Turan,5,15,0,,,Yangikent,d_aral_il,867,CK3 Wiki List of duchies
+Barsuki,Oghuz il,Turan,3,6,0,,,Barsuki,d_barsuki,867,CK3 Wiki List of duchies
+Aral Karakum,Oghuz il,Turan,3,6,0,,,Terekli,d_aral_karakum,867,CK3 Wiki List of duchies
+Syr Darya,Syr Darya,Turan,3,11,3,,,Jend,d_syr_darya,867,CK3 Wiki List of duchies
+Chah,Syr Darya,Turan,4,15,3,,,Chah,d_chah,867,CK3 Wiki List of duchies
+Muyunkum,Syr Darya,Turan,3,7,0,,,Shelji,d_muyunkum,867,CK3 Wiki List of duchies
+Talas Alatau,Syr Darya,Turan,4,13,1,,,Balashagun,d_talas_alatau,867,CK3 Wiki List of duchies
+Soghd,Transoxiana,Turan,7,28,8,Ark of BukharaShah-i-Zinda,,Bukhara,d_soghd,867,CK3 Wiki List of duchies
+Badakhshan,Transoxiana,Turan,5,17,4,Sar-i Sang Ancient Mine,,Badakhshan,d_badakhshan,867,CK3 Wiki List of duchies
+Khuttal,Transoxiana,Turan,4,16,5,Great Fire Temple,,Khuttal,d_khuttal,867,CK3 Wiki List of duchies
+Osrushana,Transoxiana,Turan,2,9,6,,,Oshrusana,d_osrushana,867,CK3 Wiki List of duchies
+Ferghana,Transoxiana,Turan,6,26,7,,,Ferghana,d_ferghana,867,CK3 Wiki List of duchies
+Khwarezm,Transoxiana,Turan,7,25,4,Great Fire Temple,,Gurganj,d_khorezm,867,CK3 Wiki List of duchies
+Uzboy,Transoxiana,Turan,4,11,3,,,Kurtysh,d_uzboy,867,CK3 Wiki List of duchies
+Isfahan,Persia,Persian Empire,4,15,9,The Friday MosqueUniversity,,Isfahan,d_isfahan,867,CK3 Wiki List of duchies
+Kirman,Persia,Persian Empire,5,21,7,,,Kirman,d_kirman,867,CK3 Wiki List of duchies
+Yazd,Persia,Persian Empire,3,14,6,Great Fire Temple,,Yazd,d_yazd,867,CK3 Wiki List of duchies
+Rayy,Persia,Persian Empire,3,10,8,Grand Mosque,,Rayy,d_rayy,867,CK3 Wiki List of duchies
+Hamadan,Persia,Persian Empire,3,12,6,Grand Temple,,Hamadan,d_hamadan,867,CK3 Wiki List of duchies
+Fars,Persia,Persian Empire,7,31,8,Lake MaharlooTomb of BatshebaGrand TempleGreat Fire Temple,,Shiraz,d_fars,867,CK3 Wiki List of duchies
+Hormuz,Persia,Persian Empire,2,8,9,,,Hormuz,d_hormuz,867,CK3 Wiki List of duchies
+Khuzestan,Persia,Persian Empire,6,22,6,Grand Temple,,Ahvaz,d_khuzestan,867,CK3 Wiki List of duchies
+Kermanshah,Persia,Persian Empire,3,10,6,Falak-ol-Aflak,,Kermanshah,d_kermanshah,867,CK3 Wiki List of duchies
+Nishapur,Khorasan,Persian Empire,6,21,7,Nishapur Mining PitsGreat Fire TempleSanctuary of Imam Reza,,Nishapur,d_nishapur,867,CK3 Wiki List of duchies
+Merv,Khorasan,Persian Empire,7,28,7,Great Kyz Kala,,Merv,d_merv,867,CK3 Wiki List of duchies
+Ghur,Khorasan,Persian Empire,3,10,4,Minaret of Jam,,Ghur,d_ghur,867,CK3 Wiki List of duchies
+Herat,Khorasan,Persian Empire,5,16,4,Grand Mosque,,Herat,d_herat,867,CK3 Wiki List of duchies
+Balkh,Khorasan,Persian Empire,3,14,6,Great Fire Temple,,Balkh,d_balkh,867,CK3 Wiki List of duchies
+Nasa,Khorasan,Persian Empire,2,6,3,,,Abivard,d_nasa,867,CK3 Wiki List of duchies
+Kohestan,Khorasan,Persian Empire,2,10,3,,,Qain,d_kohestan,867,CK3 Wiki List of duchies
+Daylam,Daylam,Persian Empire,3,9,6,Dome of SoltaniyehAlamut Castle,,Gilan,d_daylam,867,CK3 Wiki List of duchies
+Tabaristan,Daylam,Persian Empire,3,9,6,Mount Damavand,,Mazandaran,d_tabaristan,867,CK3 Wiki List of duchies
+Gurgan,Daylam,Persian Empire,2,8,5,Great Wall of GorganGreat Wall of Gorgan,,Gurgan,d_gurgan,867,CK3 Wiki List of duchies
+Azerbaijan,Daylam,Persian Empire,6,26,5,Rainbow MountainsGreat Fire Temple,,Tabriz,d_azerbaijan,867,CK3 Wiki List of duchies
+Shirvan,Daylam,Persian Empire,4,17,6,,,Shirvan,d_shirvan,867,CK3 Wiki List of duchies
+Makran,Makran,Persian Empire,5,24,4,,,Panjgur,d_makran,867,CK3 Wiki List of duchies
+Jabal Kufs,Makran,Persian Empire,3,14,5,Great Fire Temple,,Bampur,d_jabal_kufs,867,CK3 Wiki List of duchies
+Sistan,Makran,Persian Empire,5,23,6,Grand Temple,,Zaranj,d_sistan,867,CK3 Wiki List of duchies
+Kabulistan,Kabulistan,Persian Empire,3,11,5,Grand TempleBuddhas of BamianPansjhir Mining Settlement,,Kabul,d_kabul,867,CK3 Wiki List of duchies
+Zabulistan,Kabulistan,Persian Empire,4,17,5,,,Ghazna,d_zabulistan,867,CK3 Wiki List of duchies
+Samarra,Mesopotamia,Persian Empire,4,15,8,Great Mosque of Samarra,,Samarra,d_samarra,867,CK3 Wiki List of duchies
+Wasit,Mesopotamia,Persian Empire,2,5,8,,,Wasit,d_wasit,867,CK3 Wiki List of duchies
+Kufa,Mesopotamia,Persian Empire,6,15,7,Imam Ali MosqueGrand Temple,,Kufa,d_kufa,867,CK3 Wiki List of duchies
+Basra,Mesopotamia,Persian Empire,3,11,9,Grand Mosque,,Basra,d_basra,867,CK3 Wiki List of duchies
+Baghdad,Mesopotamia,Persian Empire,5,16,12,House of WisdomRuins of the Palace of CtesiphonUniversity,,Baghdad,d_baghdad,867,CK3 Wiki List of duchies
+Diyarrabia,Jazira,Persian Empire,6,27,7,Grand TempleGrand Temple,,Mosul,d_diyarrabia,867,CK3 Wiki List of duchies
+Diyarmudar,Jazira,Persian Empire,3,8,7,,,Raqqa,d_diyarmudar,867,CK3 Wiki List of duchies
+Diyarbakr,Jazira,Persian Empire,5,20,5,,,Amida,d_diyarbakr,867,CK3 Wiki List of duchies
+Euphrates,Jazira,Persian Empire,3,6,8,,,Rahba,d_euphrates,867,CK3 Wiki List of duchies
+Kurdistan,Jazira,Persian Empire,3,10,5,,,Irbil,d_kurdistan,867,CK3 Wiki List of duchies
+Transylvanian Alps,Wallachia,Carpathia,3,10,3,,,Târgoviște,d_transylvanian_alps,867,CK3 Wiki List of duchies
+Muntenia,Wallachia,Carpathia,5,16,3,,,Giurgiu,d_muntenia,867,CK3 Wiki List of duchies
+Oltenia,Wallachia,Carpathia,4,13,3,,,Târgu Jiu,d_oltenia,867,CK3 Wiki List of duchies
+Bukovina,Moldavia,Carpathia,4,13,2,Hotin Fort,,Suceava,d_bukovina,867,CK3 Wiki List of duchies
+Moldavia,Moldavia,Carpathia,6,15,2,Grand Temple,,Iași,d_moldova,867,CK3 Wiki List of duchies
+Bugeac,Moldavia,Carpathia,4,9,2,,Tyras (Greek),Tigheci,d_bugeac,867,CK3 Wiki List of duchies
+Visegrad,Hungary,Carpathia,5,16,2,Visegrad CitadelGrand TempleGrand Cathedral,,Visegrad,d_visegrad,867,CK3 Wiki List of duchies
+Somogy,Hungary,Carpathia,4,14,2,,"Balaton (Czech, Slovien, Polish, Pommeranian, Polabian, Croatian, Bosnian, Serbian)",Somogy,d_somogy,867,CK3 Wiki List of duchies
+Nitra,Great Moravia,West-Slavia,9,28,4,Kremnica Mining SettlementGrand Temple,"Nyitra (Hungarian, Mogyer)",Nitra,d_nyitra,867,CK3 Wiki List of duchies
+Ungvár,Hungary,Carpathia,6,17,2,,"Užhorod (Slovien, Czech)",Ungvár,d_ungvar,867,CK3 Wiki List of duchies
+Transcarpathia,Hungary,Carpathia,2,10,2,,,Marmaros,d_transcarpathia,867,CK3 Wiki List of duchies
+Transylvania,Hungary,Carpathia,7,29,2,Verespatak Mining SettlementTorda Mining Pits,,Fehér,d_transylvania,867,CK3 Wiki List of duchies
+Bihar,Hungary,Carpathia,5,22,2,,,Bihar,d_bihar,867,CK3 Wiki List of duchies
+Temes,Hungary,Carpathia,5,14,2,,,Temes,d_temes,867,CK3 Wiki List of duchies
+Bacs,Hungary,Carpathia,3,6,2,,,Bacs,d_bacs,867,CK3 Wiki List of duchies
+Gyor,Hungary,Carpathia,4,11,2,,"Ráb (Czech, Slovien, Polish, Pommeranian, Polabian, Croatian, Bosnian, Serbian)",Gyor,d_gyor,867,CK3 Wiki List of duchies
+Syrmia,Serbia,Byzantine Empire,1,3,5,,,Szerém,d_syrmia,867,CK3 Wiki List of duchies
+Valois,France,Francia,7,26,9,Notre-DameUniversity,,Isle de France,d_valois,867,CK3 Wiki List of duchies
+Berry,France,Francia,4,12,6,,,Berry,d_berry,867,CK3 Wiki List of duchies
+Anjou,France,Francia,4,13,5,,,Anjou,d_anjou,867,CK3 Wiki List of duchies
+Normandy,France,Francia,7,21,5,,Neustria (867)Normandy (1066),Rouen,d_normandy,867,CK3 Wiki List of duchies
+Orleans,France,Francia,5,16,6,,,Orléans,d_orleans,867,CK3 Wiki List of duchies
+Champagne,France,Francia,7,24,8,,,Reims,d_champagne,867,CK3 Wiki List of duchies
+Burgundy,France,Francia,8,23,5,Cluny Abbey,,Dijon,d_burgundy,867,CK3 Wiki List of duchies
+Flanders,France,Francia,5,16,5,,,Brugge,d_flanders,867,CK3 Wiki List of duchies
+Gascogne,Aquitaine,Francia,5,16,6,Grand Temple,,Bordeaux,d_gascogne,867,CK3 Wiki List of duchies
+Aquitaine,Aquitaine,Francia,5,17,6,,,Angoulême,d_aquitaine,867,CK3 Wiki List of duchies
+Toulouse,Aquitaine,Francia,5,18,5,,,Toulouse,d_toulouse,867,CK3 Wiki List of duchies
+Languedoc,Aquitaine,Francia,6,16,5,Grand CathedralCévennes Mining Settlement,,Albi,d_languedoc,867,CK3 Wiki List of duchies
+Armagnac,Aquitaine,Francia,4,13,5,,,Armagnac,d_armagnac,867,CK3 Wiki List of duchies
+Poitiers,Aquitaine,Francia,4,14,5,,,Poitiers,d_poitou,867,CK3 Wiki List of duchies
+Auvergne,Aquitaine,Francia,4,11,5,,,Auvergne,d_auvergne,867,CK3 Wiki List of duchies
+Bourbon,Aquitaine,Francia,4,11,5,,,Bourbon,d_bourbon,867,CK3 Wiki List of duchies
+Brittany,Brittany,Francia,6,17,5,,,Vannes,d_brittany,867,CK3 Wiki List of duchies
+Provence,Burgundy,Francia,4,19,6,,,Venaissin,d_provence,867,CK3 Wiki List of duchies
+Savoy,Burgundy,Francia,4,13,6,,,Savoie,d_savoie,867,CK3 Wiki List of duchies
+Viennois,Burgundy,Francia,5,15,5,Grand Cathedral,,Lyon,d_dauphine,867,CK3 Wiki List of duchies
+Upper Burgundy,Burgundy,Francia,3,11,5,,,Besancon,d_upper_burgundy,867,CK3 Wiki List of duchies
+Transjurania,Burgundy,Francia,3,7,5,,,Bern,d_transjurania,867,CK3 Wiki List of duchies
+Cordoba,Andalusia,Hispania,4,12,12,The Great Mosque of Cordoba,"Qurtubah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Cordoba,d_cordoba,867,CK3 Wiki List of duchies
+Granada,Andalusia,Hispania,4,11,10,Alhambra Fortress Ruins,"Garnatah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Granada,d_granada,867,CK3 Wiki List of duchies
+Seville,Andalusia,Hispania,5,16,11,Rock of Gibraltar,"Isbiliyyah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Sevilla,d_sevilla,867,CK3 Wiki List of duchies
+Toledo,Andalusia,Hispania,6,23,10,City Walls of ToledoUniversity,"Tulaytulah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Toledo,d_toledo,867,CK3 Wiki List of duchies
+Beja,Badajoz,Hispania,4,12,8,,"Baya (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Lisboa,d_beja,867,CK3 Wiki List of duchies
+Badajoz,Badajoz,Hispania,5,15,8,,"Batalyaws (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Badajoz,d_badajoz,867,CK3 Wiki List of duchies
+Algarve,Badajoz,Hispania,2,5,8,,"al-Gharb (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Faro,d_algarve,867,CK3 Wiki List of duchies
+València,Valencia,Hispania,5,14,8,,"Balansiyyah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Valencia,d_valencia,867,CK3 Wiki List of duchies
+Mallorca,Valencia,Hispania,3,4,4,,"Mayurqa (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Mallorca,d_mallorca,867,CK3 Wiki List of duchies
+Murcia,Valencia,Hispania,3,13,8,Grand Temple,"Mursiyyah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Murcia,d_murcia,867,CK3 Wiki List of duchies
+Castile,Castile,Hispania,5,16,6,Alcázar of Segovia,"al-Quila (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Burgos,d_castilla,867,CK3 Wiki List of duchies
+Cantabria,Castile,Hispania,2,7,6,,,Asturias de Santillana,d_cantabria,867,CK3 Wiki List of duchies
+Aragon,Valencia,Hispania,8,22,7,AljaferíaGrand Temple,"Saraqustah (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Zaragoza,d_aragon,867,CK3 Wiki List of duchies
+Barcelona,Aquitaine,Francia,8,26,5,DrassanesUniversity,"Barshiluna (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)Gothia (French, Occitan)",Barcelona,d_barcelona,867,CK3 Wiki List of duchies
+Navarra,Navarra,Hispania,3,8,7,,,Navarra,d_navarra,867,CK3 Wiki List of duchies
+Viscaya,Navarra,Hispania,2,4,7,Grand Temple,,Viscaya,d_viscaya,867,CK3 Wiki List of duchies
+León,Asturias,Hispania,5,17,4,University,"Liyyun (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Leon,d_leon,867,CK3 Wiki List of duchies
+Asturias,Asturias,Hispania,2,8,3,,,Asturias de Oviedo,d_asturias,867,CK3 Wiki List of duchies
+Galicia,Galicia,Hispania,5,18,5,Farum BrigantiumCathedral of Santiago de CompostelaRoman Walls of Lugo,"Yilliqiyya (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Coruna,d_galicia,867,CK3 Wiki List of duchies
+Portucale,Galicia,Hispania,2,8,5,,"Burtughal (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Porto,d_porto,867,CK3 Wiki List of duchies
+Coimbra,Galicia,Hispania,4,11,5,University,"Kulumriyya (Bedouin, Baranis, Butr, Zaghawa, Levantine, Egyptian, Maghrebi, Andalusian, Yemeni)",Coimbra,d_coimbra,867,CK3 Wiki List of duchies
+Marrakesh,Maghreb,Maghreb,6,24,7,Grand Mosque,,Marrakesh,d_marrakesh,867,CK3 Wiki List of duchies
+Sous,Maghreb,Maghreb,4,16,5,,,Sous,d_sous,867,CK3 Wiki List of duchies
+Tafilalt,Maghreb,Maghreb,3,8,6,Grand Mosque,,Sijilmasa,d_tafilalt,867,CK3 Wiki List of duchies
+Fes,Maghreb,Maghreb,5,20,10,University of al-QarawiyyinGrand Mosque,,Fes,d_fes,867,CK3 Wiki List of duchies
+Rif,Maghreb,Maghreb,3,9,9,,,Tangiers,d_rif,867,CK3 Wiki List of duchies
+Canarias,Maghreb,Maghreb,3,5,2,Grand TempleGrand Temple,Al-Guañac (Guanche),Achinech,d_canarias,867,CK3 Wiki List of duchies
+Tlemcen,Tahert,Maghreb,4,14,9,,,Tlemcen,d_tlemcen,867,CK3 Wiki List of duchies
+Tahert,Tahert,Maghreb,4,15,5,,,Tahert,d_tahert,867,CK3 Wiki List of duchies
+Alger,Tahert,Maghreb,2,7,8,,,Algier,d_alger,867,CK3 Wiki List of duchies
+Bejaia,Tahert,Maghreb,2,6,9,,,Bejaia,d_bejaia,867,CK3 Wiki List of duchies
+Zab,Tahert,Maghreb,3,10,3,,,Hodna,d_zab,867,CK3 Wiki List of duchies
+Mzab,Tahert,Maghreb,4,12,3,,,Wargla,d_mzab,867,CK3 Wiki List of duchies
+Kairouan,Africa,Maghreb,3,13,7,Kairouan Basins,,Kairwan,d_kairouan,867,CK3 Wiki List of duchies
+Tunis,Africa,Maghreb,4,14,9,Grand CathedralUniversity,,Tunis,d_tunis,867,CK3 Wiki List of duchies
+Kroumerie,Africa,Maghreb,2,8,7,,,Constantine,d_kroumerie,867,CK3 Wiki List of duchies
+Gabes,Africa,Maghreb,2,5,7,,,Gabes,d_gabes,867,CK3 Wiki List of duchies
+Jerid,Africa,Maghreb,4,11,3,,,Qashtiliya,d_jerid,867,CK3 Wiki List of duchies
+Tripolitania,Africa,Maghreb,3,11,4,,,Tripolitana,d_tripolitania,867,CK3 Wiki List of duchies
+Syrte,Africa,Maghreb,3,9,3,,,Syrte,d_syrte,867,CK3 Wiki List of duchies
+Zammour,Anbiya,Maghreb,3,8,3,,,Zammour,d_zammour,867,CK3 Wiki List of duchies
+Adrar,Anbiya,Maghreb,3,8,3,Grand TempleIjil Mining Pits,,Wadan,d_adrar,867,CK3 Wiki List of duchies
+Touat,Anbiya,Maghreb,2,7,4,,,Touat,d_touat,867,CK3 Wiki List of duchies
+Taghaza,Anbiya,Maghreb,2,6,5,Taghaza Mining Pits,,Taghaza,d_taghaza,867,CK3 Wiki List of duchies
+Tadmekka,Sahara,Maghreb,2,5,3,,,Tadmekka,d_tadmekka,867,CK3 Wiki List of duchies
+Ghat,Sahara,Maghreb,2,10,5,,,Ghat,d_ghat,867,CK3 Wiki List of duchies
+Air,Sahara,Maghreb,2,6,3,Takkeda Mining Settlement,,Takkeda,d_air,867,CK3 Wiki List of duchies
+Kawar,Sahara,Maghreb,3,10,4,,,Bilma,d_kawar,867,CK3 Wiki List of duchies
+Tibesti,Sahara,Maghreb,3,9,3,,,Ain Galakka,d_tibesti,867,CK3 Wiki List of duchies
+Fezzan,Sahara,Maghreb,3,9,3,,,Murzuk,d_fezzan,867,CK3 Wiki List of duchies
+Al-Jawf,Arabia,Arabian Empire,3,9,4,,,Al-Jawf,d_jawf,867,CK3 Wiki List of duchies
+Amman,Arabia,Arabian Empire,3,8,8,,,Balqa',d_amman,867,CK3 Wiki List of duchies
+Shammar,Arabia,Arabian Empire,4,15,7,,,Tabuk,d_shammar,867,CK3 Wiki List of duchies
+Medina,Arabia,Arabian Empire,5,20,7,The Prophetic Mosque,,Medina,d_medina,867,CK3 Wiki List of duchies
+Mecca,Arabia,Arabian Empire,4,14,11,Great Mosque of Mecca,,Mecca,d_mecca,867,CK3 Wiki List of duchies
+Asir,Arabia,Arabian Empire,2,5,1,,,Aqiq,d_asir,867,CK3 Wiki List of duchies
+Najd,Arabia,Arabian Empire,6,26,2,,,Sharaf,d_najd,867,CK3 Wiki List of duchies
+Yamama,Arabia,Arabian Empire,3,8,1,Grand Mosque,,Yamama,d_yamama,867,CK3 Wiki List of duchies
+Al-Hasa,Arabia,Arabian Empire,4,9,4,,,Al-Hasa,d_al-hasa,867,CK3 Wiki List of duchies
+Bahrain,Arabia,Arabian Empire,3,10,5,Grand Mosque,,Qatif,d_bahrain,867,CK3 Wiki List of duchies
+Oman,Arabia,Arabian Empire,6,20,4,Grand Mosque,,Nizwa,d_oman,867,CK3 Wiki List of duchies
+San'a',Yemen,Arabian Empire,4,15,9,,,San'a',d_sanaa,867,CK3 Wiki List of duchies
+Jawf al-Yamani,Yemen,Arabian Empire,2,6,3,,,Al-Jawf al-Yamani,d_jawf-al-yamani,867,CK3 Wiki List of duchies
+Ta'izz,Yemen,Arabian Empire,3,13,9,,,Ta'izz,d_taizz,867,CK3 Wiki List of duchies
+Hadramawt,Yemen,Arabian Empire,3,9,3,,,Hadramawt,d_hadramawt,867,CK3 Wiki List of duchies
+Mahra,Yemen,Arabian Empire,3,8,3,,,Mahra,d_mahra,867,CK3 Wiki List of duchies
+Socotra,Yemen,Arabian Empire,1,2,7,,,Socotra,d_socotra,867,CK3 Wiki List of duchies
+Cyrenaica,Egypt,Arabian Empire,4,11,3,,,Barqa,d_cyrenaica,867,CK3 Wiki List of duchies
+Alexandria,Egypt,Arabian Empire,3,9,5,Grand Cathedral,,Alexandria,d_alexandria,867,CK3 Wiki List of duchies
+Delta,Egypt,Arabian Empire,4,14,10,,,Damietta,d_delta,867,CK3 Wiki List of duchies
+Cairo,Egypt,Arabian Empire,3,10,11,Al-Azhar UniversityGrand TempleThe Pyramids,,Cairo,d_cairo,867,CK3 Wiki List of duchies
+Al-Wahat,Egypt,Arabian Empire,4,9,7,,,Bahriya,d_al-wahat,867,CK3 Wiki List of duchies
+Al-Said,Egypt,Arabian Empire,5,19,8,Grand Temple,,Qus,d_al-said,867,CK3 Wiki List of duchies
+Eastern Desert,Egypt,Arabian Empire,2,6,6,,,Qusayr,d_eastern_desert,867,CK3 Wiki List of duchies
+Sinai,Egypt,Arabian Empire,3,10,8,Grand MosqueSaint Catherine's Monastery,,Farama,d_sinai,867,CK3 Wiki List of duchies
+Oultrejourdain,Jerusalem,Arabian Empire,2,7,9,Petra,,Kerak,d_oultrejourdain,867,CK3 Wiki List of duchies
+Palestine,Jerusalem,Arabian Empire,3,8,8,Dome of the RockGrand Temple,,Jerusalem,d_palestine,867,CK3 Wiki List of duchies
+Urdunn,Jerusalem,Arabian Empire,3,6,9,Grand Temple,,Tiberias,d_urdunn,867,CK3 Wiki List of duchies
+Aleppo,Syria,Arabian Empire,4,12,7,Citadel of Aleppo,,Aleppo,d_aleppo,867,CK3 Wiki List of duchies
+Edessa,Syria,Arabian Empire,4,11,7,,,Edessa,d_edessa,867,CK3 Wiki List of duchies
+Homs,Syria,Arabian Empire,3,8,8,,,Homs,d_homs,867,CK3 Wiki List of duchies
+Antioch,Syria,Arabian Empire,2,7,10,Grand Cathedral,,Antiocheia,d_antioch,867,CK3 Wiki List of duchies
+Lebanon,Syria,Arabian Empire,2,4,10,Grand Mosque,,Beirut,d_lebanon,867,CK3 Wiki List of duchies
+Damascus,Syria,Arabian Empire,4,13,6,Great Mosque of DamascusGrand Temple,,Damascus,d_damascus,867,CK3 Wiki List of duchies
+Palmyra,Syria,Arabian Empire,3,7,5,Grand Mosque,,Palmyra,d_palmyra,867,CK3 Wiki List of duchies
+Aksum,Abyssinia,Abyssinia,3,13,8,Grand Cathedral,,Tigré,d_aksum,867,CK3 Wiki List of duchies
+Dahlaks,Abyssinia,Abyssinia,3,7,7,,,Dahlak,d_dahlaks,867,CK3 Wiki List of duchies
+Lasta,Abyssinia,Abyssinia,4,14,5,St George of Lalibela,,Lasta,d_lasta,867,CK3 Wiki List of duchies
+Gondar,Abyssinia,Abyssinia,3,11,5,Grand Temple,,Dämbiya,d_gondar,867,CK3 Wiki List of duchies
+Gojjam,Abyssinia,Abyssinia,3,10,1,,,Gojjam,d_gojjam,867,CK3 Wiki List of duchies
+Showa,Abyssinia,Abyssinia,4,13,3,,,Showa,d_showa,867,CK3 Wiki List of duchies
+Nobatia,Nubia,Abyssinia,5,12,5,,,Qasr Ibrim,d_nobatia,867,CK3 Wiki List of duchies
+Makuria,Nubia,Abyssinia,6,27,6,Grand CathedralGrand Temple,,Dongola,d_makuria,867,CK3 Wiki List of duchies
+Shamir,Nubia,Abyssinia,3,8,5,,,Shamir,d_shamir,867,CK3 Wiki List of duchies
+Alwa,Nubia,Abyssinia,5,18,1,,,Alodia,d_alwa,867,CK3 Wiki List of duchies
+Alodia,Nubia,Abyssinia,4,13,1,Grand Temple,,Sennar,d_sennar,867,CK3 Wiki List of duchies
+Naqis,Blemmyia,Abyssinia,4,12,3,Wadi al-Allaq Mining SettlementGrand Temple,,Aydhab,d_naqis,867,CK3 Wiki List of duchies
+Bazin,Blemmyia,Abyssinia,3,7,4,,,Bazin,d_bazin,867,CK3 Wiki List of duchies
+Baqlin,Blemmyia,Abyssinia,6,18,1,,,Baqlin,d_baqlin,867,CK3 Wiki List of duchies
+Damot,Damot,Abyssinia,4,14,2,,,Damot,d_damot,867,CK3 Wiki List of duchies
+Kaffa,Damot,Abyssinia,3,9,1,Grand Temple,,Kaffa,d_kaffa,867,CK3 Wiki List of duchies
+Sharka,Damot,Abyssinia,4,11,2,,,Sharka,d_sharka,867,CK3 Wiki List of duchies
+Dawaro,Adal,Abyssinia,3,10,1,,,Dawaro,d_dawaro,867,CK3 Wiki List of duchies
+Adal,Adal,Abyssinia,4,12,3,Grand Temple,,Dakkar,d_adal,867,CK3 Wiki List of duchies
+Mora,Adal,Abyssinia,2,6,1,,,Awssa,d_mora,867,CK3 Wiki List of duchies
+Danakil,Adal,Abyssinia,3,8,1,Grand Temple,,Danakil,d_danakil,867,CK3 Wiki List of duchies
+Zaila,Adal,Abyssinia,3,9,5,,,Zaila,d_zaila,867,CK3 Wiki List of duchies
+Sanaag,Adal,Abyssinia,3,9,2,Grand Temple,,Mait,d_sanaag,867,CK3 Wiki List of duchies
+Hafun,Ajuraan,Azania,4,10,1,,,Ras Hafun,d_hafun,867,CK3 Wiki List of duchies
+Mogadishu,Ajuraan,Azania,4,15,1,Grand Temple,,Mogadishu,d_mogadishu,867,CK3 Wiki List of duchies
+West Ajuraan,Ajuraan,Azania,5,15,1,,,Bardhere,d_west_ajuraan,867,CK3 Wiki List of duchies
+Shabelle,Bale,Azania,3,11,1,,,Gode,d_shabelle,867,CK3 Wiki List of duchies
+Bali,Bale,Azania,2,8,2,,,Sidamo,d_bali,867,CK3 Wiki List of duchies
+Samalo,Bale,Azania,4,11,0,,,Marsabit,d_samalo,867,CK3 Wiki List of duchies
+Pate,Zanj,Azania,3,9,2,Pate Island Trade PortsLamu Trade Ports,,Pate,d_pate,867,CK3 Wiki List of duchies
+Mombasa,Zanj,Azania,2,5,2,Port of MombasaGrand Temple,,Mombasa,d_mombasa,867,CK3 Wiki List of duchies
+Bonde la Ufa,Zanj,Azania,5,13,1,Grand TempleGrand Temple,,Kirinyaga,d_bonde_la_ufa,867,CK3 Wiki List of duchies
+Zanzibar,Zanj,Azania,4,9,2,Pemba Trade PortsZanzibar Trade Ports,,Zanzibar,d_zanzibar,867,CK3 Wiki List of duchies
+Kanem,Kanem,Kanem-Bornu,2,9,5,,,Kanem,d_kanem,867,CK3 Wiki List of duchies
+Bornu,Kanem,Kanem-Bornu,4,16,4,Grand Temple,,Bornu,d_bornu,867,CK3 Wiki List of duchies
+Kagha,Kanem,Kanem-Bornu,3,11,3,,,Kagha,d_kagha,867,CK3 Wiki List of duchies
+Baguirmi,Sao,Kanem-Bornu,6,20,1,,,Baguirmi,d_baguirmi,867,CK3 Wiki List of duchies
+Salamat,Sao,Kanem-Bornu,2,5,1,,,Salamat,d_salamat,867,CK3 Wiki List of duchies
+Wandala,Sao,Kanem-Bornu,5,17,2,Grand Temple,,Wandala,d_wandala,867,CK3 Wiki List of duchies
+Kano,Hausaland,Kanem-Bornu,3,7,6,Kano EarthworksGrand Temple,,Kano,d_kano,867,CK3 Wiki List of duchies
+Katsina,Hausaland,Kanem-Bornu,3,6,6,,,Katsina,d_katsina,867,CK3 Wiki List of duchies
+Kebbi,Hausaland,Kanem-Bornu,3,10,3,,,Kebbi,d_kebbi,867,CK3 Wiki List of duchies
+Gobir,Hausaland,Kanem-Bornu,2,6,1,,,Gobir,d_gobir,867,CK3 Wiki List of duchies
+Dárfúr,Darfur,Kanem-Bornu,4,17,3,Grand Temple,,El-Fasher,d_darfur,867,CK3 Wiki List of duchies
+West Dárfúr,Darfur,Kanem-Bornu,3,9,1,,,Ayn Farah,d_west_darfur,867,CK3 Wiki List of duchies
+Wadaï,Darfur,Kanem-Bornu,6,18,1,,,Wadaï,d_wadai,867,CK3 Wiki List of duchies
+Kordofan,Darfur,Kanem-Bornu,3,9,1,,,Kordofan,d_kordofan,867,CK3 Wiki List of duchies
+Kawkaw,Songhay,Mali,3,10,7,Grand Temple,,Gao,d_kawkaw,867,CK3 Wiki List of duchies
+Timbuktu,Songhay,Mali,2,6,3,The University of Sankoré,,Tirakka,d_timbuktu,867,CK3 Wiki List of duchies
+Dendi,Songhay,Mali,3,9,2,,,Dendi,d_dendi,867,CK3 Wiki List of duchies
+Lower Gurma,Gurma,Mali,4,13,2,,,Gurma,d_lower_gurma,867,CK3 Wiki List of duchies
+Upper Gurma,Gurma,Mali,3,11,1,,,Oudalan,d_upper_gurma,867,CK3 Wiki List of duchies
+Yatenga,Gurma,Mali,4,13,2,,,Yatenga,d_yatenga,867,CK3 Wiki List of duchies
+Wagadu,Ghana,Mali,3,11,8,Grand Temple,,Awkar,d_wagadu,867,CK3 Wiki List of duchies
+Mema,Ghana,Mali,3,11,7,,,Mema,d_mema,867,CK3 Wiki List of duchies
+Tagant,Ghana,Mali,3,7,6,,,Hodh,d_tagant,867,CK3 Wiki List of duchies
+Diafunu,Ghana,Mali,3,8,6,,,Guidimaka,d_diafunu,867,CK3 Wiki List of duchies
+Kaniaga,Ghana,Mali,4,11,5,,,Kaniaga,d_kaniaga,867,CK3 Wiki List of duchies
+Manding,Mali,Mali,6,23,3,Grand TempleGold Mining SettlementGold Mining Settlement,,Niani,d_manding,867,CK3 Wiki List of duchies
+Bambuk,Mali,Mali,4,17,3,Gold Mining Settlement,,Bambuk,d_bambuk,867,CK3 Wiki List of duchies
+Fura Jalon,Mali,Mali,3,12,2,,,Futa Jalon,d_futa_jalon,867,CK3 Wiki List of duchies
+Loma,Mali,Mali,3,12,2,Grand Temple,,Kuranko,d_loma,867,CK3 Wiki List of duchies
+Takrūr,Takrūr,Mali,3,7,4,,,Takrūr,d_takrur,867,CK3 Wiki List of duchies
+Silla,Takrūr,Mali,3,9,4,,,Silla,d_silla,867,CK3 Wiki List of duchies
+Djolof,Takrūr,Mali,4,13,3,Grand Temple,,Jolof,d_djolof,867,CK3 Wiki List of duchies
+Jenne,Jenne,Mali,4,16,6,Great Mosque of Djenne,,Jenne,d_jenne,867,CK3 Wiki List of duchies
+Bobo,Jenne,Mali,2,5,2,,,Sikasso,d_bobo,867,CK3 Wiki List of duchies
+Kaabu,Kaabu,Mali,2,8,3,,,Kaabu,d_kaabu,867,CK3 Wiki List of duchies
+Wuli,Kaabu,Mali,3,8,2,,,Wuli,d_wuli,867,CK3 Wiki List of duchies
+Kasa,Kaabu,Mali,3,11,2,Grand Temple,,Kasa,d_kasa,867,CK3 Wiki List of duchies
+Sapi,Guinea,Guinea,4,12,0,,,Temne,d_sapi,867,CK3 Wiki List of duchies
+Kono,Guinea,Guinea,3,10,0,Grand Temple,,Kono,d_kono,867,CK3 Wiki List of duchies
+Bassa,Guinea,Guinea,3,9,0,,,Bassa,d_bassa,867,CK3 Wiki List of duchies
+Toro,Guinea,Guinea,5,17,1,,,Toro,d_toro,867,CK3 Wiki List of duchies
+Wenyon,Guinea,Guinea,2,7,0,,,Wenyon,d_wenyon,867,CK3 Wiki List of duchies
+Kru,Guinea,Guinea,4,11,0,,,Kru,d_kru,867,CK3 Wiki List of duchies
+Worodugu,Kong,Guinea,3,14,1,,,Worodugu,d_worodugu,867,CK3 Wiki List of duchies
+Kong,Kong,Guinea,4,16,1,,,Kong,d_kong,867,CK3 Wiki List of duchies
+Lobi,Kong,Guinea,4,13,0,,,Lobi,d_lobi,867,CK3 Wiki List of duchies
+Ashanti,Akan,Guinea,5,17,2,Grand Temple,,Kumasi,d_ashanti,867,CK3 Wiki List of duchies
+Adiukru,Akan,Guinea,3,9,0,,,Attie,d_adiukru,867,CK3 Wiki List of duchies
+Gyaman,Akan,Guinea,2,7,1,,,Bonduku,d_gyaman,867,CK3 Wiki List of duchies
+Brong,Akan,Guinea,4,14,4,Grand Temple,,Bono,d_brong,867,CK3 Wiki List of duchies
+Eweland,Akan,Guinea,3,10,1,,,Ewe,d_eweland,867,CK3 Wiki List of duchies
+Dagomba,Gur,Guinea,3,9,2,,,Dagomba,d_dagomba,867,CK3 Wiki List of duchies
+Wagadugu,Gur,Guinea,2,6,2,,,Wagadugu,d_wagadugu,867,CK3 Wiki List of duchies
+Mamprusi,Gur,Guinea,3,12,0,,,Mamprusi,d_mamprusi,867,CK3 Wiki List of duchies
+Borgu,Borgu,Guinea,5,16,3,Grand Temple,,Nikki,d_borgu,867,CK3 Wiki List of duchies
+Savalu,Borgu,Guinea,4,12,0,,,Savalu,d_savalu,867,CK3 Wiki List of duchies
+Ibadan,Yorubaland,Guinea,4,10,0,,,Ibadan,d_ibadan,867,CK3 Wiki List of duchies
+Oyo,Yorubaland,Guinea,5,17,2,,,Oyo,d_oyo,867,CK3 Wiki List of duchies
+Ife,Yorubaland,Guinea,3,9,4,Grand Temple,,Ife,d_ife,867,CK3 Wiki List of duchies
+Benin,Yorubaland,Guinea,2,6,3,Walls of Benin,,Benin,d_benin,867,CK3 Wiki List of duchies
+Igboland,Igbo-Benue,Guinea,5,17,1,Grand Temple,,Igbo,d_igboland,867,CK3 Wiki List of duchies
+Nupe,Igbo-Benue,Guinea,4,15,1,,,Nupe,d_nupe,867,CK3 Wiki List of duchies
+Kwararafa,Igbo-Benue,Guinea,3,10,1,,,Kwararafa,d_kwararafa,867,CK3 Wiki List of duchies
+Sauvira,Sindh,Rajasthan,5,18,12,,,Debul,d_sauvira,867,CK3 Wiki List of duchies
+Bhakkar,Sindh,Rajasthan,5,18,7,,,Bhakkar,d_bhakkar,867,CK3 Wiki List of duchies
+Multan,Punjab,Rajasthan,6,20,12,Grand Temple,,Multan,d_multan,867,CK3 Wiki List of duchies
+Lahore,Punjab,Rajasthan,8,28,12,,,Lahur,d_lahore,867,CK3 Wiki List of duchies
+Gandhara,Punjab,Rajasthan,5,15,12,Grand Temple,,Udabhanda,d_gandhara,867,CK3 Wiki List of duchies
+Kuru,Delhi,Rajasthan,3,13,12,Iron Pillar of DelhiGrand Temple,,Delhi,d_kuru,867,CK3 Wiki List of duchies
+Haritanaka,Delhi,Rajasthan,3,8,5,Grand Temple,,Tribandapura,d_haritanaka,867,CK3 Wiki List of duchies
+Mathura,Delhi,Rajasthan,3,10,12,Grand Temple,,Mathura,d_mathura,867,CK3 Wiki List of duchies
+Vodamayutja,Delhi,Rajasthan,3,11,12,,,Vodamayutja,d_vodamayutja,867,CK3 Wiki List of duchies
+Gurjara Mandala,Gujarat,Rajasthan,3,12,12,,,Sarasvata Mandala,d_gurjara_mandala,867,CK3 Wiki List of duchies
+Anartta,Gujarat,Rajasthan,3,10,5,Grand Temple,,Dvaraka,d_anartta,867,CK3 Wiki List of duchies
+Saurashtra,Gujarat,Rajasthan,4,16,7,Grand TempleUniversity,,Bhumilka,d_saurashtra,867,CK3 Wiki List of duchies
+Lata,Gujarat,Rajasthan,3,11,12,,,Vadodara,d_lata,867,CK3 Wiki List of duchies
+Maru,Rajputana,Rajasthan,4,13,5,Grand Temple,,Mandavyapura,d_maru,867,CK3 Wiki List of duchies
+Jangladesh,Rajputana,Rajasthan,3,8,3,,,Nagauda,d_jangladesh,867,CK3 Wiki List of duchies
+Stravani,Rajputana,Rajasthan,2,7,5,Golden Fort,,Ludrava,d_stravani,867,CK3 Wiki List of duchies
+Medapata,Rajputana,Rajasthan,3,12,7,Zawar Mining Settlement,,Medapata,d_medapata,867,CK3 Wiki List of duchies
+Ajmer,Rajputana,Rajasthan,5,18,7,Khetri Mining Settlement,,Ajayameru,d_ajmer,867,CK3 Wiki List of duchies
+Avanti,Malwa,Rajasthan,4,14,12,UniversityIron Pillar of Dhar,,Ujjayini,d_dadhipadra,867,CK3 Wiki List of duchies
+Akara-Dasarna,Malwa,Rajasthan,4,17,12,Grand TempleKhajuraho,,Vidisa,d_akara_dasarna,867,CK3 Wiki List of duchies
+Anupa,Malwa,Rajasthan,4,13,12,,,Mandapika,d_anupa,867,CK3 Wiki List of duchies
+Kanyakubja,Kosala,Rajasthan,6,15,14,,,Kanyakubja,d_kanyakubja,867,CK3 Wiki List of duchies
+Saryupara,Kosala,Rajasthan,3,9,8,Grand Temple,,Ayodhyā,d_saryupara,867,CK3 Wiki List of duchies
+Jejakabhukti,Kosala,Rajasthan,4,13,7,,,Mahoba,d_jejakabhukti,867,CK3 Wiki List of duchies
+Kurmanchal,Himalaya,Rajasthan,4,12,5,Grand TempleGrand Temple,,Kumaon,d_kurmanchal,867,CK3 Wiki List of duchies
+Khasa,Himalaya,Rajasthan,6,15,5,Grand TempleGrand Temple,,Jumla,d_khasa,867,CK3 Wiki List of duchies
+Nepal,Himalaya,Rajasthan,3,9,5,Grand TempleUniversity,,Kathmandu,d_nepal,867,CK3 Wiki List of duchies
+Limbuwan,Himalaya,Rajasthan,3,9,5,Grand Temple,,Ilam,d_limbuwan,867,CK3 Wiki List of duchies
+Kasmira,Kashmir,Rajasthan,3,9,12,University,,Kasmira,d_kasmira,867,CK3 Wiki List of duchies
+Pamir,Kashmir,Rajasthan,3,8,9,Grand Temple,,Gilgit,d_pamir,867,CK3 Wiki List of duchies
+Gauda,Bengal,Pracya,4,14,12,Grand Temple,,Laksmanāvati,d_gauda,867,CK3 Wiki List of duchies
+Varendra,Bengal,Pracya,3,10,12,Somapura University,,Pundravardhana,d_varendra,867,CK3 Wiki List of duchies
+Vanga,Bengal,Pracya,5,18,12,,,Bikrampur,d_vanga,867,CK3 Wiki List of duchies
+Nadia,Bengal,Pracya,3,9,12,,,Nabadwipa,d_nadia,867,CK3 Wiki List of duchies
+Suhma,Bengal,Pracya,3,8,12,,,Mallabhum,d_suhma,867,CK3 Wiki List of duchies
+Kamarupanagara,Kamarupa,Pracya,2,7,7,,,Kamarupanagara,d_kamarupanagara,867,CK3 Wiki List of duchies
+Sutiya,Kamarupa,Pracya,3,9,5,,,Haruppeswara,d_sutiya,867,CK3 Wiki List of duchies
+Para-Lauhitya,Kamarupa,Pracya,4,12,3,Grand Temple,,Goalpara,d_para_lauhitya,867,CK3 Wiki List of duchies
+Magadha,Bihar,Pracya,4,14,12,Nalanda UniversityMahabodhi Temple,,Magadha,d_magadha,867,CK3 Wiki List of duchies
+Tirabhukti,Bihar,Pracya,4,13,12,,,Mithila,d_tirabhukti,867,CK3 Wiki List of duchies
+Kasi,Bihar,Pracya,3,7,12,Grand Temple,,Jaunpur,d_kasi,867,CK3 Wiki List of duchies
+Jharkand,Bihar,Pracya,5,12,3,,,Munda,d_jharkand,867,CK3 Wiki List of duchies
+Dahala,Gondwana,Pracya,2,9,5,,,Tripurī,d_dahala,867,CK3 Wiki List of duchies
+Ratanpur,Gondwana,Pracya,3,8,5,,,Ratanpur,d_ratanpur,867,CK3 Wiki List of duchies
+Tosali,Orissa,Pracya,5,22,12,Konarak Sun Temple,,Kataka,d_tosali,867,CK3 Wiki List of duchies
+Daksina Kosala,Orissa,Pracya,5,16,7,,,Rayapura,d_daksina_kosala,867,CK3 Wiki List of duchies
+Kalinga,Orissa,Pracya,4,11,7,Grand Temple,,Kalinganagar,d_kalinga,867,CK3 Wiki List of duchies
+Dandakaranya,Orissa,Pracya,2,6,5,,,Cakrakuta,d_dandakaranya,867,CK3 Wiki List of duchies
+Devagiri,Maharastra,Deccan Empire,3,10,8,Grand Temple,,Devagiri,d_devagiri,867,CK3 Wiki List of duchies
+Vidharba,Maharastra,Deccan Empire,4,14,5,,,Acalapura,d_vidharba,867,CK3 Wiki List of duchies
+Konkana,Maharastra,Deccan Empire,3,11,12,,,Surparaka,d_konkana,867,CK3 Wiki List of duchies
+Nasikya,Maharastra,Deccan Empire,2,8,7,,,Kondana,d_nasikya,867,CK3 Wiki List of duchies
+Rattapadi,Maharastra,Deccan Empire,5,19,7,,,Taradavadi,d_rattapadi,867,CK3 Wiki List of duchies
+Kalyani,Karnata,Deccan Empire,2,7,12,University,,Kalyani,d_kalyani,867,CK3 Wiki List of duchies
+Gangavadi,Karnata,Deccan Empire,3,11,12,,,Manyapura,d_gangavadi,867,CK3 Wiki List of duchies
+Nulambavadi,Karnata,Deccan Empire,5,16,7,Grand Temple,,Uchangidurga,d_nulambavadi,867,CK3 Wiki List of duchies
+Raichur Doab,Karnata,Deccan Empire,4,14,12,Vatapi Caves,,Idatarainadu,d_raichur_doab,867,CK3 Wiki List of duchies
+Pandya Nadu,Tamilakam,Deccan Empire,3,14,14,Grand Temple,,Madurai,d_pandya_nadu,867,CK3 Wiki List of duchies
+Chola Nadu,Tamilakam,Deccan Empire,3,11,14,Brihadeeswarar Temple,,Cholamandalam,d_chola_nadu,867,CK3 Wiki List of duchies
+Chera Nadu,Tamilakam,Deccan Empire,5,14,10,Grand CathedralGrand TempleUniversity,,Vembanad,d_chera_nadu,867,CK3 Wiki List of duchies
+Tondai Nadu,Tamilakam,Deccan Empire,6,19,7,University,,Kanchipuram,d_tondai_nadu,867,CK3 Wiki List of duchies
+Pakanadu,Andhra,Deccan Empire,3,11,7,Grand Temple,,Kammanadu,d_udayagiri,867,CK3 Wiki List of duchies
+Vengi,Andhra,Deccan Empire,2,6,7,,,Vengipura,d_vengi,867,CK3 Wiki List of duchies
+Warangal,Telingana,Deccan Empire,5,17,7,Kollur Mining PitsKonasamudram Mining Settlement,,Orangallu,d_warangal,867,CK3 Wiki List of duchies
+Racakonda,Telingana,Deccan Empire,2,6,7,,,Racakonda,d_racakonda,867,CK3 Wiki List of duchies
+Maya,Lanka,Deccan Empire,2,7,7,Ratnapura Mining Pits,,Dakhina Desa,d_dakhina_desa,867,CK3 Wiki List of duchies
+Ruhunu,Lanka,Deccan Empire,2,6,7,,,Rohana,d_ruhunu,867,CK3 Wiki List of duchies
+Rajarata,Lanka,Deccan Empire,4,10,12,University,,Pihiti,d_sinhala,867,CK3 Wiki List of duchies
+Yarlung,Ü,Tibet,5,14,5,,,Zêtang,d_yarlung,867,CK3 Wiki List of duchies
+Lhasa,Ü,Tibet,5,18,5,Jokhang Temple,,Lhasa,d_lhasa,867,CK3 Wiki List of duchies
+Nagqu,Ü,Tibet,3,10,5,,,Nagqu,d_nagchu,867,CK3 Wiki List of duchies
+Co'nyi,Ü,Tibet,4,13,2,,,Cozhêlhoma,d_conyi,867,CK3 Wiki List of duchies
+Xigazê,Tsang,Tibet,3,9,5,,,Xigazê,d_xigaze,867,CK3 Wiki List of duchies
+Sa'gya,Tsang,Tibet,4,15,5,Grand Temple,,Sa'gya,d_sagya,867,CK3 Wiki List of duchies
+Ngamring,Tsang,Tibet,3,10,5,,,Kagar,d_ngamring,867,CK3 Wiki List of duchies
+Nyima,Tsang,Tibet,3,8,5,,,Nyima,d_nyima,867,CK3 Wiki List of duchies
+Qamdo,Kham,Tibet,5,17,5,,,Qamdo,d_qamdo,867,CK3 Wiki List of duchies
+Boyül,Kham,Tibet,3,8,5,,,Bomê,d_boyul,867,CK3 Wiki List of duchies
+Nyingchi,Kham,Tibet,2,7,5,,,Nyingchi,d_nyingchi,867,CK3 Wiki List of duchies
+Nangqên,Kham,Tibet,2,4,5,,,Nangqên,d_nangqen,867,CK3 Wiki List of duchies
+Lhatok,Kham,Tibet,3,7,5,,,Lhatok,d_lhatok,867,CK3 Wiki List of duchies
+Lingtsang,Kham,Tibet,2,4,5,,,Lingtsang,d_lingtsang,867,CK3 Wiki List of duchies
+Dêgê,Kham,Tibet,3,8,5,,,Dêgê,d_dege,867,CK3 Wiki List of duchies
+Batang,Kham,Tibet,4,10,5,Grand Temple,,Batang,d_batang,867,CK3 Wiki List of duchies
+Litang,Kham,Tibet,3,7,5,,,Litang,d_litang,867,CK3 Wiki List of duchies
+Xining,Amdo,Tibet,2,5,2,,"Qingtang (Bodpa, Tsangpa, Lhomon, Sumpa, Zhangzhung)",Xining,d_xining,867,CK3 Wiki List of duchies
+Tuyuhun,Amdo,Tibet,6,16,2,,"Tsongönpo (Bodpa, Tsangpa, Lhomon, Sumpa, Zhangzhung)",Fuqi,d_tuyuhun,867,CK3 Wiki List of duchies
+Nagormo,Amdo,Tibet,5,13,2,,,Nagormo,d_nagormo,867,CK3 Wiki List of duchies
+Amdo,Amdo,Tibet,6,15,2,,,Amdo,d_amdo,867,CK3 Wiki List of duchies
+Zadoi,Amdo,Tibet,3,9,2,,,Zadoi,d_zadoi,867,CK3 Wiki List of duchies
+Qumarlêb,Amdo,Tibet,3,6,2,,,Qumarlêb,d_qumarleb,867,CK3 Wiki List of duchies
+Aksay,Amdo,Tibet,2,4,2,,,Aksay,d_aksay,867,CK3 Wiki List of duchies
+Gyalrong,Gyalrong,Tibet,5,14,5,Grand Temple,"Jiarong (Han)Ryarong (Tangut, Qiang)",Barkam,d_gyalrong,867,CK3 Wiki List of duchies
+Chakla,Gyalrong,Tibet,4,11,5,Grand Temple,Mingzheng (Han),Chakla,d_chakla,867,CK3 Wiki List of duchies
+Golog,Gyalrong,Tibet,3,8,5,,Guoluo (Han),Maqên,d_golog,867,CK3 Wiki List of duchies
+Malho,Gyalrong,Tibet,3,7,5,Grand Temple,Huangnan (Han),Rebgong,d_malho,867,CK3 Wiki List of duchies
+Gainlho,Gyalrong,Tibet,4,9,5,,Gannan (Han),Jonê,d_gainlho,867,CK3 Wiki List of duchies
+Guge,Gugé,Tibet,6,16,3,,,Tsaparang,d_ngari,867,CK3 Wiki List of duchies
+Kinnaur,Gugé,Tibet,2,7,3,,,Kamru,d_kinnaur,867,CK3 Wiki List of duchies
+Purang,Gugé,Tibet,6,18,3,Grand Temple,,Purang,d_purang,867,CK3 Wiki List of duchies
+Ladakh,Maryül,Tibet,3,11,3,,,Leh,d_ladakh,867,CK3 Wiki List of duchies
+Zanskar,Maryül,Tibet,3,7,3,,,Padum,d_zanskar,867,CK3 Wiki List of duchies
+Baltiyül,Maryül,Tibet,3,8,3,,,Skardu,d_baltiyul,867,CK3 Wiki List of duchies
+Aksai Chin,Maryül,Tibet,3,7,3,,"Karpoyül (Bodpa, Tsangpa, Lhomon, Sumpa, Zhangzhung)",Khurnak,d_aksai_chin,867,CK3 Wiki List of duchies
+Rutog,Maryül,Tibet,2,7,3,,,Rutog,d_rutog,867,CK3 Wiki List of duchies
+Bumthang,Lhomon,Tibet,3,8,3,,,Bumthang,d_bumthang,867,CK3 Wiki List of duchies
+Paro,Lhomon,Tibet,4,11,3,,,Paro,d_paro,867,CK3 Wiki List of duchies
+Monyul,Lhomon,Tibet,3,7,3,,,Tawang,d_monyul,867,CK3 Wiki List of duchies
+Lhoyul,Lhomon,Tibet,4,11,3,Grand TempleGrand Temple,,Itanagar,d_lhoyul,867,CK3 Wiki List of duchies
+Dzayül,Lhomon,Tibet,4,11,3,Grand TempleGrand Temple,,Rima,d_dzayul,867,CK3 Wiki List of duchies
+Bóhai,Bóhai,Andong,5,18,6,,"Dan Gur (Khitan)Balhae (Samhanic, Balhae)Dàzhēn (Jurchen)Lóngquán (Han)",Lóngquán,d_BAL_parhae,867,CK3 Wiki List of duchies
+Moe-Su,Bóhai,Andong,3,10,4,,,Makhil,d_BAL_moe_su,867,CK3 Wiki List of duchies
+Fúyú,Bóhai,Andong,4,13,4,,"Buyeo (Samhanic, Balhae)",Changchun,d_BAL_buyeo,867,CK3 Wiki List of duchies
+Yālü-Zhangling,Bóhai,Andong,4,15,4,Mount Baekdu,"Amnok-Jangryeong (Samhanic, Balhae)",East Yālü,d_BAL_amnok_jangryeong,867,CK3 Wiki List of duchies
+Wòju,Bóhai,Andong,4,11,3,,"Okjeo (Samhanic, Balhae)",Nánhai,d_BAL_southern_balhae,867,CK3 Wiki List of duchies
+Liaodong,Bóhai,Andong,5,21,5,Xiuyan Mining Settlement,Dongjing (Khitan),Shenyang,d_LIAO_dongjing,867,CK3 Wiki List of duchies
+Qingxingan,Shiwei,Andong,5,15,0,,,Huangtouguo,d_SW_qingxingan,867,CK3 Wiki List of duchies
+Lingxiguo,Shiwei,Andong,3,10,0,,,Lingxiguo,d_SW_lingxiguo,867,CK3 Wiki List of duchies
+Ruzheguo,Shiwei,Andong,3,10,0,,,Jiqin Hari,d_SW_ruzheguo,867,CK3 Wiki List of duchies
+Puyudao,Shiwei,Andong,4,15,0,,,Puyuzhou,d_SW_puyudao,867,CK3 Wiki List of duchies
+Sushenguo,Shiwei,Andong,5,14,0,,,Suihua,d_SW_sushenguo,867,CK3 Wiki List of duchies
+Heicheziguo,Shiwei,Andong,4,16,0,,,Zhongcheziguo,d_SW_heicheziguo,867,CK3 Wiki List of duchies
+Dashiweiguo,Shiwei,Andong,5,16,0,,,Pibeihe,d_SW_dashiweiguo,867,CK3 Wiki List of duchies
+Linhuang,Khitan,Andong,6,19,2,,,Linhuang,d_LIAO_linhuang,867,CK3 Wiki List of duchies
+Talu,Khitan,Andong,5,20,1,,Shangjing (Khitan),Wuzhou,d_LIAO_shangjing,867,CK3 Wiki List of duchies
+Dōngpíng,Luzhen,Andong,2,6,2,Grand Temple,"Dongpyeong (Samhanic, Balhae)",Yizhou,d_BAL_dongpyeong,867,CK3 Wiki List of duchies
+Tielì,Luzhen,Andong,3,8,1,,"Cheolli (Samhanic, Balhae)",Délizhèn,d_BAL_cheolli,867,CK3 Wiki List of duchies
+Huáiyuan,Luzhen,Andong,5,13,1,,"Hoewon (Samhanic, Balhae)",Dazhou,d_BAL_hoewon,867,CK3 Wiki List of duchies
+Shuàibīn-Ānbiān,Luzhen,Andong,4,14,3,,"Solbin-Anwon (Samhanic, Balhae)",Shuàibīn,d_BAL_yeojintang,867,CK3 Wiki List of duchies
+Ānyuan,Luzhen,Andong,4,12,1,,"Anwon (Samhanic, Balhae)",Níngzhōu,d_BAL_anwon,867,CK3 Wiki List of duchies
+Raole,Raole,Andong,6,19,5,,Zhongjing (Khitan),Dading,d_LIAO_zhongjing,867,CK3 Wiki List of duchies
+Liaoxi,Raole,Andong,6,20,6,,,Chaoyang,d_liaoxi,867,CK3 Wiki List of duchies
+Yuyi,Raole,Andong,2,6,4,The Great Wall,,Huanzhou,d_yanyun_yuyi,867,CK3 Wiki List of duchies
+Boli,Amur,Amur,4,14,0,Grand Temple,,Boli,d_eman_boli,867,CK3 Wiki List of duchies
+Sikhotebei,Amur,Amur,4,11,0,,,Yerenhe,d_eman_sikhotebei,867,CK3 Wiki List of duchies
+Samagero,Amur,Amur,4,11,0,Grand Temple,,Tudali,d_eman_samagero,867,CK3 Wiki List of duchies
+Nivkhia,Amur,Amur,3,10,0,,,Nurgan,d_eman_nivkhia,867,CK3 Wiki List of duchies
+Amar,Amur,Amur,4,12,0,,,Murkonno,d_eman_amar,867,CK3 Wiki List of duchies
+Bureya,Amur,Amur,3,7,0,,,Turma,d_eman_bureya,867,CK3 Wiki List of duchies
+Sahaliyan,Aynumosir,Amur,3,9,0,Grand Temple,"Karafuto (Yamato, Emishi)Kuye (Han)Yankemosir (Ainu)Ygh-mif (Nivkh)",Kusunkotan,d_sahaliyan,867,CK3 Wiki List of duchies
+Menas,Aynumosir,Amur,4,13,1,Grand TempleGrand Temple,East Hokkaidō (Yamato)East Oshima (Emishi),Simenas,d_menas,867,CK3 Wiki List of duchies
+Sum,Aynumosir,Amur,4,16,2,Grand TempleGrand Temple,West Hokkaidō (Yamato)West Oshima (Emishi),Uskes,d_sum,867,CK3 Wiki List of duchies
+Hitakami,Hitakami,Amur,5,19,4,Kinka Gold PitsChinjufu District,Mutsu (Yamato),Korehari,d_hitakami,867,CK3 Wiki List of duchies
+Nushiro,Hitakami,Amur,2,8,3,Grand Shrine,Dewa (Yamato),Nushiro,d_nushiro,867,CK3 Wiki List of duchies
+Mataram,Yavakadvipa,Srivijaya,4,21,9,Grand TempleBorobudurDieng Plateau,Kediri (1178),Mataram,d_JAV_mataram,867,CK3 Wiki List of duchies
+Taruma,Yavakadvipa,Srivijaya,3,14,7,,Sunda (1178),Sunda,d_JAV_taruma,867,CK3 Wiki List of duchies
+Bali,Yavakadvipa,Srivijaya,3,9,6,Besakih Temple,,Bali,d_IDO_bali,867,CK3 Wiki List of duchies
+Palembang,Malayadvipa,Srivijaya,5,18,5,Ornate TempleUniversityKrakatoa,,Palembang,d_SUM_palembang,867,CK3 Wiki List of duchies
+Jambi,Malayadvipa,Srivijaya,5,17,4,Muaro Jambi Compounds,Melayu (1178),Jambi,d_SUM_jambi,867,CK3 Wiki List of duchies
+Riau,Malayadvipa,Srivijaya,5,14,3,Grand Temple,,Muara Takus,d_SUM_riau,867,CK3 Wiki List of duchies
+Aceh,Malayadvipa,Srivijaya,4,16,5,Suvarnadvipa Mining Settlement,,Lambri,d_SUM_aceh,867,CK3 Wiki List of duchies
+Minangkabau,Malayadvipa,Srivijaya,3,7,3,Grand Temple,,Minangkabau,d_SUM_minangkabau,867,CK3 Wiki List of duchies
+Nias,Malayadvipa,Srivijaya,2,5,1,,,Nias,d_nias,867,CK3 Wiki List of duchies
+Handumans,Malayadvipa,Srivijaya,2,5,1,Grand TempleGrand Temple,,Handumans,d_handumans,867,CK3 Wiki List of duchies
+Langkasuka,Hujung Medini,Srivijaya,5,18,6,,,Patani,d_MAL_langkasuka,867,CK3 Wiki List of duchies
+Pahang,Hujung Medini,Srivijaya,6,18,4,Grand Temple,,Pahang,d_MAL_pahang,867,CK3 Wiki List of duchies
+Kinai,Yamato,Japan,4,12,10,Heian PalaceTada Copper PitsKōfuku TempleMozu Tombs,,Yamashiro,d_kinai,867,CK3 Wiki List of duchies
+Nankaidō,Yamato,Japan,6,23,6,Grand ShrineUniversity,,Iyo,d_nankaido,867,CK3 Wiki List of duchies
+East San'indō,Yamato,Japan,4,11,5,,,Tanba,d_east_sanindo,867,CK3 Wiki List of duchies
+West San'indō,Yamato,Japan,4,12,5,Grand Shrine,,Izumo,d_west_sanindo,867,CK3 Wiki List of duchies
+West San'yōdō,Yamato,Japan,4,16,6,Itsukushima Shrine,,Aki,d_west_sanyodo,867,CK3 Wiki List of duchies
+East San'yōdō,Yamato,Japan,4,13,6,,,Harima,d_east_sanyodo,867,CK3 Wiki List of duchies
+East Bandō,Azuma,Japan,4,17,6,Grand Shrine,,Shimōsa,d_east_bando,867,CK3 Wiki List of duchies
+West Bandō,Azuma,Japan,4,14,6,,,Musashi,d_west_bando,867,CK3 Wiki List of duchies
+Tōkaidō,Azuma,Japan,5,18,7,Ise ShrineMount Fuji,,Ise,d_tokaido,867,CK3 Wiki List of duchies
+Tōsandō,Azuma,Japan,5,19,6,Enryaku Temple,,Ōmi,d_tosando,867,CK3 Wiki List of duchies
+Hokurikudō,Azuma,Japan,5,17,6,Itoigawa Mining SettlementSado Gold PitsHōshi RyokanGrand Shrine,,Echizen,d_hokurikudo,867,CK3 Wiki List of duchies
+Dazaifu,Tsukushi,Japan,6,19,7,Dazaifu OfficeHakata PortGrand ShrineTsushima Silver Pits,,Chikuzen,d_north_saikaido,867,CK3 Wiki List of duchies
+South Saikaidō,Tsukushi,Japan,4,19,6,,,Satsuma,d_south_saikaido,867,CK3 Wiki List of duchies
+Dongji,Henan,Zhongyuan,2,8,14,Grand TempleShaolin Monastery,,Henan,d_dongji,867,CK3 Wiki List of duchies
+Biansong,Henan,Zhongyuan,5,18,11,Kaifeng Imperial PalaceGrand Temple,,Bianzhou,d_biansong,867,CK3 Wiki List of duchies
+Shanguo,Henan,Zhongyuan,2,4,16,,,Shanzhou,d_shanguo,867,CK3 Wiki List of duchies
+Zhenghua,Henan,Zhongyuan,2,6,14,,,Huazhou,d_zhenghua,867,CK3 Wiki List of duchies
+Chenxu,Henan,Zhongyuan,4,14,11,,,Xuzhou,d_chenxu,867,CK3 Wiki List of duchies
+Ziqing,Qingxu,Zhongyuan,5,17,11,Grand TempleJiaodong Mining Settlement,,Qingzhou,d_ziqing,867,CK3 Wiki List of duchies
+Yanhai,Qingxu,Zhongyuan,4,18,11,Culai AcademyGrand Temple,,Yanzhou,d_yanhai,867,CK3 Wiki List of duchies
+Xusi,Qingxu,Zhongyuan,4,14,10,,,Xuzhou,d_xusi,867,CK3 Wiki List of duchies
+Yuncao,Qingxu,Zhongyuan,4,15,15,Grand TempleGrand Temple,,Yunzhou,d_yuncao,867,CK3 Wiki List of duchies
+Weibo,Hebei,Zhongyuan,3,8,17,Grand Temple,,Weizhou,d_weibo,867,CK3 Wiki List of duchies
+Xingming,Hebei,Zhongyuan,3,9,12,Hanxing Mining Settlement,,Xingzhou,d_xingming,867,CK3 Wiki List of duchies
+Chengde,Hebei,Zhongyuan,4,11,14,Lize Academy,,Zhenzhou,d_chengde,867,CK3 Wiki List of duchies
+Cangjing,Hebei,Zhongyuan,3,9,14,,,Cangzhou,d_cangjing,867,CK3 Wiki List of duchies
+Heyang,Hebei,Zhongyuan,2,4,12,,,Huaizhou,d_heyang,867,CK3 Wiki List of duchies
+Hedong,Hedong,Zhongyuan,5,20,8,Grand Temple,,Taiyuan,d_hedong,867,CK3 Wiki List of duchies
+Yanmen,Hedong,Zhongyuan,2,7,8,Pagoda of Fogong Temple,,Daizhou,d_yanmen,867,CK3 Wiki List of duchies
+Hezhong,Hedong,Zhongyuan,5,17,8,Grand Temple,,Hezhong,d_hezhong,867,CK3 Wiki List of duchies
+Zelu,Hedong,Zhongyuan,3,10,8,,,Luzhou,d_zelu,867,CK3 Wiki List of duchies
+Youzhou,Youji,Zhongyuan,6,21,8,,,Youzhou,d_youzhou,867,CK3 Wiki List of duchies
+Yideng,Youji,Zhongyuan,2,5,9,,,Dingzhou,d_yideng,867,CK3 Wiki List of duchies
+Yingmo,Youji,Zhongyuan,2,6,11,,,Yingzhou,d_yingmo,867,CK3 Wiki List of duchies
+Yunshuo,Daibei,Zhongyuan,5,17,4,Yungang GrottoesThe Great WallGrand TempleHanging TempleThe Great Wall,,Datong,d_yunshuo,867,CK3 Wiki List of duchies
+Sanggan,Daibei,Zhongyuan,4,11,4,The Great WallThe Great Wall,,Yongxing,d_sanggan,867,CK3 Wiki List of duchies
+Zhenwu,Daibei,Zhongyuan,5,14,5,The Great WallThe Great Wall,,Yunneizhou,d_xinan,867,CK3 Wiki List of duchies
+Yongxing,Guannei,Yongliang,4,14,20,Giant Wild Goose PagodaLantian Mining SettlementQianling Mausoleum,,Jingzhao,d_yongxing,867,CK3 Wiki List of duchies
+Fengxiang,Guannei,Yongliang,2,6,14,Kaibao Mining Settlement,,Fengxiang,d_fengxiang,867,CK3 Wiki List of duchies
+Jinshang,Guannei,Yongliang,2,8,8,,,Jinzhou,d_jinshang,867,CK3 Wiki List of duchies
+Binning,Guannei,Yongliang,4,12,11,The Great WallThe Great WallThe Great Wall,,Binzhou,d_binning,867,CK3 Wiki List of duchies
+Fufang,Guannei,Yongliang,4,13,10,,,Fuzhou,d_fufang,867,CK3 Wiki List of duchies
+Jingyuan,Guannei,Yongliang,3,8,8,The Great WallThe Great Wall,,Jingzhou,d_jingyuan,867,CK3 Wiki List of duchies
+Qincheng,Guannei,Yongliang,5,14,8,,,Qinzhou,d_qincheng,867,CK3 Wiki List of duchies
+Xingfeng,Guannei,Yongliang,2,4,8,,,Xingqing,d_xingfeng,867,CK3 Wiki List of duchies
+Hexi,Hexi,Yongliang,5,13,6,,,Liangzhou,d_hexi,867,CK3 Wiki List of duchies
+Shanzhou,Hexi,Yongliang,4,11,6,,,Shanzhou,d_longyou,867,CK3 Wiki List of duchies
+Qilian,Hexi,Yongliang,2,4,6,,,Qilin,d_qilian,867,CK3 Wiki List of duchies
+Gansu,Hexi,Yongliang,6,16,6,,,Ganzhou,d_gansu,867,CK3 Wiki List of duchies
+Guasha,Hexi,Yongliang,6,15,6,UniversityGrand Temple,,Shazhou,d_guasha,867,CK3 Wiki List of duchies
+Shuofang,Xia,Yongliang,6,21,8,Grand TempleThe Great WallThe Great WallThe Great WallThe Great WallThe Great WallThe Great WallGrand TempleThe Great WallThe Great Wall,,Lingzhou,d_shuofang,867,CK3 Wiki List of duchies
+Xiasui,Xia,Yongliang,6,21,8,The Great WallThe Great WallThe Great WallThe Great WallThe Great WallThe Great Wall,,Xiazhou,d_xiasui,867,CK3 Wiki List of duchies
+Tiande,Xia,Yongliang,2,5,8,The Great WallThe Great WallThe Great Wall,,Tiande,d_tiande,867,CK3 Wiki List of duchies
+Wuluhai,Xia,Yongliang,3,8,8,The Great WallThe Great WallThe Great WallThe Great WallThe Great Wall,,Wuluhai,d_langshan,867,CK3 Wiki List of duchies
+Zhenfan,Xia,Yongliang,3,7,8,Grand Temple,Wamo (Bodpa),Zhenfan,d_xiutu,867,CK3 Wiki List of duchies
+Juyan,Xia,Yongliang,4,8,8,Grand Temple,,Tongcheng,d_juyan,867,CK3 Wiki List of duchies
+Jiangdong,Jiangdong,Jingyang,4,14,16,Maoshan Academy,,Jiangning,d_jiangdong,867,CK3 Wiki List of duchies
+Xuanshe,Jiangdong,Jingyang,4,16,12,Grand Temple,,Xuanzhou,d_xuanshe,867,CK3 Wiki List of duchies
+Zhexi,Liangzhe,Jingyang,4,14,13,Grand TempleLingyin TempleLiuhe Pagoda,,Hangzhou,d_zhexi,867,CK3 Wiki List of duchies
+Zhedong,Liangzhe,Jingyang,7,28,9,Tiantai MonasteriesGrand TempleLiangzhe Mining Settlement,,Yuezhou,d_zhedong,867,CK3 Wiki List of duchies
+Weiwu,Fujian,Jingyang,2,8,10,Baofeng Mining Settlement,,Fuzhou,d_weiwu,867,CK3 Wiki List of duchies
+Pinghai,Fujian,Jingyang,3,11,9,Quanzhou SeaportUniversity,,Quanzhou,d_pinghai,867,CK3 Wiki List of duchies
+Jianning,Fujian,Jingyang,4,17,9,Zijinshan Mining Settlement,,Jianzhou,d_jianning,867,CK3 Wiki List of duchies
+Huainan,Huainan,Jingyang,4,14,8,,,Yangzhou,d_huainan,867,CK3 Wiki List of duchies
+Huaixi,Huainan,Jingyang,6,24,8,,,Shouzhou,d_huaixi,867,CK3 Wiki List of duchies
+Jiangxi,Jiangxi,Jingyang,7,27,8,Grand Temple,,Hongzhou,d_jiangxi,867,CK3 Wiki List of duchies
+Dingjiang,Jiangxi,Jingyang,4,16,10,White Deer Grotto Academy,,Jiangzhou,d_dingjiang,867,CK3 Wiki List of duchies
+Zhaoxin,Jiangxi,Jingyang,3,9,8,,,Qianzhou,d_zhaoxin,867,CK3 Wiki List of duchies
+Xiangdeng,Shannan,Jingyang,7,28,8,Wudang Mountain TemplesDushan Mining Settlement,,Xiangyang,d_xiangdeng,867,CK3 Wiki List of duchies
+Jingnan,Shannan,Jingyang,7,26,9,Wulingyuan,,Jiangling,d_jingnan,867,CK3 Wiki List of duchies
+Eyue,Shannan,Jingyang,5,20,8,Grand TempleChihu Mining SettlementGrand TempleGrand Temple,,Ezhou,d_eyue,867,CK3 Wiki List of duchies
+Hunan,Hunan,Jingyang,5,21,9,UniversityShigu AcademyGuiyang Mining SettlementNanhua Temple,,Tanzhou,d_hunan,867,CK3 Wiki List of duchies
+Lingling,Hunan,Jingyang,4,15,8,Grand TempleGrand Temple,,Yongzhou,d_lingling,867,CK3 Wiki List of duchies
+Xichuan,Xichuan,Liangyi,6,15,11,Grand TempleGrand Temple,,Chengdu,d_xichuan,867,CK3 Wiki List of duchies
+Qiongnan,Xichuan,Liangyi,6,18,8,Grand TempleGrand TempleLeshan Giant Buddha,,Qiongzhou,d_qiongnan,867,CK3 Wiki List of duchies
+Xingyuan,Xingyuan,Liangyi,4,13,9,,,Xingyuan,d_xingyuan,867,CK3 Wiki List of duchies
+Lilang,Xingyuan,Liangyi,5,13,10,,,Lizhou,d_lilang,867,CK3 Wiki List of duchies
+Baqu,Xingyuan,Liangyi,4,12,12,,,Bazhou,d_baqu,867,CK3 Wiki List of duchies
+Dongchuan,Dongchuan,Liangyi,6,15,11,,,Tongchuan,d_dongchuan,867,CK3 Wiki List of duchies
+Wuxin,Dongchuan,Liangyi,6,15,11,Ziliujing & Gongjing Mining Settlement,,Suizhou,d_wuxin,867,CK3 Wiki List of duchies
+Kuizhong,Kuizhou,Liangyi,4,15,11,,,Kuizhou,d_kuizhong,867,CK3 Wiki List of duchies
+Qianzhong,Kuizhou,Liangyi,7,22,6,,,Qianzhou,d_qianzhong,867,CK3 Wiki List of duchies
+Wuxi,Kuizhou,Liangyi,6,21,6,,,Chenzhou,d_wuxi,867,CK3 Wiki List of duchies
+Luodian,Qianzhong,Liangyi,3,8,4,Grand Temple,,Luodian,d_luodian,867,CK3 Wiki List of duchies
+Luoshi,Qianzhong,Liangyi,4,14,4,,,Sie,d_luoshi,867,CK3 Wiki List of duchies
+Shimen,Qianzhong,Liangyi,3,8,4,Grand Temple,,Yinzhou,d_shimen,867,CK3 Wiki List of duchies
+Zangke,Qianzhong,Liangyi,5,16,4,,,Juzhou,d_zangke,867,CK3 Wiki List of duchies
+Xiyuan,Qianzhong,Liangyi,3,8,4,,,Siyuan,d_xiyuan,867,CK3 Wiki List of duchies
+Dali,Dali,Liangyi,3,7,7,Grand Temple,,Dali,d_dali,867,CK3 Wiki List of duchies
+Jianchuan,Dali,Liangyi,3,9,3,,,Jianchuan,d_jianchuan,867,CK3 Wiki List of duchies
+Huichuan,Dali,Liangyi,2,5,5,,,Huichuan,d_huichuan,867,CK3 Wiki List of duchies
+Yinsheng,Dali,Liangyi,3,8,3,,,Yinsheng,d_yinsheng,867,CK3 Wiki List of duchies
+Tuodong,Dali,Liangyi,3,9,5,,,Shanchan,d_tuodong,867,CK3 Wiki List of duchies
+Tonghai,Dali,Liangyi,3,10,4,Grand Temple,,Tonghai,d_tonghai,867,CK3 Wiki List of duchies
+Lingnan,Lingnan,Lingnan,8,28,8,,Lĩnh Nam (Vietnamese),Guangzhou,d_lingnan,867,CK3 Wiki List of duchies
+Huixun,Lingnan,Lingnan,6,27,8,,,Huizhou,d_huixun,867,CK3 Wiki List of duchies
+Gaoliang,Lingnan,Lingnan,3,10,8,,,Gaozhou,d_gaoliang,867,CK3 Wiki List of duchies
+Qiongguan,Lingnan,Lingnan,5,15,8,,,Yazhou,d_qiongguan,867,CK3 Wiki List of duchies
+Guiguan,Lingxi,Lingnan,5,17,8,,,Guizhou,d_guiguan,867,CK3 Wiki List of duchies
+Jingjiang,Lingxi,Lingnan,3,9,8,,,Zhaozhou,d_jingjiang,867,CK3 Wiki List of duchies
+Rongguan,Lingxi,Lingnan,5,16,8,,,Rongzhou,d_rongguan,867,CK3 Wiki List of duchies
+Yongguan,Lingxi,Lingnan,8,23,8,,,Yongzhou,d_yongguan,867,CK3 Wiki List of duchies
+Hai Dong,Dai Viet,Lingnan,2,8,5,Grand TempleUniversity,,Hai Dong,d_hai_dong,867,CK3 Wiki List of duchies
+Nghe An,Dai Viet,Lingnan,3,10,4,Plain of Jars,Jiuzhēn (Han),Nghe An,d_nghe_an,867,CK3 Wiki List of duchies
+Lam Tay,Dai Viet,Lingnan,2,8,4,Grand Temple,,Lam Tay,d_lam_tay,867,CK3 Wiki List of duchies
+Thăng Long,Dai Viet,Lingnan,2,6,8,Đai La CitadelDâu Temple,Jiāozhi (Han),Thăng Long,d_thang_long,867,CK3 Wiki List of duchies
+Pagan,Pagan,Suvarnabhumi,6,23,6,Ananda TempleUniversityGrand Temple,,Pagan,d_pagan,867,CK3 Wiki List of duchies
+Tagaung,Pagan,Suvarnabhumi,4,13,6,Hpakant Mining SettlementMogok Mining Pits,,Takon,d_tagaung,867,CK3 Wiki List of duchies
+Śrīksetra,Pagan,Suvarnabhumi,4,11,6,,,Śrīksetra,d_sriksetra,867,CK3 Wiki List of duchies
+Arakan,Pagan,Suvarnabhumi,4,12,5,Grand Temple,,Vaiśālĩ,d_arakan,867,CK3 Wiki List of duchies
+Rāmaññadeśa,Pagan,Suvarnabhumi,5,16,7,Grand TempleShwedagon Pagoda,,Thaton,d_ramannadesa,867,CK3 Wiki List of duchies
+Mongnai,Pagan,Suvarnabhumi,3,11,3,Grand Temple,,Mongnai,d_mongnai,867,CK3 Wiki List of duchies
+Yongchang,Pagan,Suvarnabhumi,3,9,6,Jizu Shan Temples,,Yongchang,d_yongchang,867,CK3 Wiki List of duchies
+Lishui,Pagan,Suvarnabhumi,5,18,2,Grand TempleGrand Temple,,Momauk,d_tengchong,867,CK3 Wiki List of duchies
+Lop Buri,Dvaravati,Suvarnabhumi,3,10,7,Ornate TempleGrand Temple,,Lop Buri,d_lop_buri,867,CK3 Wiki List of duchies
+Muang Sua,Dvaravati,Suvarnabhumi,4,13,5,,,Muang Sua,d_muang_sua,867,CK3 Wiki List of duchies
+Sukhothai,Dvaravati,Suvarnabhumi,4,14,4,Grand Temple,,Sukhothai,d_sukhothai,867,CK3 Wiki List of duchies
+Tun Sun,Dvaravati,Suvarnabhumi,3,10,3,,,Phetchaburi,d_tun_sun,867,CK3 Wiki List of duchies
+Haripuñjaya,Dvaravati,Suvarnabhumi,3,11,5,Grand Temple,,Haripuñjaya,d_haripunjaya,867,CK3 Wiki List of duchies
+Sipsongpanna,Dvaravati,Suvarnabhumi,2,9,4,Grand Temple,Jinglong (Han)Moeng Lü (Tai),Chiang Rung,d_sipsongpanna,867,CK3 Wiki List of duchies
+Baigaur,Angkor,Kambuja,3,10,4,,,Ca Mau,d_baigaur,867,CK3 Wiki List of duchies
+Vyadhapura,Angkor,Kambuja,3,10,4,,,Binh Long,d_vyadhapura,867,CK3 Wiki List of duchies
+Angkor,Angkor,Kambuja,5,15,7,Angkor WatPhnom Dek Mining Settlement,,Angkor,d_angkor,867,CK3 Wiki List of duchies
+Ratanakiri,Angkor,Kambuja,3,9,2,University,,Ratanakiri,d_ratanakiri,867,CK3 Wiki List of duchies
+Angkor Borey,Angkor,Kambuja,4,15,4,University,,Angkor Borey,d_angkor_borey,867,CK3 Wiki List of duchies
+Phonsavan,Chenla,Kambuja,3,13,2,Grand Temple,,Sanasomboon,d_phonsavan,867,CK3 Wiki List of duchies
+Mukdahan,Chenla,Kambuja,5,17,3,,,Canasha,d_mukdahan,867,CK3 Wiki List of duchies
+Indrapura,Champa,Kambuja,3,9,6,Ornate TempleGrand Temple,Dong Duong (Vietnamese),Indrapura,d_indrapura,867,CK3 Wiki List of duchies
+Vijaya,Champa,Kambuja,3,9,5,Ornate TemplePo Klong Garai Temple,Do Bàn (Vietnamese),Vijaya,d_vijaya,867,CK3 Wiki List of duchies
+Gaeseong,Goguryeo,Samhan,3,10,6,Byeokran Port,,Gaeseong,d_gaeseong,867,CK3 Wiki List of duchies
+Haeju,Goguryeo,Samhan,3,9,4,,,Haeju,d_haeju,867,CK3 Wiki List of duchies
+Gyoju,Goguryeo,Samhan,4,12,4,,,Gyoju,d_gyoju,867,CK3 Wiki List of duchies
+Yukju,Goguryeo,Samhan,4,11,4,,,Jangjeong,d_yukju,867,CK3 Wiki List of duchies
+Bukgye,Goguryeo,Samhan,3,12,5,University,,Seogyeong,d_bukgye,867,CK3 Wiki List of duchies
+Gwangju,Goguryeo,Samhan,3,9,6,,,Gwangju,d_gwangju,867,CK3 Wiki List of duchies
+Gyeongju,Silla,Samhan,4,12,6,Hwangnyong TempleGrand Temple,,Gyeongju,d_gyeongju,867,CK3 Wiki List of duchies
+Jinju,Silla,Samhan,4,12,3,,,Jinju,d_jinju,867,CK3 Wiki List of duchies
+Donggye,Silla,Samhan,5,18,3,Grand Temple,,Myeongju,d_donggye,867,CK3 Wiki List of duchies
+Chungju,Baekje,Samhan,4,13,4,Gongsanseong Fortress,,Chungju,d_chungju,867,CK3 Wiki List of duchies
+Naju,Baekje,Samhan,3,10,3,,,Naju,d_naju,867,CK3 Wiki List of duchies
+Tamna,Baekje,Samhan,1,2,4,Grand Temple,,Tamna,d_tamna,867,CK3 Wiki List of duchies
+Jeonju,Baekje,Samhan,3,9,4,,,Jeonju,d_jeonju,867,CK3 Wiki List of duchies
+Tondo,Lusung,Nusantara,5,21,4,Grand Temple,,Tondo,d_PHI_tondo,867,CK3 Wiki List of duchies
+Ilocana,Lusung,Nusantara,4,13,3,Grand Temple,,Pangasinan,d_PHI_ilocana,867,CK3 Wiki List of duchies
+Cagayan,Lusung,Nusantara,2,6,3,,,Cagayan Valley,d_PHI_cagayan,867,CK3 Wiki List of duchies
+Sandao,Lusung,Nusantara,2,6,2,Grand Temple,,Taytay,d_PHI_sandao,867,CK3 Wiki List of duchies
+Visayas,Kabisay-An,Nusantara,5,18,4,UniversityGrand Temple,,Panay,d_PHI_visayas,867,CK3 Wiki List of duchies
+Maguindanao,Kabisay-An,Nusantara,5,18,4,Grand Temple,,Lanao,d_PHI_maguindanao,867,CK3 Wiki List of duchies
+Butuan,Kabisay-An,Nusantara,4,14,3,Mount Apo,,Butuan,d_PHI_butuan,867,CK3 Wiki List of duchies
+Liuqiu,Liuqiu,Nusantara,3,10,1,Grand TempleFengtian Mining Settlement,,Hoanya,d_liuqiu,867,CK3 Wiki List of duchies
+Tanjungpura,Tanjungnagara,Nusantara,4,12,4,Grand Temple,,Sambas,d_BOR_tanjungpura,867,CK3 Wiki List of duchies
+Barune,Tanjungnagara,Nusantara,5,15,2,Grand Temple,,Brunei,d_BOR_barune,867,CK3 Wiki List of duchies
+Santubong,Tanjungnagara,Nusantara,4,12,3,Grand Temple,,Santubong,d_BOR_santubong,867,CK3 Wiki List of duchies
+Nan Sarunai,Tanjungnagara,Nusantara,4,13,3,Grand Temple,,Banjar,d_BOR_nan_sarunai,867,CK3 Wiki List of duchies
+Kutai,Tanjungnagara,Nusantara,4,12,3,Grand Temple,,Martapura,d_BOR_kutai,867,CK3 Wiki List of duchies
+Luwu,Sulawesi,Nusantara,4,13,4,Grand TempleGrand Temple,,Luwu,d_SuMa_luwu,867,CK3 Wiki List of duchies
+Konawe,Sulawesi,Nusantara,4,13,4,,,Konawe,d_SuMa_konawe,867,CK3 Wiki List of duchies
+Minahasa,Sulawesi,Nusantara,3,10,4,Grand Temple,,Gorontalo,d_SuMa_minahasa,867,CK3 Wiki List of duchies
+Tompotika,Sulawesi,Nusantara,3,9,3,,,Banggai,d_SuMa_tompotika,867,CK3 Wiki List of duchies
+Halmahera,Maluku,Nusantara,3,9,4,,,Ternate,d_SuMa_halmahera,867,CK3 Wiki List of duchies
+Maluku,Maluku,Nusantara,3,7,2,Grand Temple,,Seram,d_SuMa_maluku,867,CK3 Wiki List of duchies
+Lesser Sunda,Maluku,Nusantara,3,9,3,,,Galiyao,d_IDO_lesser_sunda,867,CK3 Wiki List of duchies
+Timor,Maluku,Nusantara,3,11,2,Grand Temple,,Sonba'i,d_IDO_timor,867,CK3 Wiki List of duchies
+Papua,Maluku,Nusantara,4,12,2,Grand TempleGrand Temple,,Sran,d_papua,867,CK3 Wiki List of duchies
+Ruucuu,Ruucuu,Nusantara,2,4,3,Grand TempleGrand Temple,"Ryūkyū (Yamato, Emishi)",Ucinaa,d_ruucuu,867,CK3 Wiki List of duchies

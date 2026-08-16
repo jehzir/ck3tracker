@@ -30,14 +30,56 @@ The existing seeded data and dead-run placeholder are the initial implementation
 - readable completed journals after a run is declared dead
 - no destructive deletion when a run ends
 
+### Map Profile Boundary
+- Use CK3 title IDs and the CK3 title hierarchy as the canonical source.
+- Treat the current small seeded map as a synthetic UI-test profile only.
+- Keep the seed profile separate from the full CK3 map; never combine their records.
+- Resolve goals and duchy membership by stable IDs, never by familiar display names.
+- Load one internally consistent map profile for a run before calculating dashboard progress.
+- Import only de jure duchies; exclude all uncreatable duchies because they are exempt from the goal workflow.
+- Permanently limit the application to 867 starts; do not add start-date switching or support for 1066/1178.
+- Preserve CK3-defined title IDs exactly as the canonical keys.
+- Preserve the source special-building list on duchy metadata records.
+
+### Survival Journal Objective
+The central question of the run is: how long can the realm survive from the 867 start before larger external powers overwhelm it? Features should support recording the realm's growth, goals, pressures, threats, and eventual survival or death across that timeline. Alternate start dates are outside the product scope.
+
 ---
 
 ## 📂 Data Sources
+
+### Canonical Reference Sources
+- `raw/ck3_867_00_landed_titles.txt` — installed CK3 title hierarchy and canonical title IDs
+- `raw/duchies_source.html` — validated 867 de jure duchy metadata, counts, development summary, capitals, and special buildings
+- `raw/barony_source.html` — candidate barony reference source; unverified until checked against `00_landed_titles.txt`
+- CK3 `ruler_decisions` — goal definitions, requirements, required regions/titles, costs, and effects
+
+Reference snapshot metadata:
+- game version: `1.19.0.6 (Scribe)`
+- start date: `867`
+- title hierarchy source: installed CK3 game files
+- wiki metadata source: CK3 Wiki pages captured for the matching game data
+
+### Run-State Sources
 - `holdings.parquet`
 - `playthrough_holdings.parquet`
 - `counties.parquet`
 - `duchies.parquet`
 - `characters.parquet`
+
+Reference sources define what exists in CK3. Parquet is the durable application data layer for run state, persistence, and historical journal observations. Manual updates write into that run-state layer rather than replacing the reference sources.
+
+### Parquet Backbone
+All persistent application records should be normalized into parquet datasets keyed by `playthrough_id`, stable CK3 IDs, and observation/event dates where applicable. The parquet layer is the backbone for:
+- run identity and lifecycle
+- ruler history
+- current and historical holdings
+- county and duchy progress
+- selected goals and requirement status
+- manual control updates
+- journal observations, milestones, threats, and completion events
+
+Every persisted run must record the reference snapshot it was created against, including `game_version` and `start_date`. A Scribe run must not silently load reference data from another game version.
 
 ---
 
@@ -59,6 +101,14 @@ The existing seeded data and dead-run placeholder are the initial implementation
 - `duchy_id`  
 - `duchy_name`  
 - `capital_county_id`  
+- `kingdom_name_867`
+- `empire_name_867`
+- `county_count_867`
+- `barony_count_867`
+- `average_development_867`
+- `special_buildings`
+- `start_date` (always `867`)
+- `source_revision`
 
 ### Holding  
 - `holding_id`  
@@ -213,6 +263,26 @@ Required derived fields:
 - `title_state`
 - `counties_held_percent` for the target-title summary row
 
+### Goal Progress Bridge
+The goal workflow connects static CK3 decision rules to the player's lived run:
+
+1. Select a ruler decision such as Restore Old Vasconia or Restore Carthage.
+2. Populate the decision's regions, target titles, and requirement groups.
+3. Resolve duchies into canonical counties and baronies through CK3 title IDs.
+4. Let the player manually record control, completion, exceptions, and notes.
+5. Calculate current progress without changing the source decision definition.
+6. Record target and decision completion dates in the living journal.
+
+The implementation must preserve threshold logic such as "completely control at least four of the following duchies" rather than flattening it into an all-target requirement.
+
+### Domain vs Realm Progress
+Goal and duchy progress must distinguish two conditions:
+
+- `domain`: directly held by the player character
+- `realm`: held anywhere inside the player's realm, including vassal holdings
+
+The app must retain separate counts and completion states for both. A manually entered `Have` value must identify whether it represents Domain or Realm progress; it must not silently combine the two.
+
 ---
 
 ## 🔄 Dashboard Data Flow  
@@ -256,8 +326,8 @@ Dashboard reads the dictionary and updates:
 - [x] Step 9.8 — Verify dashboard runs successfully
 
 ### **Phase 1: Provider Implementation** — IN PROGRESS
-- [x] Step 10 — Create Holding dataclass
-- [ ] Step 11 — Create County dataclass
+- [~] Step 10 — Create Holding dataclass (visual/schema scaffold exists; provider and parquet integration remain)
+- [~] Step 11 — Create County dataclass (county column mapping exists; dataclass and provider integration remain)
 - [ ] Step 12 — Create Duchy dataclass
 - [ ] Step 13 — Create Character dataclass
 - [ ] Step 14 — Add validation utilities (check required columns, types)
@@ -276,11 +346,43 @@ Dashboard reads the dictionary and updates:
 - [ ] Step 27 — Implement CharacterProvider `get_character()`
 
 ### **Current Working State (Holdings First Build)**
+- `[~]` Steps 10–11 are visually represented enough to support the current seeded dashboard/holdings experience, but neither is functionally complete against real parquet data.
 - [x] Holdings provider seeded with realistic dummy rows so the UI renders and remains functional.
 - [x] Holdings table is active and displays a working dark-theme grid.
 - [x] Dead-run placeholder playthroughs are visible as explicit "dead" entries.
 - [ ] New-run creation is deferred as an admin task until the holdings section is assembled.
 - [ ] Real parquet-backed provider replacement is next once the UI shell is stable.
+
+### **Refined Next Session Plan**
+The next implementation pass should remain narrow and use Restore Carthage as the proving example.
+
+1. **Freeze the Scribe reference contract**
+    - Record `1.19.0.6 (Scribe)` and `867` as required run metadata.
+    - Keep `00_landed_titles.txt`, `80_major_decisions.txt`, and validated duchy metadata in the raw/reference layer.
+
+2. **Define the parquet run backbone**
+    - Establish `playthroughs`, `goals`, `goal_targets`, `holdings`, and event/history records.
+    - Key all records by `playthrough_id`, CK3 title IDs, game version, and observation date.
+
+3. **Build the Restore Carthage bridge**
+    - Use `restore_carthage_decision` as the source goal.
+    - Resolve its custom regions into the human-readable Area groups: `CN`, `M`, `T`, and `CAR`.
+    - Populate the duchy worklist from the interpreted summary structure.
+    - Preserve shortened display names while storing canonical CK3 IDs.
+
+4. **Add separate Domain and Realm progress**
+    - Track direct holdings separately from realm-wide control through vassals.
+    - Keep `Have`, completion, and notes scope-aware.
+
+5. **Add Realm/Succession state**
+    - Capture primary title, realm size, heir, partition law, inherited titles, titles lost, and recipient sons.
+    - Treat succession forecasts as current state and actual succession as a dated journal event.
+
+6. **Add replay comparison after one run is stable**
+    - Group attempts by the same goal.
+    - Compare game version, survival length, milestones, failures, succession outcomes, and completion/death state.
+
+Do not build the full goal catalog, barony import, or broad dashboard redesign until this vertical slice is validated visually and against the manual bridge.
 
 ### **Phase 2: Dashboard Service**
 - [ ] Step 28 — Implement DashboardService `get_dashboard_metrics()`
