@@ -207,7 +207,13 @@ Dashboard reads the dictionary and updates:
 - [x] Step 8 — Add project_plan.md & architecture.md
 - [x] Step 9 — Create changelog.md
 
-### **Phase 1: Provider Implementation** — IN PROGRESS
+### **Phase 0.5: Scaffolding Reorganization** ✅ COMPLETE
+- [x] Step 9.5 — Create logic/ folder with all providers
+- [x] Step 9.6 — Create all schema dataclass files
+- [x] Step 9.7 — Update imports to match scaffolding
+- [x] Step 9.8 — Verify dashboard runs successfully
+
+### **Phase 1: Provider Implementation** — NEXT
 - [ ] Step 10 — Create Holding dataclass
 - [ ] Step 11 — Create County dataclass
 - [ ] Step 12 — Create Duchy dataclass
