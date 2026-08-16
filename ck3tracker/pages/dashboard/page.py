@@ -26,25 +26,23 @@ def layout():
 
             html.Div(
                 [
-                    html.Div(f"Counties / Goal: {summary['counties_total']} / {summary['counties_goal']}", style=DARK_CARD_STYLE),
-                    html.Div(f"Duchies Held: {summary['duchies_held']}", style=DARK_CARD_STYLE),
-                    html.Div(f"Domain: {summary['domain_size']}", style=DARK_CARD_STYLE),
-                    html.Div(f"Total Tax: {summary['total_tax']}", style=DARK_CARD_STYLE),
-                    html.Div(f"Total Levies: {summary['total_levies']}", style=DARK_CARD_STYLE),
+                    html.Div(f"Baronies: {summary['domain_size']}", style=DARK_CARD_STYLE),
+                    html.Div(f"Counties (Domain): {summary['counties_total']}", style=DARK_CARD_STYLE),
+                    html.Div(f"Duchies (Held/Total): {summary['duchies_held']}", style=DARK_CARD_STYLE),
+                    html.Div(f"Total Income: {summary['total_tax']}", style=DARK_CARD_STYLE),
+                    html.Div(f"Levies: {summary['total_levies']}", style=DARK_CARD_STYLE),
                     html.Div(f"Control ≤25: {summary['control_low_count']}", style=DARK_CARD_STYLE),
-                    html.Div(f"Development Avg: {summary['development_avg']}", style=DARK_CARD_STYLE),
-                    html.Div(f"Terrain Distribution: {summary['terrain_distribution']}", style=DARK_CARD_STYLE),
                 ],
                 style={
                     "display": "grid",
-                    "gridTemplateColumns": "repeat(4, 1fr)",
+                    "gridTemplateColumns": "repeat(6, 1fr)",
                     "gap": "1rem"
                 }
             ),
 
             html.Hr(style={"borderColor": ACCENT, "marginTop": "2rem"}),
 
-            html.Div("Dashboard will expand as other tabs become ready.", style={"color": TEXT})
+            html.Div("Summary tables will appear below.", style={"color": TEXT})
         ],
         style=DARK_PAGE_STYLE
     )
