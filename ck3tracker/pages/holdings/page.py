@@ -7,9 +7,9 @@ from logic.trial_service import load_trial_tables
 
 dash.register_page(__name__, path="/holdings", name="Holdings")
 
-PAGE_STYLE = {"padding": "2rem", "backgroundColor": "#1e1e1e", "color": "#e0e0e0", "minHeight": "100vh"}
+PAGE_STYLE = {"padding": "1.25rem 1.5rem", "backgroundColor": "#1e1e1e", "color": "#e0e0e0", "minHeight": "100vh"}
 HEADER_STYLE = {"textAlign": "left", "padding": "0.75rem", "borderBottom": "2px solid #78b7b0", "fontWeight": "700", "color": "#e0e0e0"}
-CELL_STYLE = {"textAlign": "left", "padding": "0.75rem", "borderBottom": "1px solid #4a4a4a", "color": "#e0e0e0"}
+CELL_STYLE = {"textAlign": "left", "padding": "0.55rem 0.65rem", "borderBottom": "1px solid #4a4a4a", "color": "#e0e0e0"}
 
 
 def _table(headers, rows):
@@ -114,14 +114,31 @@ def _barony_scope_workspace():
         })
     return html.Div([
         html.H3("Barony updates", className="dhs-section-heading"),
-        html.Label("County", style={"fontWeight": "bold"}),
-        dcc.Dropdown(
-            options=options, id="trial-county-selector", value="c_constantine", clearable=False,
-            searchable=True, placeholder="Search county, duchy, or barony",
-            className="updater-status-dropdown", style={"marginTop": "0.5rem", "color": "#e0e0e0"},
-        ),
         html.Div(id="trial-action-message", style={"marginTop": "1rem", "color": "#9be28f"}),
-        html.Div(id="trial-county-detail", children=_county_detail("c_constantine"), style={"marginTop": "1.5rem"}),
+        html.Div(id="trial-county-detail", children=_county_detail("c_constantine", include_selector=False, include_county_state=False), style={"marginTop": "1rem"}),
+        html.Div(id="trial-barony-editor", children=_barony_editor("c_constantine", "b_constantine", "update")),
+    ])
+
+
+def _barony_target_card(county_id, mode):
+    tables = load_trial_tables()
+    slots = tables["base_baronies"]
+    holdings = tables["holding_observations"]
+    slots = slots[slots["county_id"] == county_id].sort_values("slot_number")
+    options = []
+    for slot in slots.to_dict("records"):
+        observed = holdings[holdings["barony_id"] == slot["barony_id"]]
+        live = observed.iloc[0].to_dict() if not observed.empty else {}
+        status = live.get("holder_type", "open") if mode == "update" else slot["slot_status"]
+        options.append({"label": f'{slot["slot_number"]}. {slot["barony_id"]} | {status}', "value": slot["barony_id"]})
+    return html.Div([
+        html.Label("Barony to edit", className="dhs-field-label"),
+        dcc.RadioItems(
+            options=options, value=options[0]["value"] if options else None,
+            id="trial-barony-selector", inline=False,
+            labelStyle={"display": "flex", "alignItems": "center", "gap": "0.45rem", "marginBottom": "0.35rem"},
+            inputStyle={"margin": 0},
+        ),
     ])
 
 
@@ -185,8 +202,25 @@ def _duchy_editor_workspace():
 
 
 def _editor_scope_workspace():
+    tables = load_trial_tables()
+    county_options = tables["county_observations"][["county_id", "county_name", "duchy_id"]].drop_duplicates()
+    options = []
+    for county in county_options.to_dict("records"):
+        baronies = tables["base_baronies"][tables["base_baronies"]["county_id"] == county["county_id"]]
+        barony_ids = [row["barony_id"] for row in baronies.to_dict("records")]
+        options.append({
+            "label": f'{county["county_name"]} | {county["duchy_id"]} | {len(barony_ids)} baronies',
+            "value": county["county_id"],
+            "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
+        })
     return html.Div([
         html.H3("Record a major update", className="dhs-section-heading"),
+        html.Label("County filter", className="dhs-field-label"),
+        dcc.Dropdown(
+            options=options, id="trial-county-selector", value="c_constantine", clearable=False,
+            searchable=True, placeholder="Search county, duchy, or barony",
+            className="updater-status-dropdown", style={"marginBottom": "1rem", "color": "#e0e0e0"},
+        ),
         html.Div([
             html.Div([
             html.Label("What are you editing?", className="dhs-field-label"),
@@ -210,6 +244,7 @@ def _editor_scope_workspace():
                 inputStyle={"margin": 0},
             ),
             ], className="dhs-radio-card"),
+            html.Div(id="trial-barony-target-card", children=_barony_target_card("c_constantine", "update"), className="dhs-radio-card dhs-barony-target-card"),
         ], className="dhs-editor-choice-grid"),
         html.Div([
             html.Div(id="editor-scope-content", children=_barony_scope_workspace(), style={"marginTop": "1.5rem"}),
@@ -291,7 +326,7 @@ def _barony_selector(county_id, mode):
     ], className="trial-barony-section")
 
 
-def _county_detail(county_id):
+def _county_detail(county_id, include_selector=True, include_county_state=True):
     tables = load_trial_tables()
     counties = tables["county_observations"]
     base_baronies = tables["base_baronies"]
@@ -325,17 +360,20 @@ def _county_detail(county_id):
             html.Td(live.get("levies", "-"), style=CELL_STYLE),
             html.Td(live.get("plague_resistance", "-"), style=CELL_STYLE),
         ]))
-    return html.Div([
-        html.H3(f"{county['county_name']} | {county['duchy_id']}", style={"color": "#e0e0e0"}),
+    county_state = [
         html.H4("County-wide daily state", style={"color": "#e0e0e0"}),
         summary,
+    ] if include_county_state else []
+    return html.Div([
+        html.H3(f"{county['county_name']} | {county['duchy_id']}", style={"color": "#e0e0e0"}),
+        *county_state,
         html.H4("Barony slots and observed holdings", style={"color": "#e0e0e0", "marginTop": "1.5rem"}),
         _table(["Slot", "Barony ID", "Base Type", "Capital", "Slot State", "Observed Holder", "Tax", "Levies", "Plague Res."], rows),
-        _barony_selector(county_id, "update"),
+        _barony_selector(county_id, "update") if include_selector else html.Div(),
     ])
 
 
-def _new_county_detail(county_id):
+def _new_county_detail(county_id, include_selector=True):
     tables = load_trial_tables()
     base_baronies = tables["base_baronies"]
     slots = base_baronies[base_baronies["county_id"] == county_id].sort_values("slot_number")
@@ -356,7 +394,7 @@ def _new_county_detail(county_id):
         html.H3("New / Conquered County", style={"color": "#e0e0e0"}),
         html.P("This creates the full base slot structure before daily values are entered."),
         _table(["Slot", "Barony ID", "Base Type", "Capital", "Slot State"], rows),
-        _barony_selector(county_id, "new"),
+        _barony_selector(county_id, "new") if include_selector else html.Div(),
         html.Button(
             "Record County Acquisition",
             id="trial-record-acquisition",
@@ -406,7 +444,7 @@ def update_holdings_scope(scope):
     Input("trial-holding-mode", "value"),
 )
 def update_trial_county_detail(county_id, mode):
-    return _new_county_detail(county_id) if mode == "new" else _county_detail(county_id)
+    return _new_county_detail(county_id, include_selector=False) if mode == "new" else _county_detail(county_id, include_selector=False, include_county_state=False)
 
 
 @callback(
@@ -431,6 +469,15 @@ def record_trial_acquisition(n_clicks, county_id, mode):
 )
 def update_trial_barony_editor(barony_id, county_id, mode):
     return _barony_editor(county_id, barony_id, mode)
+
+
+@callback(
+    Output("trial-barony-target-card", "children"),
+    Input("trial-county-selector", "value"),
+    Input("trial-holding-mode", "value"),
+)
+def update_trial_barony_target(county_id, mode):
+    return _barony_target_card(county_id, mode)
 
 
 @callback(

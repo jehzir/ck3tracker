@@ -283,14 +283,14 @@
 
 .dhs-editor-choice-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(12rem, 0.9fr) minmax(13rem, 1fr) minmax(16rem, 1.35fr);
     gap: 1rem;
     max-width: 64rem;
 }
 
 .dhs-radio-card {
     min-width: 0;
-    padding: 1rem;
+    padding: 0.7rem 0.8rem;
     border: 1px solid #4a4a4a;
     border-top: 0.3rem solid #007c91;
     background: #242424;
@@ -306,6 +306,18 @@
 
 .dhs-editor-detail {
     max-width: 64rem;
+}
+
+.dhs-barony-target-card {
+    align-self: start;
+}
+
+.trial-barony-section {
+    margin-top: 0.75rem;
+}
+
+.trial-barony-section h4 {
+    margin: 0.75rem 0 0.45rem;
 }
 
 .dhs-editor-field {
