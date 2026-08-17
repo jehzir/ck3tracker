@@ -113,9 +113,8 @@ def _barony_scope_workspace():
             "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
         })
     return html.Div([
-        html.H3("Barony updates", className="dhs-section-heading"),
         html.Div(id="trial-action-message", style={"marginTop": "1rem", "color": "#9be28f"}),
-        html.Div(id="trial-county-detail", children=_county_detail("c_constantine", include_selector=False, include_county_state=False), style={"marginTop": "1rem"}),
+        html.Div(id="trial-county-detail", children=_county_detail("c_constantine", include_selector=False, include_county_state=False, include_context_heading=False), style={"marginTop": "1rem"}),
         html.Div(id="trial-barony-editor", children=_barony_editor("c_constantine", "b_constantine", "update")),
     ])
 
@@ -339,7 +338,7 @@ def _barony_selector(county_id, mode):
     ], className="trial-barony-section")
 
 
-def _county_detail(county_id, include_selector=True, include_county_state=True):
+def _county_detail(county_id, include_selector=True, include_county_state=True, include_context_heading=True):
     tables = load_trial_tables()
     counties = tables["county_observations"]
     base_baronies = tables["base_baronies"]
@@ -377,10 +376,16 @@ def _county_detail(county_id, include_selector=True, include_county_state=True):
         html.H4("County-wide daily state", style={"color": "#e0e0e0"}),
         summary,
     ] if include_county_state else []
-    return html.Div([
+    context_heading = [
         html.H3(f"{county['county_name']} | {county['duchy_id']}", style={"color": "#e0e0e0"}),
-        *county_state,
+    ] if include_context_heading else []
+    table_heading = [
         html.H4("Barony slots and observed holdings", style={"color": "#e0e0e0", "marginTop": "1.5rem"}),
+    ] if include_context_heading else []
+    return html.Div([
+        *context_heading,
+        *county_state,
+        *table_heading,
         _table(["Slot", "Barony ID", "Base Type", "Capital", "Slot State", "Observed Holder", "Tax", "Levies", "Plague Res."], rows),
         _barony_selector(county_id, "update") if include_selector else html.Div(),
     ])
@@ -457,7 +462,7 @@ def update_holdings_scope(scope):
     Input("trial-holding-mode", "value"),
 )
 def update_trial_county_detail(county_id, mode):
-    return _new_county_detail(county_id, include_selector=False) if mode == "new" else _county_detail(county_id, include_selector=False, include_county_state=False)
+    return _new_county_detail(county_id, include_selector=False) if mode == "new" else _county_detail(county_id, include_selector=False, include_county_state=False, include_context_heading=False)
 
 
 @callback(
