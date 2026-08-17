@@ -307,6 +307,20 @@
     accent-color: #78b7b0;
 }
 
+#trial-editor-scope,
+#trial-holding-mode {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.55rem;
+    white-space: nowrap;
+}
+
+#trial-editor-scope label,
+#trial-holding-mode label {
+    margin-right: 0.35rem !important;
+}
+
 .dhs-editor-detail {
     max-width: 80rem;
 }
