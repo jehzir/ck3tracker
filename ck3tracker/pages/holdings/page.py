@@ -176,21 +176,31 @@ def _county_history_detail(county_id):
 
 def _duchy_scope_summary():
     tables = load_trial_tables()
-    counties = _active_counties(tables)
+    counties = tables["county_observations"]
     base_baronies = tables["base_baronies"]
+    observed_baronies = tables["holding_observations"]
     rows = []
-    for duchy_id, duchy_counties in counties.groupby("duchy_id"):
-        base_count = len(base_baronies[base_baronies["duchy_id"] == duchy_id])
+    for duchy_id, duchy_counties in base_baronies.groupby("duchy_id"):
+        base_counties = duchy_counties["county_id"].nunique()
+        observed_counties = counties[counties["duchy_id"] == duchy_id]["county_id"].nunique()
+        base_count = len(duchy_counties)
+        observed_count = observed_baronies[observed_baronies["duchy_id"] == duchy_id]["barony_id"].nunique()
+        county_coverage = f"{observed_counties / base_counties:.0%}" if base_counties else "-"
+        barony_coverage = f"{observed_count / base_count:.0%}" if base_count else "-"
         rows.append(html.Tr([
             html.Td(duchy_id, style=CELL_STYLE),
-            html.Td(len(duchy_counties), style=CELL_STYLE),
+            html.Td(base_counties, style=CELL_STYLE),
+            html.Td(observed_counties, style=CELL_STYLE),
+            html.Td(county_coverage, style=CELL_STYLE),
             html.Td(base_count, style=CELL_STYLE),
-            html.Td("In progress", style=CELL_STYLE),
+            html.Td(observed_count, style=CELL_STYLE),
+            html.Td(barony_coverage, style=CELL_STYLE),
+            html.Td("Complete" if county_coverage == "100%" and barony_coverage == "100%" else "In progress", style=CELL_STYLE),
         ]))
     return html.Div([
         html.H3("Duchy state", className="dhs-section-heading"),
-        html.P("Duchy scope summarizes title progress and its underlying county structure."),
-        _table(["Duchy", "Observed Counties", "Base Baronies", "Status"], rows),
+        html.P("Coverage compares observed records with the structural county and barony base."),
+        _table(["Duchy", "Base Counties", "Observed Counties", "County Coverage", "Base Baronies", "Observed Baronies", "Barony Coverage", "Status"], rows),
     ])
 
 
