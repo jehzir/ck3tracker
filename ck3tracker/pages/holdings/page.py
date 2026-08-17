@@ -92,20 +92,34 @@ def _county_scope_summary():
 def _county_history_workspace(county_id="c_annaba"):
     tables = load_trial_tables()
     counties = tables["county_observations"]
+    lifecycle = tables.get("county_lifecycle", pd.DataFrame())
+    inactive_ids = set(lifecycle.loc[~lifecycle["active_in_editor"], "county_id"]) if not lifecycle.empty else set()
+    inactive_counties = counties[counties["county_id"].isin(inactive_ids)]
     options = [
         {"label": row["county_name"], "value": row["county_id"]}
-        for row in counties.to_dict("records")
+        for row in inactive_counties.to_dict("records")
     ]
+    selected_county_id = county_id if county_id in set(inactive_counties["county_id"]) else (
+        options[0]["value"] if options else None
+    )
     return html.Div([
         dcc.Dropdown(
-            options=options, value=county_id, clearable=False,
+            options=options, value=selected_county_id, clearable=False,
             id="county-history-selector", className="updater-status-dropdown",
-            placeholder="Select county history",
+            placeholder="Select inactive county history",
         ),
         html.Div(
             id="county-history-detail",
-            children=_county_history_detail(county_id),
+            children=_county_history_detail(selected_county_id),
             className="dhs-history-detail",
+        ),
+        html.Button(
+            "Restore / Reclaim County",
+            id="county-reclaim-action",
+            n_clicks=0,
+            disabled=selected_county_id is None,
+            className="dhs-action-button",
+            style={"marginTop": "0.75rem"},
         ),
     ], className="dhs-history-workspace")
 
@@ -127,12 +141,6 @@ def _county_history_detail(county_id):
     baronies = base_baronies[base_baronies["county_id"] == county_id].sort_values("slot_number")
     barony_text = ", ".join(row["barony_id"] for row in baronies.to_dict("records"))
     archived = state.get("lifecycle_state") == "archived"
-    action = html.Button(
-        "Restore / Reclaim County",
-        id="county-reclaim-action",
-        className="dhs-action-button",
-        style={"marginTop": "0.75rem"},
-    ) if archived else html.P("County is currently active; record changes through Editor.")
     return html.Div([
         html.Div([
             html.Strong(f'{county["county_name"]} | {county["duchy_id"]}'),
@@ -142,7 +150,7 @@ def _county_history_detail(county_id):
         html.Div(f'Historical control / development: {county["control"]} / {county["development"]}'),
         html.Div(f"Attached baronies: {barony_text}"),
         html.Div(f'Recovery note: {state.get("reason", "Historical observation retained.")}'),
-        action,
+        html.P("Ready to reclaim this inactive county." if archived else "County is currently active; record changes through Editor."),
     ], className="dhs-history-record")
 
 
@@ -526,12 +534,13 @@ def update_holdings_scope(scope):
 
 @callback(
     Output("county-history-detail", "children"),
+    Output("county-reclaim-action", "disabled"),
     Input("county-history-selector", "value"),
     Input("county-reclaim-action", "n_clicks"),
     prevent_initial_call=True,
 )
 def update_county_history(county_id, reclaim_clicks):
-    if reclaim_clicks:
+    if reclaim_clicks and county_id:
         record_county_reclamation(
             county_id,
             "trial_dead_run",
@@ -539,7 +548,11 @@ def update_county_history(county_id, reclaim_clicks):
             "vassal",
             "manual_trial_reclaim",
         )
-    return _county_history_detail(county_id)
+    tables = load_trial_tables()
+    lifecycle = tables.get("county_lifecycle", pd.DataFrame())
+    county_state = lifecycle[lifecycle["county_id"] == county_id]
+    is_active = not county_state.empty and bool(county_state.iloc[0]["active_in_editor"])
+    return _county_history_detail(county_id), county_id is None or is_active
 
 
 @callback(
