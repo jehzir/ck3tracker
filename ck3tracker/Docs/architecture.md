@@ -58,6 +58,59 @@ The duchy import must include only titles from the source's `De jure duchies` se
 
 The duchy metadata should retain the source's special-building information. Special buildings are metadata for the duchy/title record and must not be inferred from ordinary holding buildings.
 
+## County Capital Changes
+
+`b_capital` identifies the county's current primary castle, but it is not permanently immutable. A county can change its capital when the game conditions allow it, including the requirement that at least two castles exist in the county. This is a run-state change and must not rewrite the canonical 867 title reference.
+
+The journal must preserve both:
+
+- `original_capital_barony_id`: the capital from the 867 reference hierarchy
+- `current_capital_barony_id`: the capital after any in-run change
+
+Changing the capital can have irreversible economic consequences. The former capital may lose a duchy-level capital bonus and, where applicable, lose a building slot. A new capital does not automatically regain the lost slot or bonus. The model must therefore record the capital-change event and its resulting slot/bonus state rather than deriving current capacity only from the new capital.
+
+The domain/holding view should expose capital status, capital history, building slots, and lost-capital effects separately. In the captured Scribe `00_landed_titles.txt` source, the county block does not always contain an explicit `capital = b_*` field; the first barony listed under the county is the primary capital castle. The player's later capital decision belongs in parquet-backed run state.
+
+## County Screen Icon Semantics
+
+The county breakdown screen supplies behavioral evidence for the hierarchy and controls:
+
+- The faint divider below the county-holder section and above the holding icons separates county data from barony/holding data.
+- Each holding icon in the lower section represents one barony.
+- The silver crown marks the county's capital barony.
+- The greyed realm-up-arrow control is the move-realm-capital action; it is not an additional holding, title, or capital-barony marker.
+- A selected holding's label such as `Your Castle Holding` describes the selected barony only and must not be used to count all baronies in the county.
+
+For the Mallorca proof slice, Mayurqa contains two baronies: Alcudia as a city and Palma as the capital castle. Palma must be present in the barony breakdown even when the initially selected holding view is Alcudia.
+
+## Daily County and Barony State
+
+County and barony values are live run-state observations and can change on each in-game day tick. They must be stored with an observation date or timestamp rather than treated as static reference metadata.
+
+County-wide state:
+
+- control
+- development
+- popular opinion
+- culture
+- faith
+
+Barony/holding state contributes additive holding-level values beneath the county section:
+
+- tax
+- loot
+- levies
+- supply limit
+- plague resistance
+- garrison
+- fort level
+- regular building slots
+- duchy building slot
+
+`Garrison` and `Fort level` are separate values. For example, `Garrison: 480` and `Fort level: 4` must not be confused with `Castle level: 1`, which describes the holding type/level display. The two regular building slots and the separate duchy-building slot are also distinct capacity fields.
+
+The inward-arrow duchy building slot is a visual indicator that the holding belongs to a true de jure duchy associated with the duchy title icon in the county hierarchy. This visual evidence should be represented as a validated `is_de_jure_duchy`/duchy-building-slot state, not inferred from the holding name alone.
+
 ## Reference Source Responsibilities
 
 `raw/ck3_867_00_landed_titles.txt` is authoritative for title identity and hierarchy. The parser must preserve CK3 IDs and resolve empire → kingdom → duchy → county → barony relationships.
@@ -69,6 +122,44 @@ The duchy metadata should retain the source's special-building information. Spec
 `ruler_decisions` is the source for goal definitions. A decision can describe result titles, regions, required duchies, alternative requirement groups, costs, prerequisites, and effects. It is not a source of current playthrough control.
 
 The reference layer and parquet data layer must remain separate. Static files explain what the game allows; parquet records explain what happened in the player's run. Manual updates are writes to parquet-backed run state and journal events.
+
+## Trial Evidence Model
+
+The current trial proves the model with two contrasting cases:
+
+- `d_mallorca`: three Domain counties and four directly held baronies
+- `d_kroumerie`: two Realm counties and two observed vassal holdings, with eight canonical base baronies
+
+The trial distinguishes three kinds of data:
+
+- **Base data**: the complete canonical title/slot structure for the 867 map
+- **Observed run data**: values visible in screenshots for a specific dead run snapshot
+- **Derived data**: Domain/Realm counts, title progress, and validation results calculated from the first two layers
+
+Missing screenshots do not invalidate the base structure. They only mean the corresponding live holding values remain unobserved until the player supplies them.
+
+## Source Order and UI Slot Order
+
+The order of barony declarations in `00_landed_titles.txt` is not guaranteed to be the order shown in the in-game holding slots. Both values must be preserved separately:
+
+- `source_order`: canonical declaration order from CK3 files
+- `ui_slot_number`: observed in-game slot position
+
+UI slot mappings are evidence-backed run/reference metadata. They must not be inferred from source order alone. The Constantine trial mapping is:
+
+```text
+1 b_constantine  castle/county capital
+2 b_qasr-al-ifriqi city
+3 b_tijis        open
+4 b_tifash       temple
+5 b_taburshiq    open
+```
+
+## County Acquisition Bridge
+
+When a county enters a run, the acquisition workflow resolves the complete base barony set, applies any validated UI slot mapping, and creates one acquisition event plus one run-state row per barony. This allows a county with only partial screenshot evidence to retain a complete structural record without fabricating unseen daily stats.
+
+For the current Kroumerie trial, `c_constantine` has five UI slots and `c_annaba` has three BASE baronies. The acquisition bridge creates all structural rows immediately, while live daily fields remain unknown until observed. The current vassal proof contains two observed city holdings and six remaining barony observations are still outstanding.
 
 ## Parquet Data Contract
 

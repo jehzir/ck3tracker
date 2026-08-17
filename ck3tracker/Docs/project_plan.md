@@ -283,6 +283,61 @@ Goal and duchy progress must distinguish two conditions:
 
 The app must retain separate counts and completion states for both. A manually entered `Have` value must identify whether it represents Domain or Realm progress; it must not silently combine the two.
 
+### Trial Evidence Boundary
+- Treat `base_baronies.parquet` as complete structural evidence for the trial map.
+- Treat `holding_observations.parquet` and `county_observations.parquet` as screenshot-backed live observations only.
+- Do not fill unseen daily values with guesses.
+- Preserve CK3 source order separately from observed UI slot order.
+- Use the acquisition bridge to create complete barony state rows when a county is acquired.
+- Mark the trial `[VALIDATED]` only when its executable assertions pass.
+
+Current Constantine UI slot mapping:
+- slot 1: `b_constantine`, capital castle
+- slot 2: `b_qasr-al-ifriqi`, city
+- slot 3: `b_tijis`, open
+- slot 4: `b_tifash`, temple
+- slot 5: `b_taburshiq`, open
+
+### Vassal Observation Follow-Up
+The Kroumerie trial has complete BASE structure for eight baronies but only two live screenshot observations (`b_qasr-al-ifriqi` and `b_qalama`). Six remaining vassal barony screenshots are needed to complete the daily run-state values. The missing screenshots must not be fabricated from BASE data.
+
+### County Capital Changes
+- Treat the primary castle from the 867 title map as the original canonical capital; in the captured Scribe source this is the first barony listed in the county block when no explicit capital field exists.
+- Allow a run-state capital change only when the game permits it, including two or more castles in the county.
+- Preserve original and current capital barony IDs separately.
+- Record lost capital bonuses and building slots as irreversible run-state effects.
+- Do not restore a lost slot or bonus merely because the new capital becomes `b_capital`.
+
+### County Breakdown Interpretation
+- Use the faint divider to separate county-holder data from the barony/holding section.
+- Count lower-section holding icons as baronies.
+- Treat the silver crown as the county-capital marker.
+- Treat the greyed realm-up-arrow as the move-realm-capital action.
+- In the Mallorca proof slice, include Palma as Mayurqa's capital barony even when Alcudia is the selected city holding.
+
+### Live Daily State
+County and barony statistics are daily observations and may change on every game tick.
+
+County-wide fields:
+- `control`
+- `development`
+- `popular_opinion`
+- `culture`
+- `faith`
+
+Barony/holding additive fields:
+- `tax`
+- `loot`
+- `levies`
+- `supply_limit`
+- `plague_resistance`
+- `garrison`
+- `fort_level`
+- `regular_building_slots`
+- `duchy_building_slots`
+
+Keep `fort_level` separate from `castle_level`. A duchy building slot with inward arrows, together with the duchy title icon in the county hierarchy, is evidence of a true de jure duchy relationship.
+
 ---
 
 ## 🔄 Dashboard Data Flow  

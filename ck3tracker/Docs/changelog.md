@@ -20,3 +20,10 @@
 - Defined CK3 `1.19.0.6 (Scribe)` as the supported game-data contract and parquet as the persistent backbone for normalized run state and journal history.
 - Added separate Domain and Realm progress scopes so direct ruler holdings are not confused with holdings controlled through vassals.
 - Added the refined implementation sequence: Scribe-versioned parquet backbone, Restore Carthage bridge, Domain/Realm progress, Realm/Succession state, and replay comparison across attempts.
+- Corrected the capital model: `b_capital` can change during a run when valid, while lost capital bonuses and building slots must persist as historical run-state effects.
+- Clarified county-screen semantics: the silver crown marks the county capital, the greyed realm arrow moves the realm capital, and Palma is the missing Mayurqa capital barony in the Mallorca proof slice.
+- Documented daily county-wide versus barony additive statistics, including garrison, fort level, regular slots, and the visual true de jure duchy-building slot indicator.
+- Validated the Mallorca barony proof slice: four baronies across three counties, with Palma, Ibiza, and Menorca as county capitals and Alcudia as the additional city.
+- Documented the trial evidence model: complete base structure, screenshot-backed live observations, derived Domain/Realm counts, and separate CK3 source order versus UI slot order.
+- Documented the Constantine acquisition bridge and corrected UI slot mapping: Tijis slot 3, Tifash slot 4, Taburshiq slot 5.
+- Recorded the Kroumerie observation boundary: eight BASE baronies, two observed vassal holdings, and six remaining screenshots required for complete live daily data.

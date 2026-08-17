@@ -5,7 +5,8 @@ from logic.playthroughs_provider import get_all_playthroughs
 app = dash.Dash(
     __name__,
     use_pages=True,
-    pages_folder="pages"   # CRITICAL
+    pages_folder="pages",
+    suppress_callback_exceptions=True,
 )
 
 
