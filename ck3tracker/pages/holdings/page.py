@@ -114,12 +114,6 @@ def _barony_scope_workspace():
         })
     return html.Div([
         html.H3("Barony updates", className="dhs-section-heading"),
-        dcc.RadioItems(
-            options=[{"label": "New / Conquered", "value": "new"}, {"label": "Update / Realm", "value": "update"}],
-            value="update", id="trial-holding-mode", inline=True,
-            labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
-            inputStyle={"margin": 0}, style={"marginBottom": "1rem"},
-        ),
         html.Label("County", style={"fontWeight": "bold"}),
         dcc.Dropdown(
             options=options, id="trial-county-selector", value="c_constantine", clearable=False,
@@ -193,18 +187,33 @@ def _duchy_editor_workspace():
 def _editor_scope_workspace():
     return html.Div([
         html.H3("Record a major update", className="dhs-section-heading"),
-        html.Label("What are you editing?", className="dhs-field-label"),
-        dcc.RadioItems(
-            options=[
-                {"label": "Barony", "value": "barony"},
-                {"label": "County", "value": "county"},
-                {"label": "Duchy", "value": "duchy"},
-            ],
-            value="barony", id="trial-editor-scope", inline=True,
-            labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
-            inputStyle={"margin": 0}, style={"marginTop": "0.6rem"},
-        ),
-        html.Div(id="editor-scope-content", children=_barony_scope_workspace(), style={"marginTop": "1.5rem"}),
+        html.Div([
+            html.Div([
+            html.Label("What are you editing?", className="dhs-field-label"),
+            dcc.RadioItems(
+                options=[
+                    {"label": "Barony", "value": "barony"},
+                    {"label": "County", "value": "county"},
+                    {"label": "Duchy", "value": "duchy"},
+                ],
+                value="barony", id="trial-editor-scope", inline=True,
+                labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
+                inputStyle={"margin": 0},
+            ),
+            ], className="dhs-radio-card"),
+            html.Div([
+            html.Label("Update style", className="dhs-field-label"),
+            dcc.RadioItems(
+                options=[{"label": "New / Conquered", "value": "new"}, {"label": "Update / Realm", "value": "update"}],
+                value="update", id="trial-holding-mode", inline=True,
+                labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
+                inputStyle={"margin": 0},
+            ),
+            ], className="dhs-radio-card"),
+        ], className="dhs-editor-choice-grid"),
+        html.Div([
+            html.Div(id="editor-scope-content", children=_barony_scope_workspace(), style={"marginTop": "1.5rem"}),
+        ], className="dhs-editor-detail"),
     ])
 
 

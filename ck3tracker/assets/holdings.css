@@ -281,6 +281,33 @@
     padding-top: 1.25rem;
 }
 
+.dhs-editor-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 64rem;
+}
+
+.dhs-radio-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid #4a4a4a;
+    border-top: 0.3rem solid #007c91;
+    background: #242424;
+}
+
+.dhs-radio-card label {
+    color: #e0e0e0 !important;
+}
+
+.dhs-radio-card input {
+    accent-color: #78b7b0;
+}
+
+.dhs-editor-detail {
+    max-width: 64rem;
+}
+
 .dhs-editor-field {
     min-width: 0;
 }
@@ -313,6 +340,10 @@
 
 @media (max-width: 900px) {
     .dhs-county-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dhs-editor-choice-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 }
