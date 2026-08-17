@@ -8,14 +8,15 @@ from logic.trial_service import load_trial_tables
 dash.register_page(__name__, path="/holdings", name="Holdings")
 
 PAGE_STYLE = {"padding": "2rem", "backgroundColor": "#1e1e1e", "color": "#e0e0e0", "minHeight": "100vh"}
-HEADER_STYLE = {"textAlign": "left", "padding": "0.65rem", "borderBottom": "1px solid #555", "fontWeight": "bold"}
-CELL_STYLE = {"textAlign": "left", "padding": "0.65rem", "borderBottom": "1px solid #3a3a3a"}
+HEADER_STYLE = {"textAlign": "left", "padding": "0.75rem", "borderBottom": "2px solid #78b7b0", "fontWeight": "700", "color": "#e0e0e0"}
+CELL_STYLE = {"textAlign": "left", "padding": "0.75rem", "borderBottom": "1px solid #4a4a4a", "color": "#e0e0e0"}
 
 
 def _table(headers, rows):
     return html.Table(
         [html.Thead(html.Tr([html.Th(header, style=HEADER_STYLE) for header in headers])), html.Tbody(rows)],
-        style={"width": "100%", "borderCollapse": "collapse", "tableLayout": "fixed", "color": "#e0e0e0", "marginTop": "0.75rem"},
+        className="dhs-table",
+        style={"width": "100%", "borderCollapse": "collapse", "tableLayout": "fixed", "marginTop": "0.75rem"},
     )
 
 
@@ -41,7 +42,7 @@ def _holdings_summary():
             html.Td(attention, style=CELL_STYLE),
         ]))
     return html.Div([
-        html.H3("Holdings summary", style={"color": "#e0e0e0"}),
+        html.H3("Holdings summary", className="dhs-section-heading"),
         html.P("Current realm snapshot. Open a scope tab to record a major update."),
         _table(["County", "Scope", "Duchy", "Holder", "Control", "Dev", "Occupied / Slots", "Status"], rows),
     ])
@@ -59,7 +60,7 @@ def _county_scope_summary():
         html.Td(county["county_holder_name"], style=CELL_STYLE),
     ]) for county in counties.to_dict("records")]
     return html.Div([
-        html.H3("County state", style={"color": "#e0e0e0"}),
+        html.H3("County state", className="dhs-section-heading"),
         html.P("County-wide values are updated at major run events, not every game-day tick."),
         _table(["County", "Control", "Development", "Popular Opinion", "Culture / Faith", "Holder"], rows),
     ])
@@ -79,7 +80,7 @@ def _duchy_scope_summary():
             html.Td("In progress", style=CELL_STYLE),
         ]))
     return html.Div([
-        html.H3("Duchy state", style={"color": "#e0e0e0"}),
+        html.H3("Duchy state", className="dhs-section-heading"),
         html.P("Duchy scope summarizes title progress and its underlying county structure."),
         _table(["Duchy", "Observed Counties", "Base Baronies", "Status"], rows),
     ])
@@ -99,7 +100,7 @@ def _barony_scope_workspace():
             "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
         })
     return html.Div([
-        html.H3("Barony updates", style={"color": "#e0e0e0"}),
+        html.H3("Barony updates", className="dhs-section-heading"),
         dcc.RadioItems(
             options=[{"label": "New / Conquered", "value": "new"}, {"label": "Update / Realm", "value": "update"}],
             value="update", id="trial-holding-mode", inline=True,
@@ -268,8 +269,8 @@ def _new_county_detail(county_id):
 
 def layout():
     return html.Div([
-        html.H1("Holdings", style={"color": "#e0e0e0"}),
-        html.P("Trial proof view | Scribe 1.19.0.6 | [VALIDATED]", style={"color": "#9be28f"}),
+        html.H1("Holdings", className="dhs-page-heading"),
+            html.P("Trial proof view | Scribe 1.19.0.6 | [VALIDATED]", className="dhs-validation-badge"),
         dcc.Tabs(
             id="holdings-scope-tabs",
             value="summary",
@@ -279,10 +280,11 @@ def layout():
                 dcc.Tab(label="County", value="county"),
                 dcc.Tab(label="Duchy", value="duchy"),
             ],
-            style={"marginBottom": "1.5rem"},
+                className="dhs-tabs",
+                style={"marginBottom": "1.5rem"},
         ),
         html.Div(id="holdings-scope-content", children=_holdings_summary()),
-    ], style=PAGE_STYLE)
+    ], className="dhs-holdings-page", style=PAGE_STYLE)
 
 
 @callback(Output("holdings-scope-content", "children"), Input("holdings-scope-tabs", "value"))
