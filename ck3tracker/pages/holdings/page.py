@@ -249,7 +249,9 @@ def _selected_barony_context(county_id, barony_id):
 
 def _barony_scope_summary():
     tables = load_trial_tables()
+    active_county_ids = set(_active_counties(tables)["county_id"])
     base_baronies = tables["base_baronies"]
+    base_baronies = base_baronies[base_baronies["county_id"].isin(active_county_ids)]
     holdings = tables["holding_observations"]
     rows = []
     for slot in base_baronies.to_dict("records"):
