@@ -566,7 +566,7 @@ def update_holdings_scope(scope, lifecycle_refresh=0):
     prevent_initial_call=True,
 )
 def update_county_history(county_id, reclaim_clicks):
-    if reclaim_clicks and county_id:
+    if dash.ctx.triggered_id == "county-reclaim-action" and reclaim_clicks and county_id:
         record_county_reclamation(
             county_id,
             "trial_dead_run",
