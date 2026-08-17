@@ -111,7 +111,7 @@ def _county_scope_summary():
     ])
 
 
-def _county_history_workspace(county_id="c_annaba"):
+def _county_history_workspace(county_id=None):
     tables = load_trial_tables()
     counties = tables["county_observations"]
     lifecycle = tables.get("county_lifecycle", pd.DataFrame())
@@ -121,9 +121,7 @@ def _county_history_workspace(county_id="c_annaba"):
         {"label": row["county_name"], "value": row["county_id"]}
         for row in inactive_counties.to_dict("records")
     ]
-    selected_county_id = county_id if county_id in set(inactive_counties["county_id"]) else (
-        options[0]["value"] if options else None
-    )
+    selected_county_id = county_id if county_id in set(inactive_counties["county_id"]) else None
     return html.Div([
         dcc.Dropdown(
             options=options, value=selected_county_id, clearable=False,
