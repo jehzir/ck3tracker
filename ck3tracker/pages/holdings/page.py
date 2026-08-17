@@ -104,7 +104,7 @@ def _county_scope_summary():
                 className="dhs-action-button",
                 style={"marginTop": "0.75rem"},
             ),
-            html.Div(id="county-lifecycle-message", style={"marginTop": "0.5rem", "color": "#9be28f"}),
+            html.Div("Lifecycle changes refresh the County view from persisted history.", style={"marginTop": "0.5rem", "color": "#9be28f"}),
         ], className="dhs-history-workspace"),
         _county_history_workspace(),
     ])
@@ -521,6 +521,7 @@ def _new_county_detail(county_id, include_selector=True):
 
 def layout():
     return html.Div([
+        dcc.Store(id="county-lifecycle-refresh", data=0),
         html.H1("Holdings", className="dhs-page-heading"),
             html.P("Trial proof view | Scribe 1.19.0.6 | [VALIDATED]", className="dhs-validation-badge"),
         dcc.Tabs(
@@ -540,8 +541,12 @@ def layout():
     ], className="dhs-holdings-page", style=PAGE_STYLE)
 
 
-@callback(Output("holdings-scope-content", "children"), Input("holdings-scope-tabs", "value"))
-def update_holdings_scope(scope):
+@callback(
+    Output("holdings-scope-content", "children"),
+    Input("holdings-scope-tabs", "value"),
+    Input("county-lifecycle-refresh", "data"),
+)
+def update_holdings_scope(scope, lifecycle_refresh=0):
     if scope == "editor":
         return _editor_scope_workspace()
     if scope == "barony":
@@ -577,7 +582,7 @@ def update_county_history(county_id, reclaim_clicks):
 
 
 @callback(
-    Output("county-lifecycle-message", "children"),
+    Output("county-lifecycle-refresh", "data"),
     Output("county-history-selector", "options"),
     Output("county-history-selector", "value"),
     Input("county-mark-inactive-action", "n_clicks"),
@@ -586,7 +591,7 @@ def update_county_history(county_id, reclaim_clicks):
 )
 def mark_county_inactive(n_clicks, county_id):
     if not n_clicks or not county_id:
-        return "", [], None
+        return 0, [], None
     record_county_loss(county_id, "trial_dead_run", "manual_trial_loss")
     tables = load_trial_tables()
     lifecycle = tables["county_lifecycle"]
@@ -596,7 +601,7 @@ def mark_county_inactive(n_clicks, county_id):
         {"label": row["county_name"], "value": row["county_id"]}
         for row in counties[counties["county_id"].isin(inactive_ids)].to_dict("records")
     ]
-    return f"Marked {county_id} inactive. Historical county and barony observations were retained.", options, county_id
+    return n_clicks, options, county_id
 
 
 @callback(
