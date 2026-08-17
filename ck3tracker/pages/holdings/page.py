@@ -94,7 +94,17 @@ def _new_county_detail(county_id):
 
 def layout():
     tables = load_trial_tables()
-    options = tables["county_observations"][["county_id", "county_name"]].drop_duplicates().to_dict("records")
+    county_options = tables["county_observations"][["county_id", "county_name", "duchy_id"]].drop_duplicates()
+    base_baronies = tables["base_baronies"]
+    options = []
+    for county in county_options.to_dict("records"):
+        baronies = base_baronies[base_baronies["county_id"] == county["county_id"]].sort_values("slot_number")
+        barony_ids = [row["barony_id"] for row in baronies.to_dict("records")]
+        options.append({
+            "label": f'{county["county_name"]} | {county["duchy_id"]} | {len(barony_ids)} baronies',
+            "value": county["county_id"],
+            "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
+        })
     return html.Div([
         html.H1("Holdings", style={"color": "#e0e0e0"}),
         html.P("Trial proof view | Scribe 1.19.0.6 | [VALIDATED]", style={"color": "#9be28f"}),
@@ -111,10 +121,12 @@ def layout():
         ),
         html.Label("County", style={"fontWeight": "bold"}),
         dcc.Dropdown(
-            options=[{"label": option["county_name"], "value": option["county_id"]} for option in options],
+            options=options,
             id="trial-county-selector",
             value="c_constantine",
             clearable=False,
+            searchable=True,
+            placeholder="Search county, duchy, or barony",
             className="updater-status-dropdown",
             style={"marginTop": "0.5rem", "color": "#e0e0e0"},
         ),
