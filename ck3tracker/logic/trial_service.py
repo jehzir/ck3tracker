@@ -18,11 +18,22 @@ def load_trial_tables() -> dict[str, pd.DataFrame]:
         "holding_observations",
         "base_baronies",
         "title_progress",
+        "county_lifecycle",
     )
     return {
         name: pd.read_parquet(TRIAL_DIR / f"{name}.parquet")
         for name in table_names
     }
+
+
+def get_active_trial_counties(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Return counties currently active in the trial editor without deleting history."""
+    counties = tables["county_observations"]
+    lifecycle = tables.get("county_lifecycle")
+    if lifecycle is None:
+        return counties
+    active_ids = lifecycle[lifecycle["active_in_editor"]]["county_id"]
+    return counties[counties["county_id"].isin(active_ids)]
 
 
 def get_trial_summary(playthrough_id: str = "trial_dead_run") -> dict:

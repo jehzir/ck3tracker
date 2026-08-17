@@ -3,13 +3,17 @@ import dash
 from dash import Input, Output, State, callback, dcc, html
 
 from logic.acquisition_service import record_county_acquisition
-from logic.trial_service import load_trial_tables
+from logic.trial_service import get_active_trial_counties, load_trial_tables
 
 dash.register_page(__name__, path="/holdings", name="Holdings")
 
 PAGE_STYLE = {"padding": "1.25rem 1.5rem", "backgroundColor": "#1e1e1e", "color": "#e0e0e0", "minHeight": "100vh"}
 HEADER_STYLE = {"textAlign": "left", "padding": "0.75rem", "borderBottom": "2px solid #78b7b0", "fontWeight": "700", "color": "#e0e0e0"}
 CELL_STYLE = {"textAlign": "left", "padding": "0.55rem 0.65rem", "borderBottom": "1px solid #4a4a4a", "color": "#e0e0e0"}
+
+
+def _active_counties(tables):
+    return get_active_trial_counties(tables)
 
 
 def _table(headers, rows):
@@ -22,7 +26,7 @@ def _table(headers, rows):
 
 def _holdings_summary():
     tables = load_trial_tables()
-    counties = tables["county_observations"]
+    counties = _active_counties(tables)
     base_baronies = tables["base_baronies"]
     holdings = tables["holding_observations"]
     rows = []
@@ -50,7 +54,7 @@ def _holdings_summary():
 
 def _county_scope_summary():
     tables = load_trial_tables()
-    counties = tables["county_observations"]
+    counties = _active_counties(tables)
     identity_rows = [html.Tr([
         html.Td(county["county_name"], style=CELL_STYLE),
         html.Td(county["ownership_scope"], style=CELL_STYLE),
@@ -81,7 +85,7 @@ def _county_scope_summary():
 
 def _duchy_scope_summary():
     tables = load_trial_tables()
-    counties = tables["county_observations"]
+    counties = _active_counties(tables)
     base_baronies = tables["base_baronies"]
     rows = []
     for duchy_id, duchy_counties in counties.groupby("duchy_id"):
@@ -101,7 +105,7 @@ def _duchy_scope_summary():
 
 def _barony_scope_workspace():
     tables = load_trial_tables()
-    county_options = tables["county_observations"][["county_id", "county_name", "duchy_id"]].drop_duplicates()
+    county_options = _active_counties(tables)[["county_id", "county_name", "duchy_id"]].drop_duplicates()
     base_baronies = tables["base_baronies"]
     options = []
     for county in county_options.to_dict("records"):
@@ -143,7 +147,8 @@ def _barony_target_card(county_id, mode):
 
 def _selected_barony_context(county_id, barony_id):
     tables = load_trial_tables()
-    county_rows = tables["county_observations"][tables["county_observations"]["county_id"] == county_id]
+    counties = _active_counties(tables)
+    county_rows = counties[counties["county_id"] == county_id]
     county_name = county_rows.iloc[0]["county_name"] if not county_rows.empty else county_id
     return html.Div([
         html.Span("Selected barony", className="dhs-context-label"),
@@ -178,7 +183,7 @@ def _county_editor_workspace():
     tables = load_trial_tables()
     options = [
         {"label": row["county_name"], "value": row["county_id"]}
-        for row in tables["county_observations"].to_dict("records")
+        for row in _active_counties(tables).to_dict("records")
     ]
     return html.Div([
         html.H4("County update", className="dhs-subheading"),
@@ -212,7 +217,7 @@ def _duchy_editor_workspace():
 
 def _editor_scope_workspace():
     tables = load_trial_tables()
-    county_options = tables["county_observations"][["county_id", "county_name", "duchy_id"]].drop_duplicates()
+    county_options = _active_counties(tables)[["county_id", "county_name", "duchy_id"]].drop_duplicates()
     options = []
     for county in county_options.to_dict("records"):
         baronies = tables["base_baronies"][tables["base_baronies"]["county_id"] == county["county_id"]]
@@ -340,7 +345,7 @@ def _barony_selector(county_id, mode):
 
 def _county_detail(county_id, include_selector=True, include_county_state=True, include_context_heading=True):
     tables = load_trial_tables()
-    counties = tables["county_observations"]
+    counties = _active_counties(tables)
     base_baronies = tables["base_baronies"]
     holdings = tables["holding_observations"]
     county_rows = counties[counties["county_id"] == county_id]

@@ -16,6 +16,7 @@
 - Dark mode is preserved with DHS/USWDS-inspired accessibility patterns.
 - Updates are event-point snapshots, not daily game-tick tracking.
 - Current UI remains trial-backed and marked `[VALIDATED]`.
+- `c_annaba` is archived from active editor/selector views, never deleted; its historical observations remain retained.
 
 ## Next Design Tasks
 
@@ -133,6 +134,7 @@ Check each scope at desktop and narrow widths:
 - Keep the DHS/USWDS accessibility influence while preserving dark mode.
 - Do not mix synthetic trial data with canonical CK3 reference data.
 - Keep the current trial proof visible until the production persistence workflow is validated.
+- Use lifecycle metadata for archive/inactive state instead of deleting historical county or barony observations.
 
 ## Current Visual Reference
 
