@@ -142,6 +142,16 @@ def _barony_target_card(county_id, mode):
     ])
 
 
+def _selected_barony_context(county_id, barony_id):
+    tables = load_trial_tables()
+    county_rows = tables["county_observations"][tables["county_observations"]["county_id"] == county_id]
+    county_name = county_rows.iloc[0]["county_name"] if not county_rows.empty else county_id
+    return html.Div([
+        html.Span("Selected barony", className="dhs-context-label"),
+        html.Strong(f"{barony_id or 'None'} | {county_name}"),
+    ], className="dhs-selected-context")
+
+
 def _barony_scope_summary():
     tables = load_trial_tables()
     base_baronies = tables["base_baronies"]
@@ -214,7 +224,10 @@ def _editor_scope_workspace():
             "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
         })
     return html.Div([
-        html.H3("Record a major update", className="dhs-section-heading"),
+        html.Div([
+            html.H3("Record a major update", className="dhs-section-heading"),
+            html.Div(id="selected-barony-context", children=_selected_barony_context("c_constantine", "b_constantine")),
+        ], className="dhs-editor-heading-row"),
         html.Label("County filter", className="dhs-field-label"),
         dcc.Dropdown(
             options=options, id="trial-county-selector", value="c_constantine", clearable=False,
@@ -478,6 +491,15 @@ def update_trial_barony_editor(barony_id, county_id, mode):
 )
 def update_trial_barony_target(county_id, mode):
     return _barony_target_card(county_id, mode)
+
+
+@callback(
+    Output("selected-barony-context", "children"),
+    Input("trial-barony-selector", "value"),
+    Input("trial-county-selector", "value"),
+)
+def update_selected_barony_context(barony_id, county_id):
+    return _selected_barony_context(county_id, barony_id)
 
 
 @callback(

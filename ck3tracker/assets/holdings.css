@@ -199,6 +199,29 @@
     letter-spacing: 0;
 }
 
+.dhs-editor-heading-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dhs-editor-heading-row .dhs-section-heading {
+    margin: 0;
+}
+
+.dhs-selected-context {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    color: #e0e0e0;
+}
+
+.dhs-context-label {
+    color: #9fd8d2;
+    font-weight: 700;
+}
+
 .dhs-page-heading {
     margin-bottom: 0.35rem;
     font-size: 2rem;
