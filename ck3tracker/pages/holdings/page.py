@@ -183,8 +183,13 @@ def _duchy_scope_summary():
     for duchy_id, duchy_counties in base_baronies.groupby("duchy_id"):
         base_counties = duchy_counties["county_id"].nunique()
         observed_counties = counties[counties["duchy_id"] == duchy_id]["county_id"].nunique()
-        base_count = len(duchy_counties)
-        observed_count = observed_baronies[observed_baronies["duchy_id"] == duchy_id]["barony_id"].nunique()
+        realized_baronies = duchy_counties[~duchy_counties["is_open_barony_slot"]]
+        base_count = len(realized_baronies)
+        realized_ids = set(realized_baronies["barony_id"])
+        observed_count = observed_baronies[
+            (observed_baronies["duchy_id"] == duchy_id)
+            & (observed_baronies["barony_id"].isin(realized_ids))
+        ]["barony_id"].nunique()
         county_coverage = f"{observed_counties / base_counties:.0%}" if base_counties else "-"
         barony_coverage = f"{observed_count / base_count:.0%}" if base_count else "-"
         rows.append(html.Tr([
