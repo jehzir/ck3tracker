@@ -99,3 +99,90 @@
     background-color: #4a5f6f;
     color: #ffffff;
 }
+
+#trial-holding-mode,
+#trial-holding-mode label,
+#trial-barony-selector,
+#trial-barony-selector label {
+    color: #e0e0e0 !important;
+}
+
+#trial-holding-mode label,
+#trial-barony-selector label {
+    cursor: pointer;
+}
+
+#trial-holding-mode {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+#trial-holding-mode label {
+    margin: 0 !important;
+}
+
+.trial-barony-section {
+    margin-top: 1rem;
+}
+
+.trial-barony-radio-list {
+    display: grid;
+    gap: 0.25rem;
+    max-width: 52rem;
+    padding: 0.35rem;
+    background-color: #242424;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+}
+
+.trial-barony-radio-list label {
+    min-height: 2.25rem;
+    box-sizing: border-box;
+    border-radius: 3px;
+}
+
+.trial-barony-radio-list label:hover {
+    background-color: #303b3d;
+}
+
+.trial-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.trial-editor-grid label,
+#trial-barony-editor label {
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+#trial-barony-editor .dash-input,
+#trial-barony-editor input {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+@media (max-width: 760px) {
+    .trial-editor-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    #trial-holding-mode {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .trial-editor-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+#trial-holding-mode input,
+#trial-barony-selector input {
+    accent-color: #78b7b0;
+}
