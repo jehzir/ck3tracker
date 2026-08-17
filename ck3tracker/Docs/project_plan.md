@@ -96,6 +96,8 @@ This is a visual proof model for the manual bridge between static CK3 reference 
 - `County`: county-wide values such as control, development, popular opinion, culture, faith, and county holder
 - `Duchy`: title progress, observed counties, base barony structure, and goal status
 
+The editing workflow is a separate `Editor` scope. It first asks what is being edited (`Barony`, `County`, or `Duchy`), then presents only the fields and update mode appropriate to that scope.
+
 Updates are event-point snapshots. The tracker records meaningful run changes rather than attempting to reproduce every game-day tick.
 
 ---

@@ -268,6 +268,49 @@
     font-size: 1.05rem;
 }
 
+.dhs-field-label,
+.dhs-editor-field label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #e0e0e0;
+    font-weight: 700;
+}
+
+.dhs-editor-surface {
+    max-width: 64rem;
+    padding-top: 1.25rem;
+}
+
+.dhs-editor-field {
+    min-width: 0;
+}
+
+.dhs-editor-field input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid #5b6166;
+    border-radius: 3px;
+    background: #2b2b2b;
+    color: #e0e0e0;
+}
+
+.dhs-action-button {
+    min-height: 2.75rem;
+    padding: 0.65rem 1rem;
+    border: 0;
+    border-radius: 3px;
+    background: #007c91;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.dhs-action-button:hover {
+    background: #00a6b2;
+}
+
 @media (max-width: 900px) {
     .dhs-county-layout {
         grid-template-columns: minmax(0, 1fr);

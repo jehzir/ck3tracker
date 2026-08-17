@@ -38,3 +38,4 @@
 - Reshaped Holdings into the default realm summary with county, scope, duchy, holder, control, development, occupied-slot, and status columns.
 - Added Barony, County, and Duchy scope tabs so cross-over data is not presented as one undifferentiated editor.
 - Defined updates as major event-point snapshots rather than daily game-tick tracking.
+- Moved editing into its own Editor tab with a Barony, County, or Duchy scope selector; Barony retains the New / Conquered and Update / Realm modes.

@@ -131,6 +131,83 @@ def _barony_scope_workspace():
     ])
 
 
+def _barony_scope_summary():
+    tables = load_trial_tables()
+    base_baronies = tables["base_baronies"]
+    holdings = tables["holding_observations"]
+    rows = []
+    for slot in base_baronies.to_dict("records"):
+        observed = holdings[holdings["barony_id"] == slot["barony_id"]]
+        live = observed.iloc[0].to_dict() if not observed.empty else {}
+        rows.append(html.Tr([
+            html.Td(slot["barony_id"], style=CELL_STYLE),
+            html.Td(slot["county_id"], style=CELL_STYLE),
+            html.Td(slot["holding_type"], style=CELL_STYLE),
+            html.Td(live.get("holder_type", "unobserved"), style=CELL_STYLE),
+            html.Td(live.get("tax", "-"), style=CELL_STYLE),
+            html.Td(live.get("levies", "-"), style=CELL_STYLE),
+        ]))
+    return html.Div([
+        html.H3("Barony state", className="dhs-section-heading"),
+        html.P("Read-only holding summary. Use Editor to record a major update."),
+        _table(["Barony", "County", "Type", "Holder", "Tax", "Levies"], rows),
+    ])
+
+
+def _county_editor_workspace():
+    tables = load_trial_tables()
+    options = [
+        {"label": row["county_name"], "value": row["county_id"]}
+        for row in tables["county_observations"].to_dict("records")
+    ]
+    return html.Div([
+        html.H4("County update", className="dhs-subheading"),
+        dcc.Dropdown(options=options, value="c_constantine", clearable=False, className="updater-status-dropdown"),
+        html.Div([
+            html.Div([html.Label("Control"), dcc.Input(type="number", value=100, min=0, max=100)], className="dhs-editor-field"),
+            html.Div([html.Label("Development"), dcc.Input(type="number", value=10, min=0)], className="dhs-editor-field"),
+            html.Div([html.Label("Popular opinion"), dcc.Input(type="number", value=20)], className="dhs-editor-field"),
+            html.Div([html.Label("Event note"), dcc.Input(type="text", placeholder="Major run event")], className="dhs-editor-field"),
+        ], className="trial-editor-grid", style={"marginTop": "1rem"}),
+        html.Button("Save County Update", className="dhs-action-button", style={"marginTop": "1rem"}),
+    ], className="dhs-editor-surface")
+
+
+def _duchy_editor_workspace():
+    tables = load_trial_tables()
+    options = [
+        {"label": row["title_name"], "value": row["title_id"]}
+        for row in tables["title_progress"].to_dict("records")
+    ]
+    return html.Div([
+        html.H4("Duchy update", className="dhs-subheading"),
+        dcc.Dropdown(options=options, value=options[0]["value"], clearable=False, className="updater-status-dropdown"),
+        html.Div([
+            html.Div([html.Label("Title status"), dcc.Input(type="text", value="in progress")], className="dhs-editor-field"),
+            html.Div([html.Label("Event note"), dcc.Input(type="text", placeholder="Major run event")], className="dhs-editor-field"),
+        ], className="trial-editor-grid", style={"marginTop": "1rem"}),
+        html.Button("Save Duchy Update", className="dhs-action-button", style={"marginTop": "1rem"}),
+    ], className="dhs-editor-surface")
+
+
+def _editor_scope_workspace():
+    return html.Div([
+        html.H3("Record a major update", className="dhs-section-heading"),
+        html.Label("What are you editing?", className="dhs-field-label"),
+        dcc.RadioItems(
+            options=[
+                {"label": "Barony", "value": "barony"},
+                {"label": "County", "value": "county"},
+                {"label": "Duchy", "value": "duchy"},
+            ],
+            value="barony", id="trial-editor-scope", inline=True,
+            labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
+            inputStyle={"margin": 0}, style={"marginTop": "0.6rem"},
+        ),
+        html.Div(id="editor-scope-content", children=_barony_scope_workspace(), style={"marginTop": "1.5rem"}),
+    ])
+
+
 def _barony_editor(county_id, barony_id, mode):
     tables = load_trial_tables()
     base_baronies = tables["base_baronies"]
@@ -292,6 +369,7 @@ def layout():
                 dcc.Tab(label="Barony", value="barony"),
                 dcc.Tab(label="County", value="county"),
                 dcc.Tab(label="Duchy", value="duchy"),
+                dcc.Tab(label="Editor", value="editor"),
             ],
                 className="dhs-tabs",
                 style={"marginBottom": "1.5rem"},
@@ -302,8 +380,10 @@ def layout():
 
 @callback(Output("holdings-scope-content", "children"), Input("holdings-scope-tabs", "value"))
 def update_holdings_scope(scope):
+    if scope == "editor":
+        return _editor_scope_workspace()
     if scope == "barony":
-        return _barony_scope_workspace()
+        return _barony_scope_summary()
     if scope == "county":
         return _county_scope_summary()
     if scope == "duchy":
@@ -342,3 +422,15 @@ def record_trial_acquisition(n_clicks, county_id, mode):
 )
 def update_trial_barony_editor(barony_id, county_id, mode):
     return _barony_editor(county_id, barony_id, mode)
+
+
+@callback(
+    Output("editor-scope-content", "children"),
+    Input("trial-editor-scope", "value"),
+)
+def update_editor_scope(scope):
+    if scope == "county":
+        return _county_editor_workspace()
+    if scope == "duchy":
+        return _duchy_editor_workspace()
+    return _barony_scope_workspace()
