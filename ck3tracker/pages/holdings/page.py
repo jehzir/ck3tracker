@@ -266,7 +266,10 @@ def _barony_scope_summary():
     tables = load_trial_tables()
     active_county_ids = set(_active_counties(tables)["county_id"])
     base_baronies = tables["base_baronies"]
-    base_baronies = base_baronies[base_baronies["county_id"].isin(active_county_ids)]
+    base_baronies = base_baronies[
+        base_baronies["county_id"].isin(active_county_ids)
+        & ~base_baronies["is_open_barony_slot"]
+    ]
     holdings = tables["holding_observations"]
     rows = []
     for slot in base_baronies.to_dict("records"):
