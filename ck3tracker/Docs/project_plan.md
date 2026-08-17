@@ -89,6 +89,15 @@ The trial Holdings view uses two explicit states to separate acquisition from on
 
 This is a visual proof model for the manual bridge between static CK3 reference data and lived run state. It is trial-scoped until the production parquet repository and edit workflow are defined.
 
+### Holdings Navigation Model
+`Holdings` is the summary surface for the current realm snapshot. Detailed updates are separated by ownership scope:
+
+- `Barony`: holding-level values such as holder, tax, levies, fort level, buildings, and notes
+- `County`: county-wide values such as control, development, popular opinion, culture, faith, and county holder
+- `Duchy`: title progress, observed counties, base barony structure, and goal status
+
+Updates are event-point snapshots. The tracker records meaningful run changes rather than attempting to reproduce every game-day tick.
+
 ---
 
 ## 🧱 Schemas  

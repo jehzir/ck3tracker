@@ -19,6 +19,104 @@ def _table(headers, rows):
     )
 
 
+def _holdings_summary():
+    tables = load_trial_tables()
+    counties = tables["county_observations"]
+    base_baronies = tables["base_baronies"]
+    holdings = tables["holding_observations"]
+    rows = []
+    for county in counties.to_dict("records"):
+        slots = base_baronies[base_baronies["county_id"] == county["county_id"]]
+        observed = holdings[holdings["county_id"] == county["county_id"]]
+        occupied = int((observed["holding_type"] != "empty").sum())
+        attention = "Control watch" if county["control"] < 50 else "Stable"
+        rows.append(html.Tr([
+            html.Td(county["county_name"], style=CELL_STYLE),
+            html.Td(county["ownership_scope"], style=CELL_STYLE),
+            html.Td(county["duchy_id"], style=CELL_STYLE),
+            html.Td(county["county_holder_name"], style=CELL_STYLE),
+            html.Td(county["control"], style=CELL_STYLE),
+            html.Td(county["development"], style=CELL_STYLE),
+            html.Td(f"{occupied}/{len(slots)}", style=CELL_STYLE),
+            html.Td(attention, style=CELL_STYLE),
+        ]))
+    return html.Div([
+        html.H3("Holdings summary", style={"color": "#e0e0e0"}),
+        html.P("Current realm snapshot. Open a scope tab to record a major update."),
+        _table(["County", "Scope", "Duchy", "Holder", "Control", "Dev", "Occupied / Slots", "Status"], rows),
+    ])
+
+
+def _county_scope_summary():
+    tables = load_trial_tables()
+    counties = tables["county_observations"]
+    rows = [html.Tr([
+        html.Td(county["county_name"], style=CELL_STYLE),
+        html.Td(county["control"], style=CELL_STYLE),
+        html.Td(county["development"], style=CELL_STYLE),
+        html.Td(county["popular_opinion"], style=CELL_STYLE),
+        html.Td(f'{county["culture"]} / {county["faith"]}', style=CELL_STYLE),
+        html.Td(county["county_holder_name"], style=CELL_STYLE),
+    ]) for county in counties.to_dict("records")]
+    return html.Div([
+        html.H3("County state", style={"color": "#e0e0e0"}),
+        html.P("County-wide values are updated at major run events, not every game-day tick."),
+        _table(["County", "Control", "Development", "Popular Opinion", "Culture / Faith", "Holder"], rows),
+    ])
+
+
+def _duchy_scope_summary():
+    tables = load_trial_tables()
+    counties = tables["county_observations"]
+    base_baronies = tables["base_baronies"]
+    rows = []
+    for duchy_id, duchy_counties in counties.groupby("duchy_id"):
+        base_count = len(base_baronies[base_baronies["duchy_id"] == duchy_id])
+        rows.append(html.Tr([
+            html.Td(duchy_id, style=CELL_STYLE),
+            html.Td(len(duchy_counties), style=CELL_STYLE),
+            html.Td(base_count, style=CELL_STYLE),
+            html.Td("In progress", style=CELL_STYLE),
+        ]))
+    return html.Div([
+        html.H3("Duchy state", style={"color": "#e0e0e0"}),
+        html.P("Duchy scope summarizes title progress and its underlying county structure."),
+        _table(["Duchy", "Observed Counties", "Base Baronies", "Status"], rows),
+    ])
+
+
+def _barony_scope_workspace():
+    tables = load_trial_tables()
+    county_options = tables["county_observations"][["county_id", "county_name", "duchy_id"]].drop_duplicates()
+    base_baronies = tables["base_baronies"]
+    options = []
+    for county in county_options.to_dict("records"):
+        baronies = base_baronies[base_baronies["county_id"] == county["county_id"]].sort_values("slot_number")
+        barony_ids = [row["barony_id"] for row in baronies.to_dict("records")]
+        options.append({
+            "label": f'{county["county_name"]} | {county["duchy_id"]} | {len(barony_ids)} baronies',
+            "value": county["county_id"],
+            "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
+        })
+    return html.Div([
+        html.H3("Barony updates", style={"color": "#e0e0e0"}),
+        dcc.RadioItems(
+            options=[{"label": "New / Conquered", "value": "new"}, {"label": "Update / Realm", "value": "update"}],
+            value="update", id="trial-holding-mode", inline=True,
+            labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
+            inputStyle={"margin": 0}, style={"marginBottom": "1rem"},
+        ),
+        html.Label("County", style={"fontWeight": "bold"}),
+        dcc.Dropdown(
+            options=options, id="trial-county-selector", value="c_constantine", clearable=False,
+            searchable=True, placeholder="Search county, duchy, or barony",
+            className="updater-status-dropdown", style={"marginTop": "0.5rem", "color": "#e0e0e0"},
+        ),
+        html.Div(id="trial-action-message", style={"marginTop": "1rem", "color": "#9be28f"}),
+        html.Div(id="trial-county-detail", children=_county_detail("c_constantine"), style={"marginTop": "1.5rem"}),
+    ])
+
+
 def _barony_editor(county_id, barony_id, mode):
     tables = load_trial_tables()
     base_baronies = tables["base_baronies"]
@@ -169,47 +267,33 @@ def _new_county_detail(county_id):
 
 
 def layout():
-    tables = load_trial_tables()
-    county_options = tables["county_observations"][["county_id", "county_name", "duchy_id"]].drop_duplicates()
-    base_baronies = tables["base_baronies"]
-    options = []
-    for county in county_options.to_dict("records"):
-        baronies = base_baronies[base_baronies["county_id"] == county["county_id"]].sort_values("slot_number")
-        barony_ids = [row["barony_id"] for row in baronies.to_dict("records")]
-        options.append({
-            "label": f'{county["county_name"]} | {county["duchy_id"]} | {len(barony_ids)} baronies',
-            "value": county["county_id"],
-            "search": " ".join([county["county_name"], county["county_id"], county["duchy_id"], *barony_ids]),
-        })
     return html.Div([
         html.H1("Holdings", style={"color": "#e0e0e0"}),
         html.P("Trial proof view | Scribe 1.19.0.6 | [VALIDATED]", style={"color": "#9be28f"}),
-        dcc.RadioItems(
-            options=[
-                {"label": "New / Conquered", "value": "new"},
-                {"label": "Update / Realm", "value": "update"},
+        dcc.Tabs(
+            id="holdings-scope-tabs",
+            value="summary",
+            children=[
+                dcc.Tab(label="Holdings summary", value="summary"),
+                dcc.Tab(label="Barony", value="barony"),
+                dcc.Tab(label="County", value="county"),
+                dcc.Tab(label="Duchy", value="duchy"),
             ],
-            value="update",
-            id="trial-holding-mode",
-            inline=True,
-            labelStyle={"display": "inline-flex", "alignItems": "center", "gap": "0.55rem", "marginRight": "1.5rem"},
-            inputStyle={"margin": 0},
-            style={"marginBottom": "1rem"},
+            style={"marginBottom": "1.5rem"},
         ),
-        html.Label("County", style={"fontWeight": "bold"}),
-        dcc.Dropdown(
-            options=options,
-            id="trial-county-selector",
-            value="c_constantine",
-            clearable=False,
-            searchable=True,
-            placeholder="Search county, duchy, or barony",
-            className="updater-status-dropdown",
-            style={"marginTop": "0.5rem", "color": "#e0e0e0"},
-        ),
-        html.Div(id="trial-action-message", style={"marginTop": "1rem", "color": "#9be28f"}),
-        html.Div(id="trial-county-detail", children=_county_detail("c_constantine"), style={"marginTop": "1.5rem"}),
+        html.Div(id="holdings-scope-content", children=_holdings_summary()),
     ], style=PAGE_STYLE)
+
+
+@callback(Output("holdings-scope-content", "children"), Input("holdings-scope-tabs", "value"))
+def update_holdings_scope(scope):
+    if scope == "barony":
+        return _barony_scope_workspace()
+    if scope == "county":
+        return _county_scope_summary()
+    if scope == "duchy":
+        return _duchy_scope_summary()
+    return _holdings_summary()
 
 
 @callback(

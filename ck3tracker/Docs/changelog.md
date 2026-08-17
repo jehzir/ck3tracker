@@ -33,3 +33,8 @@
 - Added a trial-only `Update / Realm` mode that displays observed county-wide state and barony-level values for an existing realm county.
 - Connected the New / Conquered action to the acquisition bridge so recording a county persists its acquisition event and all base barony slots, including open slots.
 - Added the validated badge to the trial view so the visual proof remains clearly separate from the production workflow.
+
+## Holdings Summary Navigation
+- Reshaped Holdings into the default realm summary with county, scope, duchy, holder, control, development, occupied-slot, and status columns.
+- Added Barony, County, and Duchy scope tabs so cross-over data is not presented as one undifferentiated editor.
+- Defined updates as major event-point snapshots rather than daily game-tick tracking.
