@@ -250,3 +250,26 @@
 .dhs-table tbody tr:hover {
     background: #303b3d;
 }
+
+.dhs-county-layout {
+    display: grid;
+    grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.6fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.dhs-scope-column {
+    min-width: 0;
+}
+
+.dhs-subheading {
+    margin: 0 0 0.5rem;
+    color: #e0e0e0;
+    font-size: 1.05rem;
+}
+
+@media (max-width: 900px) {
+    .dhs-county-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

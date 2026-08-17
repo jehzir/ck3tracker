@@ -51,18 +51,31 @@ def _holdings_summary():
 def _county_scope_summary():
     tables = load_trial_tables()
     counties = tables["county_observations"]
-    rows = [html.Tr([
+    identity_rows = [html.Tr([
+        html.Td(county["county_name"], style=CELL_STYLE),
+        html.Td(county["ownership_scope"], style=CELL_STYLE),
+        html.Td(county["county_holder_name"], style=CELL_STYLE),
+    ]) for county in counties.to_dict("records")]
+    state_rows = [html.Tr([
         html.Td(county["county_name"], style=CELL_STYLE),
         html.Td(county["control"], style=CELL_STYLE),
         html.Td(county["development"], style=CELL_STYLE),
         html.Td(county["popular_opinion"], style=CELL_STYLE),
         html.Td(f'{county["culture"]} / {county["faith"]}', style=CELL_STYLE),
-        html.Td(county["county_holder_name"], style=CELL_STYLE),
     ]) for county in counties.to_dict("records")]
     return html.Div([
         html.H3("County state", className="dhs-section-heading"),
         html.P("County-wide values are updated at major run events, not every game-day tick."),
-        _table(["County", "Control", "Development", "Popular Opinion", "Culture / Faith", "Holder"], rows),
+        html.Div([
+            html.Div([
+                html.H4("Counties", className="dhs-subheading"),
+                _table(["County", "Scope", "Holder"], identity_rows),
+            ], className="dhs-scope-column"),
+            html.Div([
+                html.H4("Update points", className="dhs-subheading"),
+                _table(["County", "Control", "Development", "Popular Opinion", "Culture / Faith"], state_rows),
+            ], className="dhs-scope-column"),
+        ], className="dhs-county-layout"),
     ])
 
 
