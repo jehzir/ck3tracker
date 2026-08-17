@@ -283,9 +283,9 @@
 
 .dhs-editor-choice-grid {
     display: grid;
-    grid-template-columns: minmax(12rem, 0.9fr) minmax(13rem, 1fr) minmax(16rem, 1.35fr);
+    grid-template-columns: minmax(14rem, 0.9fr) minmax(18rem, 1.2fr) minmax(18rem, 1.35fr);
     gap: 1rem;
-    max-width: 64rem;
+    max-width: 80rem;
 }
 
 .dhs-radio-card {
@@ -297,6 +297,9 @@
 }
 
 .dhs-radio-card label {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
     color: #e0e0e0 !important;
 }
 
@@ -305,11 +308,16 @@
 }
 
 .dhs-editor-detail {
-    max-width: 64rem;
+    max-width: 80rem;
 }
 
 .dhs-barony-target-card {
     align-self: start;
+}
+
+.dhs-barony-target-card label {
+    display: flex !important;
+    white-space: nowrap;
 }
 
 .trial-barony-section {
