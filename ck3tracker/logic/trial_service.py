@@ -32,8 +32,8 @@ def get_active_trial_counties(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
     lifecycle = tables.get("county_lifecycle")
     if lifecycle is None:
         return counties
-    active_ids = lifecycle[lifecycle["active_in_editor"]]["county_id"]
-    return counties[counties["county_id"].isin(active_ids)]
+    archived_ids = lifecycle[~lifecycle["active_in_editor"]]["county_id"]
+    return counties[~counties["county_id"].isin(archived_ids)]
 
 
 def get_trial_summary(playthrough_id: str = "trial_dead_run") -> dict:
