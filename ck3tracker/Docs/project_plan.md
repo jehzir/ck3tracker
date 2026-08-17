@@ -60,17 +60,18 @@ Reference snapshot metadata:
 - title hierarchy source: installed CK3 game files
 - wiki metadata source: CK3 Wiki pages captured for the matching game data
 
-### Run-State Sources
+### Reference and Run-State Sources
 - `holdings.parquet`
 - `playthrough_holdings.parquet`
 - `counties.parquet`
 - `duchies.parquet`
 - `characters.parquet`
+- `data/trial/run_state.duckdb`
 
-Reference sources define what exists in CK3. Parquet is the durable application data layer for run state, persistence, and historical journal observations. Manual updates write into that run-state layer rather than replacing the reference sources.
+Reference sources define what exists in CK3. Parquet stores immutable game/reference data and import snapshots. DuckDB is the durable transactional layer for mutable run state, observations, lifecycle transitions, and journal events. Manual updates write transactions into DuckDB rather than replacing reference sources.
 
-### Parquet Backbone
-All persistent application records should be normalized into parquet datasets keyed by `playthrough_id`, stable CK3 IDs, and observation/event dates where applicable. The parquet layer is the backbone for:
+### Hybrid Data Backbone
+All persistent application records should be normalized around `playthrough_id`, stable CK3 IDs, observation/event dates, and provenance. Parquet stores immutable CK3 reference data and import snapshots; DuckDB stores transactional run state, current-state projections, observations, lifecycle changes, and event history. DuckDB-backed records include:
 - run identity and lifecycle
 - ruler history
 - current and historical holdings
@@ -81,13 +82,25 @@ All persistent application records should be normalized into parquet datasets ke
 
 Every persisted run must record the reference snapshot it was created against, including `game_version` and `start_date`. A Scribe run must not silently load reference data from another game version.
 
+### Bronze MVP: Barony Observation Editor
+The first functioning editor milestone is a manual barony observation workflow:
+
+1. Select an active county and realized barony.
+2. Load the latest accepted observation as a preset.
+3. Enter basic status values such as holding type, holder type, tax, levies, plague resistance, and notes.
+4. Validate stable IDs, holding-specific fields, required values, and numeric ranges.
+5. Commit one DuckDB transaction containing the event and barony observation.
+6. Refresh Summary, Barony, County, and Duchy views from the new state.
+
+The editor records a time-stamped observation; it does not attempt to synchronize every game tick or modify the savegame.
+
 ### Trial Holdings State Model
 The trial Holdings view uses two explicit states to separate acquisition from ongoing observation:
 
 - `New / Conquered`: starts from the canonical county and barony structure. Recording the acquisition persists one acquisition event and one base state row for every barony slot, including empty slots.
 - `Update / Realm`: reads the observed county-wide and barony-level state for an existing county. Empty slots remain visible as open slots, while occupied baronies display their observed holder and daily values.
 
-This is a visual proof model for the manual bridge between static CK3 reference data and lived run state. It is trial-scoped until the production parquet repository and edit workflow are defined.
+This is a visual proof model for the manual bridge between static CK3 reference data and lived run state. It is trial-scoped until the Bronze DuckDB observation workflow is complete.
 
 ### Holdings Navigation Model
 `Holdings` is the summary surface for the current realm snapshot. Detailed updates are separated by ownership scope:

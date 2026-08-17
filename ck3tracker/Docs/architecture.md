@@ -7,17 +7,18 @@ The CK3 Tracker is built on a provider-based architecture:
 - Dash pages render UI components.
 - Plotly figures provide charts.
 
-The architecture has four distinct layers:
+The architecture has five distinct layers:
 
 1. **Reference layer** — CK3 Scribe files and validated wiki extracts define the title map and decision vocabulary.
-2. **Parquet data layer** — normalized parquet datasets provide durable run storage, current state, and history.
-3. **Journal layer** — dated observations, goal changes, control updates, and milestones preserve the story.
-4. **Presentation layer** — Dash pages summarize current state and historical progress.
+2. **Snapshot layer** — normalized Parquet datasets preserve immutable game data, imports, and evidence snapshots.
+3. **Transaction layer** — DuckDB stores mutable run state, observations, lifecycle transitions, and event history atomically.
+4. **Journal layer** — dated observations, goal changes, control updates, and milestones preserve the story.
+5. **Presentation layer** — Dash pages summarize current state and historical progress.
 
 This document describes the high-level structure and relationships between components.
 
 ## Current Status
-The project is currently in a holdings-first stabilization phase. The holdings page is functional with realistic seeded data so the app remains usable while the parquet-backed implementation is still being finalized. The new-run creation flow is intentionally deferred as an admin task until the holdings section is fully assembled.
+The project is currently in a Bronze holdings-first stabilization phase. The Holdings page is functional with realistic seeded data, lifecycle transactions, and a DuckDB run-state store. The next implementation milestone is a validated manual barony observation transaction. Savegame import, game-file analysis, and any write-back capability remain deferred.
 
 ## Product Model: Living Run Journal
 
@@ -174,6 +175,10 @@ Parquet remains the immutable reference and export format for game-derived data.
 - `journal_events`: dated observations, milestones, threats, and run lifecycle events
 
 The trial state database stores lifecycle transitions, acquisition events, and mutable barony snapshots in `data/trial/run_state.duckdb`. Static game data and evidence-backed observations remain in Parquet, while current-state views are queried from DuckDB without rewriting the source files. Historical rows must remain available for the living journal.
+
+### Bronze Transaction Boundary
+
+The first complete editor transaction is a barony observation. It validates the target against immutable reference data, appends a dated observation and transaction event in DuckDB, and refreshes affected views. The application records what the player observed; it does not claim continuous game-tick synchronization and does not modify savegames.
 
 ## Replay and Version Comparison
 
