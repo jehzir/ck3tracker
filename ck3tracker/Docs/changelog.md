@@ -27,3 +27,9 @@
 - Documented the trial evidence model: complete base structure, screenshot-backed live observations, derived Domain/Realm counts, and separate CK3 source order versus UI slot order.
 - Documented the Constantine acquisition bridge and corrected UI slot mapping: Tijis slot 3, Tifash slot 4, Taburshiq slot 5.
 - Recorded the Kroumerie observation boundary: eight BASE baronies, two observed vassal holdings, and six remaining screenshots required for complete live daily data.
+
+## Trial Holdings State Model
+- Added a trial-only `New / Conquered` mode that displays the complete canonical county slot structure before daily observations exist.
+- Added a trial-only `Update / Realm` mode that displays observed county-wide state and barony-level values for an existing realm county.
+- Connected the New / Conquered action to the acquisition bridge so recording a county persists its acquisition event and all base barony slots, including open slots.
+- Added the validated badge to the trial view so the visual proof remains clearly separate from the production workflow.

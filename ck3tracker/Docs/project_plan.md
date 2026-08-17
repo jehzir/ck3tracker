@@ -81,6 +81,14 @@ All persistent application records should be normalized into parquet datasets ke
 
 Every persisted run must record the reference snapshot it was created against, including `game_version` and `start_date`. A Scribe run must not silently load reference data from another game version.
 
+### Trial Holdings State Model
+The trial Holdings view uses two explicit states to separate acquisition from ongoing observation:
+
+- `New / Conquered`: starts from the canonical county and barony structure. Recording the acquisition persists one acquisition event and one base state row for every barony slot, including empty slots.
+- `Update / Realm`: reads the observed county-wide and barony-level state for an existing county. Empty slots remain visible as open slots, while occupied baronies display their observed holder and daily values.
+
+This is a visual proof model for the manual bridge between static CK3 reference data and lived run state. It is trial-scoped until the production parquet repository and edit workflow are defined.
+
 ---
 
 ## 🧱 Schemas  

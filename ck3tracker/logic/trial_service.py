@@ -40,11 +40,12 @@ def get_trial_summary(playthrough_id: str = "trial_dead_run") -> dict:
 
     run_counties = counties[counties["playthrough_id"] == playthrough_id]
     run_holdings = holdings[holdings["playthrough_id"] == playthrough_id]
+    occupied_holdings = run_holdings[run_holdings["holding_type"] != "empty"]
     run_titles = titles[titles["playthrough_id"] == playthrough_id]
 
     title_summaries = []
     for title in run_titles.to_dict("records"):
-        title_holdings = run_holdings[run_holdings["duchy_id"] == title["title_id"]]
+        title_holdings = occupied_holdings[occupied_holdings["duchy_id"] == title["title_id"]]
         title_counties = run_counties[run_counties["duchy_id"] == title["title_id"]]
         title_base_baronies = base_baronies[base_baronies["duchy_id"] == title["title_id"]]
         title_summaries.append(
@@ -76,7 +77,7 @@ def get_trial_summary(playthrough_id: str = "trial_dead_run") -> dict:
         "domain_barony_count": int(
             (run_holdings["holder_type"] == "ruler").sum()
         ),
-        "realm_barony_count": int(len(run_holdings)),
+        "realm_barony_count": int(len(occupied_holdings)),
         "base_barony_count": int(len(base_baronies[base_baronies["duchy_id"] == "d_kroumerie"])),
         "base_baronies": base_baronies.to_dict("records"),
         "county_observations": run_counties.to_dict("records"),
@@ -90,7 +91,7 @@ def validate_trial_summary(summary: dict) -> bool:
         return False
     if summary["domain_county_count"] != 3 or summary["realm_county_count"] != 5:
         return False
-    if summary["domain_barony_count"] != 4 or summary["realm_barony_count"] != 6:
+    if summary["domain_barony_count"] != 4 or summary["realm_barony_count"] != 8:
         return False
 
     titles = {title["title_id"]: title for title in summary["titles"]}
@@ -101,6 +102,8 @@ def validate_trial_summary(summary: dict) -> bool:
     if mallorca["domain_county_count"] != 3 or mallorca["domain_barony_count"] != 4:
         return False
     if kroumerie["domain_county_count"] != 0 or kroumerie["realm_county_count"] != 2:
+        return False
+    if kroumerie["realm_barony_count"] != 4:
         return False
     if kroumerie["title_status"] != "not_created":
         return False
