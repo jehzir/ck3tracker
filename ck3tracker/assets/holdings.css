@@ -348,6 +348,37 @@
     max-width: 80rem;
 }
 
+.dhs-history-workspace {
+    max-width: 80rem;
+}
+
+.dhs-history-detail {
+    margin-top: 0.75rem;
+}
+
+.dhs-history-record {
+    display: grid;
+    gap: 0.45rem;
+    max-width: 64rem;
+    padding: 0.8rem 0.9rem;
+    border-left: 0.3rem solid #007c91;
+    background: #242424;
+    color: #e0e0e0;
+}
+
+.dhs-history-heading {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: #f1f1f1;
+}
+
+.dhs-status-text {
+    color: #9fd8d2;
+    font-weight: 700;
+}
+
 .dhs-barony-target-card {
     align-self: start;
 }

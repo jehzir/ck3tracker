@@ -1,5 +1,6 @@
 # Trial-backed Holdings proof view
 import dash
+import pandas as pd
 from dash import Input, Output, State, callback, dcc, html
 
 from logic.acquisition_service import record_county_acquisition
@@ -54,11 +55,14 @@ def _holdings_summary():
 
 def _county_scope_summary():
     tables = load_trial_tables()
-    counties = _active_counties(tables)
+    counties = tables["county_observations"]
+    lifecycle = tables.get("county_lifecycle", pd.DataFrame())
+    lifecycle_by_county = lifecycle.set_index("county_id").to_dict("index") if not lifecycle.empty else {}
     identity_rows = [html.Tr([
         html.Td(county["county_name"], style=CELL_STYLE),
         html.Td(county["ownership_scope"], style=CELL_STYLE),
         html.Td(county["county_holder_name"], style=CELL_STYLE),
+        html.Td(lifecycle_by_county.get(county["county_id"], {}).get("lifecycle_state", "active"), style=CELL_STYLE),
     ]) for county in counties.to_dict("records")]
     state_rows = [html.Tr([
         html.Td(county["county_name"], style=CELL_STYLE),
@@ -73,14 +77,73 @@ def _county_scope_summary():
         html.Div([
             html.Div([
                 html.H4("Counties", className="dhs-subheading"),
-                _table(["County", "Scope", "Holder"], identity_rows),
+                _table(["County", "Scope", "Holder", "Lifecycle"], identity_rows),
             ], className="dhs-scope-column"),
             html.Div([
                 html.H4("Update points", className="dhs-subheading"),
                 _table(["County", "Control", "Development", "Popular Opinion", "Culture / Faith"], state_rows),
             ], className="dhs-scope-column"),
         ], className="dhs-county-layout"),
+        html.H4("County history and recovery", className="dhs-subheading"),
+        _county_history_workspace(),
     ])
+
+
+def _county_history_workspace(county_id="c_annaba"):
+    tables = load_trial_tables()
+    counties = tables["county_observations"]
+    options = [
+        {"label": row["county_name"], "value": row["county_id"]}
+        for row in counties.to_dict("records")
+    ]
+    return html.Div([
+        dcc.Dropdown(
+            options=options, value=county_id, clearable=False,
+            id="county-history-selector", className="updater-status-dropdown",
+            placeholder="Select county history",
+        ),
+        html.Div(
+            id="county-history-detail",
+            children=_county_history_detail(county_id),
+            className="dhs-history-detail",
+        ),
+    ], className="dhs-history-workspace")
+
+
+def _county_history_detail(county_id):
+    tables = load_trial_tables()
+    counties = tables["county_observations"]
+    base_baronies = tables["base_baronies"]
+    lifecycle = tables.get("county_lifecycle", pd.DataFrame())
+    county_rows = counties[counties["county_id"] == county_id]
+    if county_rows.empty:
+        return html.P("No county history exists for this target.")
+    county = county_rows.iloc[0].to_dict()
+    lifecycle_rows = lifecycle[lifecycle["county_id"] == county_id]
+    state = lifecycle_rows.iloc[0].to_dict() if not lifecycle_rows.empty else {
+        "lifecycle_state": "active",
+        "reason": "Current active county snapshot.",
+    }
+    baronies = base_baronies[base_baronies["county_id"] == county_id].sort_values("slot_number")
+    barony_text = ", ".join(row["barony_id"] for row in baronies.to_dict("records"))
+    archived = state.get("lifecycle_state") == "archived"
+    action = html.Button(
+        "Restore / Reclaim County",
+        id="county-reclaim-action",
+        className="dhs-action-button",
+        style={"marginTop": "0.75rem"},
+    ) if archived else html.P("County is currently active; record changes through Editor.")
+    return html.Div([
+        html.Div([
+            html.Strong(f'{county["county_name"]} | {county["duchy_id"]}'),
+            html.Span(f'Lifecycle: {state.get("lifecycle_state", "active")}', className="dhs-status-text"),
+        ], className="dhs-history-heading"),
+        html.Div(f'Historical holder snapshot: {county.get("county_holder_name", "unrecorded")}'),
+        html.Div(f'Historical control / development: {county["control"]} / {county["development"]}'),
+        html.Div(f"Attached baronies: {barony_text}"),
+        html.Div(f'Recovery note: {state.get("reason", "Historical observation retained.")}'),
+        action,
+    ], className="dhs-history-record")
 
 
 def _duchy_scope_summary():
@@ -459,6 +522,14 @@ def update_holdings_scope(scope):
     if scope == "duchy":
         return _duchy_scope_summary()
     return _holdings_summary()
+
+
+@callback(
+    Output("county-history-detail", "children"),
+    Input("county-history-selector", "value"),
+)
+def update_county_history(county_id):
+    return _county_history_detail(county_id)
 
 
 @callback(

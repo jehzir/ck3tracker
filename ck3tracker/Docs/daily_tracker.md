@@ -17,6 +17,7 @@
 - Updates are event-point snapshots, not daily game-tick tracking.
 - Current UI remains trial-backed and marked `[VALIDATED]`.
 - `c_annaba` is archived from active editor/selector views, never deleted; its historical observations remain retained.
+- County view now exposes archived county history, attached baronies, and a trial Restore / Reclaim County action surface.
 
 ## Next Design Tasks
 
@@ -93,6 +94,8 @@ Persist the current trial editor values with:
 - Event type
 - Notes
 - Source or manual-entry marker
+
+The first County recovery action is a restore/reclaim event. It must later resolve the holder separately from the grant action, including a House Member grant path.
 
 Preserve canonical reference data separately from observed run state.
 
