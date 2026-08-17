@@ -107,3 +107,44 @@ def record_county_acquisition(
         "acquisition_events": events,
         "barony_state": states,
     }
+
+
+def record_county_reclamation(
+    county_id: str,
+    playthrough_id: str,
+    ownership_scope: str,
+    holder_type: str,
+    observed_at: str,
+) -> dict[str, pd.DataFrame]:
+    """Persist a reclaim event and reactivate the county without rewriting history."""
+    bundle = create_county_acquisition_bundle(
+        county_id=county_id,
+        playthrough_id=playthrough_id,
+        ownership_scope=ownership_scope,
+        holder_type=holder_type,
+        observed_at=observed_at,
+    )
+    event_id = f"{playthrough_id}:{county_id}:reclaimed"
+    bundle["acquisition_events"]["event_id"] = event_id
+    bundle["acquisition_events"]["event_type"] = "county_reclaimed"
+    bundle["barony_state"]["acquisition_event_id"] = event_id
+
+    event_path = TRIAL_STATE_DIR / "acquisition_events.parquet"
+    state_path = TRIAL_STATE_DIR / "barony_state.parquet"
+    lifecycle_path = TRIAL_STATE_DIR / "county_lifecycle.parquet"
+    existing_events = pd.read_parquet(event_path) if event_path.exists() else pd.DataFrame()
+    existing_state = pd.read_parquet(state_path) if state_path.exists() else pd.DataFrame()
+    events = pd.concat([existing_events, bundle["acquisition_events"]], ignore_index=True)
+    states = pd.concat([existing_state, bundle["barony_state"]], ignore_index=True)
+    events = events.drop_duplicates(subset=["event_id"], keep="last")
+    states = states.drop_duplicates(subset=["playthrough_id", "barony_id", "acquisition_event_id"], keep="last")
+    events.to_parquet(event_path, index=False)
+    states.to_parquet(state_path, index=False)
+
+    lifecycle = pd.read_parquet(lifecycle_path) if lifecycle_path.exists() else pd.DataFrame()
+    match = (lifecycle["playthrough_id"] == playthrough_id) & (lifecycle["county_id"] == county_id)
+    lifecycle.loc[match, "lifecycle_state"] = "active"
+    lifecycle.loc[match, "active_in_editor"] = True
+    lifecycle.loc[match, "reason"] = "Reclaimed by the player; reclaim event retained in acquisition history."
+    lifecycle.to_parquet(lifecycle_path, index=False)
+    return {"acquisition_events": events, "barony_state": states, "county_lifecycle": lifecycle}

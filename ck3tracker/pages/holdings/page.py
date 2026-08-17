@@ -3,7 +3,7 @@ import dash
 import pandas as pd
 from dash import Input, Output, State, callback, dcc, html
 
-from logic.acquisition_service import record_county_acquisition
+from logic.acquisition_service import record_county_acquisition, record_county_reclamation
 from logic.trial_service import get_active_trial_counties, load_trial_tables
 
 dash.register_page(__name__, path="/holdings", name="Holdings")
@@ -527,8 +527,18 @@ def update_holdings_scope(scope):
 @callback(
     Output("county-history-detail", "children"),
     Input("county-history-selector", "value"),
+    Input("county-reclaim-action", "n_clicks"),
+    prevent_initial_call=True,
 )
-def update_county_history(county_id):
+def update_county_history(county_id, reclaim_clicks):
+    if reclaim_clicks:
+        record_county_reclamation(
+            county_id,
+            "trial_dead_run",
+            "realm",
+            "vassal",
+            "manual_trial_reclaim",
+        )
     return _county_history_detail(county_id)
 
 
