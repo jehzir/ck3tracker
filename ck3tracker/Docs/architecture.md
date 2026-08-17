@@ -161,9 +161,9 @@ When a county enters a run, the acquisition workflow resolves the complete base 
 
 For the current Kroumerie trial, `c_constantine` has five UI slots and `c_annaba` has three BASE baronies. The acquisition bridge creates all structural rows immediately, while live daily fields remain unknown until observed. The current vassal proof contains two observed city holdings and six remaining barony observations are still outstanding.
 
-## Parquet Data Contract
+## Data Contract
 
-Parquet is the persistence backbone, not merely an export format. Datasets should be normalized around stable keys and retain history rather than overwrite it:
+Parquet remains the immutable reference and export format for game-derived data. DuckDB is the transactional store for mutable playthrough state and event history. Datasets should be normalized around stable keys and retain history rather than overwrite it:
 
 - `playthroughs`: run identity, ruler identity, `game_version`, `start_date`, lifecycle state
 - `holdings`: canonical holding records and latest run state
@@ -173,7 +173,7 @@ Parquet is the persistence backbone, not merely an export format. Datasets shoul
 - `goal_progress_events`: manual control, completion, exception, and note updates
 - `journal_events`: dated observations, milestones, threats, and run lifecycle events
 
-Current-state views may be derived from the latest parquet records, but historical rows must remain available for the living journal.
+The trial state database stores lifecycle transitions, acquisition events, and mutable barony snapshots in `data/trial/run_state.duckdb`. Static game data and evidence-backed observations remain in Parquet, while current-state views are queried from DuckDB without rewriting the source files. Historical rows must remain available for the living journal.
 
 ## Replay and Version Comparison
 

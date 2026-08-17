@@ -92,10 +92,11 @@ def _county_scope_summary():
                     {"label": row["county_name"], "value": row["county_id"]}
                     for row in counties.to_dict("records")
                 ],
-                value=counties.iloc[0]["county_id"] if not counties.empty else None,
+                value=None,
                 clearable=False,
                 id="county-lifecycle-selector",
                 className="updater-status-dropdown",
+                placeholder="Select county to change lifecycle",
             ),
             html.Button(
                 "Mark County Inactive",
@@ -583,25 +584,15 @@ def update_county_history(county_id, reclaim_clicks):
 
 @callback(
     Output("county-lifecycle-refresh", "data"),
-    Output("county-history-selector", "options"),
-    Output("county-history-selector", "value"),
     Input("county-mark-inactive-action", "n_clicks"),
     State("county-lifecycle-selector", "value"),
     prevent_initial_call=True,
 )
 def mark_county_inactive(n_clicks, county_id):
     if not n_clicks or not county_id:
-        return 0, [], None
+        return 0
     record_county_loss(county_id, "trial_dead_run", "manual_trial_loss")
-    tables = load_trial_tables()
-    lifecycle = tables["county_lifecycle"]
-    inactive_ids = set(lifecycle.loc[~lifecycle["active_in_editor"], "county_id"])
-    counties = tables["county_observations"]
-    options = [
-        {"label": row["county_name"], "value": row["county_id"]}
-        for row in counties[counties["county_id"].isin(inactive_ids)].to_dict("records")
-    ]
-    return n_clicks, options, county_id
+    return n_clicks
 
 
 @callback(

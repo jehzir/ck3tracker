@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from logic.run_state_store import load_table, replace_rows, update_county_lifecycle
+
 
 TRIAL_BASE_PATH = Path(__file__).parents[1] / "data" / "trial" / "base_baronies.parquet"
 TRIAL_STATE_DIR = TRIAL_BASE_PATH.parent
@@ -89,24 +91,9 @@ def record_county_acquisition(
         holder_type=holder_type,
         observed_at=observed_at,
     )
-    TRIAL_STATE_DIR.mkdir(parents=True, exist_ok=True)
-
-    event_path = TRIAL_STATE_DIR / "acquisition_events.parquet"
-    state_path = TRIAL_STATE_DIR / "barony_state.parquet"
-    existing_events = pd.read_parquet(event_path) if event_path.exists() else pd.DataFrame()
-    existing_state = pd.read_parquet(state_path) if state_path.exists() else pd.DataFrame()
-
-    events = pd.concat([existing_events, bundle["acquisition_events"]], ignore_index=True)
-    states = pd.concat([existing_state, bundle["barony_state"]], ignore_index=True)
-    events = events.drop_duplicates(subset=["event_id"], keep="last")
-    states = states.drop_duplicates(subset=["playthrough_id", "barony_id", "acquisition_event_id"], keep="last")
-    events.to_parquet(event_path, index=False)
-    states.to_parquet(state_path, index=False)
-
-    return {
-        "acquisition_events": events,
-        "barony_state": states,
-    }
+    replace_rows("acquisition_events", bundle["acquisition_events"], ["event_id"])
+    replace_rows("barony_state", bundle["barony_state"], ["playthrough_id", "barony_id", "acquisition_event_id"])
+    return {"acquisition_events": load_table("acquisition_events"), "barony_state": load_table("barony_state")}
 
 
 def record_county_reclamation(
@@ -129,25 +116,20 @@ def record_county_reclamation(
     bundle["acquisition_events"]["event_type"] = "county_reclaimed"
     bundle["barony_state"]["acquisition_event_id"] = event_id
 
-    event_path = TRIAL_STATE_DIR / "acquisition_events.parquet"
-    state_path = TRIAL_STATE_DIR / "barony_state.parquet"
-    lifecycle_path = TRIAL_STATE_DIR / "county_lifecycle.parquet"
-    existing_events = pd.read_parquet(event_path) if event_path.exists() else pd.DataFrame()
-    existing_state = pd.read_parquet(state_path) if state_path.exists() else pd.DataFrame()
-    events = pd.concat([existing_events, bundle["acquisition_events"]], ignore_index=True)
-    states = pd.concat([existing_state, bundle["barony_state"]], ignore_index=True)
-    events = events.drop_duplicates(subset=["event_id"], keep="last")
-    states = states.drop_duplicates(subset=["playthrough_id", "barony_id", "acquisition_event_id"], keep="last")
-    events.to_parquet(event_path, index=False)
-    states.to_parquet(state_path, index=False)
-
-    lifecycle = pd.read_parquet(lifecycle_path) if lifecycle_path.exists() else pd.DataFrame()
-    match = (lifecycle["playthrough_id"] == playthrough_id) & (lifecycle["county_id"] == county_id)
-    lifecycle.loc[match, "lifecycle_state"] = "active"
-    lifecycle.loc[match, "active_in_editor"] = True
-    lifecycle.loc[match, "reason"] = "Reclaimed by the player; reclaim event retained in acquisition history."
-    lifecycle.to_parquet(lifecycle_path, index=False)
-    return {"acquisition_events": events, "barony_state": states, "county_lifecycle": lifecycle}
+    replace_rows("acquisition_events", bundle["acquisition_events"], ["event_id"])
+    replace_rows("barony_state", bundle["barony_state"], ["playthrough_id", "barony_id", "acquisition_event_id"])
+    update_county_lifecycle(
+        playthrough_id,
+        county_id,
+        "active",
+        True,
+        "Reclaimed by the player; reclaim event retained in acquisition history.",
+    )
+    return {
+        "acquisition_events": load_table("acquisition_events"),
+        "barony_state": load_table("barony_state"),
+        "county_lifecycle": load_table("county_lifecycle"),
+    }
 
 
 def record_county_loss(
@@ -161,9 +143,6 @@ def record_county_loss(
     if county_baronies.empty:
         raise KeyError(f"Unknown base county: {county_id}")
 
-    event_path = TRIAL_STATE_DIR / "acquisition_events.parquet"
-    lifecycle_path = TRIAL_STATE_DIR / "county_lifecycle.parquet"
-    events = pd.read_parquet(event_path) if event_path.exists() else pd.DataFrame()
     event_id = f"{playthrough_id}:{county_id}:lost"
     event = pd.DataFrame([{
         "event_id": event_id,
@@ -176,13 +155,12 @@ def record_county_loss(
         "observed_at": observed_at,
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
     }])
-    events = pd.concat([events, event], ignore_index=True).drop_duplicates(subset=["event_id"], keep="last")
-    events.to_parquet(event_path, index=False)
-
-    lifecycle = pd.read_parquet(lifecycle_path) if lifecycle_path.exists() else pd.DataFrame()
-    match = (lifecycle["playthrough_id"] == playthrough_id) & (lifecycle["county_id"] == county_id)
-    lifecycle.loc[match, "lifecycle_state"] = "archived"
-    lifecycle.loc[match, "active_in_editor"] = False
-    lifecycle.loc[match, "reason"] = "Lost by the player; historical observations retained for future recovery."
-    lifecycle.to_parquet(lifecycle_path, index=False)
-    return lifecycle
+    replace_rows("acquisition_events", event, ["event_id"])
+    update_county_lifecycle(
+        playthrough_id,
+        county_id,
+        "archived",
+        False,
+        "Lost by the player; historical observations retained for future recovery.",
+    )
+    return load_table("county_lifecycle")

@@ -6,24 +6,27 @@ from pathlib import Path
 
 import pandas as pd
 
+from logic.run_state_store import load_table
+
 
 TRIAL_DIR = Path(__file__).parents[1] / "data" / "trial"
 
 
 def load_trial_tables() -> dict[str, pd.DataFrame]:
     """Load the trial parquet tables without mutating them."""
-    table_names = (
+    parquet_tables = (
         "playthroughs",
         "county_observations",
         "holding_observations",
         "base_baronies",
         "title_progress",
-        "county_lifecycle",
     )
-    return {
+    tables = {
         name: pd.read_parquet(TRIAL_DIR / f"{name}.parquet")
-        for name in table_names
+        for name in parquet_tables
     }
+    tables.update({name: load_table(name) for name in ("county_lifecycle", "acquisition_events", "barony_state")})
+    return tables
 
 
 def get_active_trial_counties(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
