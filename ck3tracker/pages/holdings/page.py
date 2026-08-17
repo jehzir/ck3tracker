@@ -521,6 +521,7 @@ def _new_county_detail(county_id, include_selector=True):
 def layout():
     return html.Div([
         dcc.Store(id="county-lifecycle-refresh", data=0),
+        dcc.Store(id="county-history-refresh", data=0),
         html.H1("Holdings", className="dhs-page-heading"),
             html.P("Trial proof view | Scribe 1.19.0.6 | [VALIDATED]", className="dhs-validation-badge"),
         dcc.Tabs(
@@ -544,8 +545,9 @@ def layout():
     Output("holdings-scope-content", "children"),
     Input("holdings-scope-tabs", "value"),
     Input("county-lifecycle-refresh", "data"),
+    Input("county-history-refresh", "data"),
 )
-def update_holdings_scope(scope, lifecycle_refresh=0):
+def update_holdings_scope(scope, lifecycle_refresh=0, history_refresh=0):
     if scope == "editor":
         return _editor_scope_workspace()
     if scope == "barony":
@@ -560,11 +562,13 @@ def update_holdings_scope(scope, lifecycle_refresh=0):
 @callback(
     Output("county-history-detail", "children"),
     Output("county-reclaim-action", "disabled"),
+    Output("county-history-refresh", "data"),
     Input("county-history-selector", "value"),
     Input("county-reclaim-action", "n_clicks"),
     prevent_initial_call=True,
 )
 def update_county_history(county_id, reclaim_clicks):
+    history_refresh = 0
     if dash.ctx.triggered_id == "county-reclaim-action" and reclaim_clicks and county_id:
         record_county_reclamation(
             county_id,
@@ -573,11 +577,12 @@ def update_county_history(county_id, reclaim_clicks):
             "vassal",
             "manual_trial_reclaim",
         )
+        history_refresh = reclaim_clicks
     tables = load_trial_tables()
     lifecycle = tables.get("county_lifecycle", pd.DataFrame())
     county_state = lifecycle[lifecycle["county_id"] == county_id]
     is_active = not county_state.empty and bool(county_state.iloc[0]["active_in_editor"])
-    return _county_history_detail(county_id), county_id is None or is_active
+    return _county_history_detail(county_id), county_id is None or is_active, history_refresh
 
 
 @callback(
