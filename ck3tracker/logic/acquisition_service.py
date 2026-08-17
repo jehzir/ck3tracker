@@ -148,3 +148,41 @@ def record_county_reclamation(
     lifecycle.loc[match, "reason"] = "Reclaimed by the player; reclaim event retained in acquisition history."
     lifecycle.to_parquet(lifecycle_path, index=False)
     return {"acquisition_events": events, "barony_state": states, "county_lifecycle": lifecycle}
+
+
+def record_county_loss(
+    county_id: str,
+    playthrough_id: str,
+    observed_at: str,
+) -> pd.DataFrame:
+    """Persist a county loss event and mark the county inactive without deleting history."""
+    base_baronies = pd.read_parquet(TRIAL_BASE_PATH)
+    county_baronies = base_baronies[base_baronies["county_id"] == county_id]
+    if county_baronies.empty:
+        raise KeyError(f"Unknown base county: {county_id}")
+
+    event_path = TRIAL_STATE_DIR / "acquisition_events.parquet"
+    lifecycle_path = TRIAL_STATE_DIR / "county_lifecycle.parquet"
+    events = pd.read_parquet(event_path) if event_path.exists() else pd.DataFrame()
+    event_id = f"{playthrough_id}:{county_id}:lost"
+    event = pd.DataFrame([{
+        "event_id": event_id,
+        "playthrough_id": playthrough_id,
+        "event_type": "county_lost",
+        "county_id": county_id,
+        "duchy_id": county_baronies.iloc[0]["duchy_id"],
+        "ownership_scope": "realm",
+        "holder_type": "unknown",
+        "observed_at": observed_at,
+        "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
+    }])
+    events = pd.concat([events, event], ignore_index=True).drop_duplicates(subset=["event_id"], keep="last")
+    events.to_parquet(event_path, index=False)
+
+    lifecycle = pd.read_parquet(lifecycle_path) if lifecycle_path.exists() else pd.DataFrame()
+    match = (lifecycle["playthrough_id"] == playthrough_id) & (lifecycle["county_id"] == county_id)
+    lifecycle.loc[match, "lifecycle_state"] = "archived"
+    lifecycle.loc[match, "active_in_editor"] = False
+    lifecycle.loc[match, "reason"] = "Lost by the player; historical observations retained for future recovery."
+    lifecycle.to_parquet(lifecycle_path, index=False)
+    return lifecycle
