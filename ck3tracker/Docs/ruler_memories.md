@@ -134,16 +134,9 @@ Use this section for places that became part of the ruler's story. Detailed stat
 - Holder resolution:
 - Grant or succession decision:
 - What the place means to the ruler now:
-- Related observation IDs:
-- Related transaction IDs:
-
-## Unseen Decisions
-
-There were many decisions that will never be reconstructed exactly. Use this section for inferred context rather than inventing false precision.
 
 ### Inferred Period: [Date range]
 
-- What was probably happening:
 - Evidence:
 - Likely pressures:
 - What remains unknown:
@@ -179,12 +172,181 @@ Examples:
 - How the chapter ended:
 - What changed in the ruler's identity:
 
-## Closing Memory
+## Character Memory Boundary
 
-When the run ends, write the final memory from the ruler's perspective.
+Everything below this boundary is the ruler's actual in-game memory feed. It is not an omniscient history and must not be treated as complete run data.
 
-- What did the ruler believe they had accomplished?
-- What did they fail to understand?
-- Who inherited the consequences?
-- Which place, person, or decision outlived the ruler?
-- What should the next ruler remember?
+The character knows only what the game has placed in that character's memory. The memory feed may omit decisions, private motives, hidden schemes, unseen events, and consequences that happened outside the ruler's knowledge. It may also contain game-generated wording that is technically true but incomplete or misleading.
+
+Rules for this section:
+
+- Preserve the original first-person wording and dates.
+- Do not add facts to a memory entry that the ruler could not know.
+- Do not rewrite a memory because later evidence disproves the ruler's understanding.
+- Store screenshots, savegame facts, and DuckDB observations separately as external evidence.
+- Use later journal analysis to compare character memory with the factual record, never to overwrite the memory.
+- Treat this section as the ruler's subjective continuity, not the complete history of the run.
+
+The pasted character-memory feed begins below.
+
+---
+
+17 June, 916
+My holy war against Touma ended in victory.
+
+9 June, 916
+I imprisoned Touma Rustamid.
+My son, Achan V, was born to my wife, Gisela.
+13 February, 916
+I called a Priscillianist holy war for the County of Almeria against Touma Rustamid.
+
+2 June, 915
+My grandson, Achan, died from being Sickly.
+
+17 May, 915
+I became friends with Ava Zakho.
+
+4 February, 915
+My holy war against Emira Ihtizaz ended in victory.
+
+15 June, 913
+I called a Priscillianist holy war for the County of Castellon against Emira Ihtizaz of Zaragoza.
+
+30 October, 912
+My Wet Nurse, Marta, died of old age.
+
+23 January, 911
+My holy war against Touma ended in victory.
+
+3 May, 910
+I called a Priscillianist holy war for the County of Murcia against Touma Rustamid.
+
+24 April, 909
+I realized that Queen Gisela of Sardinia was my soulmate.
+
+16 September, 908
+My holy war against Sultan Ibrahim ended in victory.
+
+16 August, 906
+I called a Priscillianist holy war for the Duchy of Kroumerie against Sultan Ibrahim II of Africa.
+
+9 October, 904
+My holy war against Touma ended in victory.
+
+25 May, 904
+I defeated Touma at the battle of Ngaous.
+
+11 May, 903
+My ward, Princess Gisela II, completed her tutelage under my guidance.
+
+9 January, 903
+I called a Priscillianist holy war for the Duchy of Bejaia against Touma Rustamid.
+
+23 October, 900
+My ward, Achan II, completed his tutelage under my guidance.
+
+8 August, 899
+My twins, Gisela VI and Gisela VII, were born to my wife, Gisela.
+
+25 January, 896
+My son, Achan V, was born to my wife, Gisela.
+
+21 January, 896
+I came to King Lothaire II's defense against Mayor Adolf's attempted populist revolt of County of Aargau.
+
+2 June, 895
+I was properly crowned by Lazare as the rightful King of the Kingdom of Sardinia.
+
+5 January, 894
+My son, Achan IV, was born to my wife, Gisela.
+
+9 October, 893
+I created the Kingdom of Sardinnia.
+
+14 June, 892
+My daughter, Gisela V, was born to my wife, Gisela.
+
+21 March, 891
+My daughter, Gisela IV, was born to my wife, Gisela.
+
+10 November, 890
+I created the Duchy of Sardinia.
+
+29 July, 889
+My son, Achan III, was born to my wife, Gisela.
+
+10 July, 888
+My holy war against Captain Arzoccu ended in victory.
+
+9 July, 888
+I imprisoned Captain Arzoccu of Longbeard Band.
+
+4 July, 888
+My daughter, Gisela III, was born to my wife, Gisela.
+
+8 May, 888
+I called a Priscillianist holy war for the County of Arborea against Captain Arzoccu of Longbeard Band.
+
+23 April, 888
+My holy war against Costantzu ended in victory.
+
+4 June, 887
+I called a Priscillianist holy war for the County of Tortoli against Costantzu de Lacon.
+
+10 May, 887
+My daughter, Gisela II, was born to my wife, Gisela.
+
+22 October, 884
+My first child, Achan II, a beautiful boy, was born to my wife, Gisela.
+
+15 January, 884
+I fell in love with Queen Gisela of Sardinia.
+
+15 January, 884
+I had sex with Queen Gisela of Sardinia.
+
+5 January, 883
+I married Queen Gisela.
+
+3 January, 883
+My guardian, Tamzin, and the court of Mallorca finally acknowledged me as a full-grown man.
+
+2 January, 883
+My guardian, Marta, and the court of Mallorca finally acknowledged me as a full-grown man.
+
+17 March, 882
+My holy war against Felictu ended in victory.
+
+9 February, 882
+I became friends with Gueraua.
+
+21 April, 881
+I called a Priscillianist holy war for the County of Cagliari against Felictu de Lacon.
+
+15 November, 878
+I created the Duchy of Mallorca.
+
+2 September, 876
+I became friends with Matriarch Samee of Sardinia.
+
+4 April, 875
+I conquered the County of Gallura from Captain Arzoccu in a holy war.
+
+3 April, 875
+My holy war against Captain Arzoccu ended in victory.
+
+2 August, 874
+I called a Priscillianist holy war for the County of Gallura against Captain Arzoccu of Longbeard Band.
+
+27 July, 869
+I conquered the County of Logudoro from Captain Arzoccu in a holy war.
+
+26 July, 869
+My holy war against Captain Arzoccu ended in victory.
+
+20 July, 868
+I called a Priscillianist holy war for the County of Logudoro against Captain Arzoccu of Longbeard Band.
+
+2 January, 867
+I gained the County of Mayurqa and 2 others.
+
