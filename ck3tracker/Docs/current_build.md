@@ -23,8 +23,8 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Repository State
 
 - Branch: `master`
-- HEAD: `882fb25 docs: add ruler memory journal template`
-- Worktree: dirty by user-edited `Docs/ruler_memories.md`
+- HEAD: `52d6934 docs: preserve ruler memory history`
+- Worktree: clean
 
 ## Completed
 
@@ -38,6 +38,8 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - Ruler memory template exists at `Docs/ruler_memories.md`.
 - Character-memory boundary was added above the pasted feed.
 - The pasted ruler feed contains 53 dated memory ticks from 867 through 916.
+- The user-pasted ruler memory history is committed and must remain separate from factual observations.
+- The 867-01-02 "Mayurqa and 2 others" memory is treated as a county-level bootstrap that fans out to attached barony structure, with unresolved details retaining provenance.
 
 ## Files That Matter
 
@@ -53,8 +55,8 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Validation
 
 - Lifecycle, reclaim, callback propagation, Barony filtering, and Duchy coverage were verified in the live Dash browser.
-- Latest completed code checkpoint before the user memory edits: `882fb25`.
-- The current pasted memory file is intentionally uncommitted user work.
+- Latest completed checkpoint: `52d6934`.
+- `git diff --check` passes.
 
 ## Known Issues
 
@@ -75,4 +77,4 @@ Start the next chat with:
 start build
 ```
 
-Read this file first. Verify git state and the current ruler memory file before editing. Do not commit or rewrite user-pasted memory content without explicit permission.
+Read this file first. Verify git state and the current ruler memory file before editing. Treat the character-memory feed as source content: do not rewrite its meaning or merge it with omniscient factual history.
