@@ -25,7 +25,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Repository State
 
 - Branch: `master`
-- HEAD: `ab3b6ae feat: add imports and align holdings hierarchy`
+- HEAD: `24dd967 feat: add screenshot OCR review draft`
 - Worktree: clean
 
 ## Completed
@@ -49,6 +49,8 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - County observation transactions are implemented with explicit game-date/source inputs and current-state projection.
 - Duchy views preserve `Barony -> County -> Duchy` order and display aligned Barony and County tables.
 - The active Imports page accepts pasted ruler-memory text and screenshot evidence as review-pending client-side imports.
+- Screenshot OCR is implemented with Pillow, pytesseract, and the configured Tesseract executable at `C:\Program Files\Tesseract-OCR\tesseract.exe`.
+- OCR review preserves the screenshot's actual detected subject; a wrong screenshot is evidence to review, not a target to coerce.
 
 ## Files That Matter
 
@@ -69,6 +71,9 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - Current DuckDB test state has Annaba and Constantine active with loss/reclaim events retained.
 - Current DuckDB test state includes one valid `b_annaba` barony observation and its transaction event.
 - Latest completed checkpoint: `ab3b6ae`.
+- Latest completed checkpoint: `24dd967`.
+- OCR was verified in the live Imports page with an Annaba/Izan screenshot and the intended Murcia Barony screenshot; identity and core Barony fields were detected, with icon-related noise retained for review.
+- All touched Python modules compile with the configured Python 3.14 interpreter; `git diff --check` passes.
 
 ## Known Issues
 
@@ -79,6 +84,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - Imports currently remain client-side review artifacts; they are not yet persisted as import batches or pending acquisition records.
 - Screenshot archive limits are intentionally unresolved: record the bounded evidence-set rule for review, but do not choose numeric quotas yet.
 - Evidence-set scaffolding uses six-digit playthrough-local IDs such as `set_000000`; four digits are insufficient for a full 867-1453 run.
+- OCR dependencies and the screenshot OCR page are committed; native Tesseract is installed outside the repository and configured by path.
 
 ## Next Exact Action
 
