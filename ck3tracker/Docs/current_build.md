@@ -24,7 +24,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Repository State
 
 - Branch: `master`
-- HEAD: `fe8d574 feat: add bronze barony observation transaction`
+- HEAD: `ab3b6ae feat: add imports and align holdings hierarchy`
 - Worktree: clean
 
 ## Completed
@@ -45,6 +45,9 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - The Barony Editor validates open slots, active county state, holder type, and non-negative numeric fields.
 - Valid observations write one `transaction_events` row and one `barony_observations` row atomically.
 - Current Barony views project the latest DuckDB observation over immutable Parquet without rewriting the source.
+- County observation transactions are implemented with explicit game-date/source inputs and current-state projection.
+- Duchy views preserve `Barony -> County -> Duchy` order and display aligned Barony and County tables.
+- The active Imports page accepts pasted ruler-memory text and screenshot evidence as review-pending client-side imports.
 
 ## Files That Matter
 
@@ -64,6 +67,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - `git diff --check` passes.
 - Current DuckDB test state has Annaba and Constantine active with loss/reclaim events retained.
 - Current DuckDB test state includes one valid `b_annaba` barony observation and its transaction event.
+- Latest completed checkpoint: `ab3b6ae`.
 
 ## Known Issues
 
@@ -71,10 +75,11 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - The memory feed is not yet parsed into structured DuckDB journal events.
 - The Bronze barony observation transaction is implemented; broader journal event parsing remains future work.
 - The exact identities of the two counties in “Mayurqa and 2 others” require external resolution; probable trial mapping is Ibiza and Menorca.
+- Imports currently remain client-side review artifacts; they are not yet persisted as import batches or pending acquisition records.
 
 ## Next Exact Action
 
-Extend the Bronze observation transaction with explicit game-date/source inputs and integrity-test coverage, then add the first journal event-group projection without altering the character-memory feed.
+Build the first Imports review workflow: persist a pasted ruler-memory import batch and linked screenshot evidence with provenance, then create reviewed pending acquisition candidates without inventing exact game dates or modifying the character-memory feed.
 
 ## Resume Note
 
@@ -82,6 +87,12 @@ Start the next chat with:
 
 ```text
 start build
+```
+
+Then use this exact next-action prompt:
+
+```text
+Implement the Imports review-to-queue slice. Persist the pasted ruler-memory text and screenshot evidence as a provenance-preserving import batch, allow review without rewriting Docs/ruler_memories.md, and create pending acquisition candidates with nullable/uncertain event dates. Keep Barony -> County -> Duchy ordering and validate the Murcia screenshot path without fabricating observations.
 ```
 
 Read this file first. Verify git state and the current ruler memory file before editing. Treat the character-memory feed as source content: do not rewrite its meaning or merge it with omniscient factual history.
