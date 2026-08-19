@@ -281,6 +281,13 @@
     align-items: start;
 }
 
+.dhs-duchy-layout {
+    display: grid;
+    grid-template-columns: minmax(22rem, 1fr) minmax(28rem, 1.35fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
 .dhs-scope-column {
     min-width: 0;
 }

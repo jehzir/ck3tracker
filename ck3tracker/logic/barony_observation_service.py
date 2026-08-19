@@ -22,8 +22,8 @@ def record_barony_observation(
     levies: float | None,
     plague_resistance: float | None,
     note: str | None,
-    observed_at: str,
-    source: str = "manual_entry",
+    game_date: str,
+    source: str,
 ) -> dict[str, str]:
     """Validate and append one barony observation plus its transaction event."""
     base = pd.read_parquet(TRIAL_DIR / "base_baronies.parquet")
@@ -35,6 +35,10 @@ def record_barony_observation(
         raise ValueError(f"Cannot observe open barony slot: {barony_id}")
     if holder_type not in {"ruler", "vassal"}:
         raise ValueError("holder_type must be 'ruler' or 'vassal'")
+    if not game_date or not game_date.strip():
+        raise ValueError("game_date is required")
+    if not source or not source.strip():
+        raise ValueError("source is required")
 
     for field_name, value in (("tax", tax), ("levies", levies), ("plague_resistance", plague_resistance)):
         if value is not None and value < 0:
@@ -63,9 +67,9 @@ def record_barony_observation(
                 "barony_observation_recorded",
                 "barony",
                 barony_id,
-                observed_at,
+                game_date.strip(),
                 recorded_at_utc,
-                source,
+                source.strip(),
                 note,
             ],
         )
@@ -87,8 +91,8 @@ def record_barony_observation(
                 levies,
                 plague_resistance,
                 note,
-                observed_at,
-                source,
+                game_date.strip(),
+                source.strip(),
             ],
         )
         connection.execute("COMMIT")

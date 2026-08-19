@@ -44,6 +44,20 @@ Architectural implications:
 
 The application tracks the CK3 title hierarchy, not real-world geography. CK3 title IDs and CK3 county-to-duchy-to-kingdom relationships are authoritative. Display names are labels only and may be shared by different title levels or titles.
 
+### Canon Law: Title Containment
+
+The containment hierarchy is fixed and must never be inverted:
+
+```text
+Barony -> County -> Duchy -> Kingdom -> Empire
+```
+
+- A County contains Baronies.
+- A Duchy contains Counties.
+- A Barony never contains a County or Duchy.
+- A Duchy count is derived from its Counties and their Baronies; it must not be used as the parent of a County's barony records.
+- UI labels, joins, summaries, and progress calculations must preserve this direction. When in doubt, resolve parentage from CK3 title IDs and the landed-title hierarchy, not from display names.
+
 The project has two distinct data profiles:
 
 - `seed`: a small synthetic map used to prove UI behavior and interaction

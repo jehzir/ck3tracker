@@ -13,6 +13,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 
 - The current application is Bronze-level manual data building, not a game-runtime mechanism.
 - The app must not write back to savegames or use Debug/mod mode.
+- Canon law: `Barony -> County -> Duchy -> Kingdom -> Empire`. Counties contain baronies; duchies contain counties. Never invert this hierarchy in views, joins, or counts.
 - Parquet is for immutable/reference/import snapshots.
 - DuckDB is for mutable run state, observations, lifecycle transitions, and transactions.
 - The ruler memory feed contains only what the character knows; it is not omniscient history.

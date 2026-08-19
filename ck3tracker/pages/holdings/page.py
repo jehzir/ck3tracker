@@ -5,6 +5,7 @@ from dash import Input, Output, State, callback, dcc, html
 
 from logic.acquisition_service import record_county_acquisition, record_county_loss, record_county_reclamation
 from logic.barony_observation_service import record_barony_observation
+from logic.county_observation_service import record_county_observation
 from logic.trial_service import get_active_trial_counties, load_trial_tables
 
 dash.register_page(__name__, path="/holdings", name="Holdings")
@@ -179,34 +180,46 @@ def _duchy_scope_summary():
     tables = load_trial_tables()
     counties = tables["county_observations"]
     base_baronies = tables["base_baronies"]
-    observed_baronies = tables["holding_observations"]
-    rows = []
+    title_progress = tables["title_progress"].set_index("title_id")
+    county_rows = []
+    barony_rows = []
     for duchy_id, duchy_counties in base_baronies.groupby("duchy_id"):
         base_counties = duchy_counties["county_id"].nunique()
-        observed_counties = counties[counties["duchy_id"] == duchy_id]["county_id"].nunique()
+        duchy_county_rows = counties[counties["duchy_id"] == duchy_id]
+        observed_counties = duchy_county_rows["county_id"].nunique()
+        county_names = ", ".join(duchy_county_rows["county_name"].drop_duplicates().tolist())
+        duchy_name = title_progress.loc[duchy_id, "title_name"] if duchy_id in title_progress.index else duchy_id
         realized_baronies = duchy_counties[~duchy_counties["is_open_barony_slot"]]
-        base_count = len(realized_baronies)
-        realized_ids = set(realized_baronies["barony_id"])
-        observed_count = observed_baronies[
-            (observed_baronies["duchy_id"] == duchy_id)
-            & (observed_baronies["barony_id"].isin(realized_ids))
-        ]["barony_id"].nunique()
+        owned_count = len(realized_baronies)
+        open_count = int(duchy_counties["is_open_barony_slot"].sum())
+        total_count = len(duchy_counties)
         county_coverage = f"{observed_counties / base_counties:.0%}" if base_counties else "-"
-        barony_coverage = f"{observed_count / base_count:.0%}" if base_count else "-"
-        rows.append(html.Tr([
-            html.Td(duchy_id, style=CELL_STYLE),
+        county_rows.append(html.Tr([
+            html.Td(county_names, style=CELL_STYLE),
+            html.Td(duchy_name, style=CELL_STYLE),
             html.Td(base_counties, style=CELL_STYLE),
             html.Td(observed_counties, style=CELL_STYLE),
             html.Td(county_coverage, style=CELL_STYLE),
-            html.Td(base_count, style=CELL_STYLE),
-            html.Td(observed_count, style=CELL_STYLE),
-            html.Td(barony_coverage, style=CELL_STYLE),
-            html.Td("Complete" if county_coverage == "100%" and barony_coverage == "100%" else "In progress", style=CELL_STYLE),
+        ]))
+        barony_rows.append(html.Tr([
+            html.Td(duchy_id, style=CELL_STYLE),
+            html.Td(owned_count, style=CELL_STYLE),
+            html.Td(open_count, style=CELL_STYLE),
+            html.Td(total_count, style=CELL_STYLE),
         ]))
     return html.Div([
         html.H3("Duchy state", className="dhs-section-heading"),
         html.P("Coverage compares observed records with the structural county and barony base."),
-        _table(["Duchy", "Base Counties", "Observed Counties", "County Coverage", "Base Baronies", "Observed Baronies", "Barony Coverage", "Status"], rows),
+        html.Div([
+            html.Div([
+                html.H4("Barony", className="dhs-subheading"),
+                _table(["Duchy", "Owned", "Open", "Total"], barony_rows),
+            ], className="dhs-scope-column"),
+            html.Div([
+                html.H4("County", className="dhs-subheading"),
+                _table(["County", "Duchy", "Base Counties", "Observed Counties", "County Coverage"], county_rows),
+            ], className="dhs-scope-column"),
+        ], className="dhs-duchy-layout"),
     ])
 
 
@@ -299,14 +312,19 @@ def _county_editor_workspace():
     ]
     return html.Div([
         html.H4("County update", className="dhs-subheading"),
-        dcc.Dropdown(options=options, value="c_constantine", clearable=False, className="updater-status-dropdown"),
+        dcc.Dropdown(options=options, value="c_constantine", clearable=False, id="trial-county-editor-selector", className="updater-status-dropdown"),
         html.Div([
-            html.Div([html.Label("Control"), dcc.Input(type="number", value=100, min=0, max=100)], className="dhs-editor-field"),
-            html.Div([html.Label("Development"), dcc.Input(type="number", value=10, min=0)], className="dhs-editor-field"),
-            html.Div([html.Label("Popular opinion"), dcc.Input(type="number", value=20)], className="dhs-editor-field"),
-            html.Div([html.Label("Event note"), dcc.Input(type="text", placeholder="Major run event")], className="dhs-editor-field"),
+            html.Div([html.Label("Control"), dcc.Input(id="trial-county-control", type="number", value=100, min=0, max=100)], className="dhs-editor-field"),
+            html.Div([html.Label("Development"), dcc.Input(id="trial-county-development", type="number", value=10, min=0)], className="dhs-editor-field"),
+            html.Div([html.Label("Popular opinion"), dcc.Input(id="trial-county-popular-opinion", type="number", value=20)], className="dhs-editor-field"),
+            html.Div([html.Label("Event note"), dcc.Input(id="trial-county-note", type="text", placeholder="Major run event")], className="dhs-editor-field"),
         ], className="trial-editor-grid", style={"marginTop": "1rem"}),
-        html.Button("Save County Update", className="dhs-action-button", style={"marginTop": "1rem"}),
+        html.Div([
+            dcc.Input(id="trial-county-game-date", type="text", value="867-01-02", placeholder="YYYY-MM-DD"),
+            dcc.Input(id="trial-county-source", type="text", value="manual_entry"),
+        ], className="trial-editor-grid", style={"marginTop": "1rem"}),
+        html.Button("Save County Update", id="trial-save-county", n_clicks=0, className="dhs-action-button", style={"marginTop": "1rem"}),
+        html.Div(id="county-observation-message", style={"marginTop": "0.75rem", "color": "#9be28f"}),
     ], className="dhs-editor-surface")
 
 
@@ -423,6 +441,10 @@ def _barony_editor(county_id, barony_id, mode):
             html.Label("Buildings / notes"),
             dcc.Input(id="trial-barony-notes", type="text", value="", placeholder="Optional observation note", style=input_style),
         ], style={"marginTop": "1rem", **field_style}),
+        html.Div([
+            html.Div([html.Label("Game date"), dcc.Input(id="trial-barony-game-date", type="text", value="867-01-02", placeholder="YYYY-MM-DD", style=input_style)], style=field_style),
+            html.Div([html.Label("Source"), dcc.Input(id="trial-barony-source", type="text", value="manual_entry", style=input_style)], style=field_style),
+        ], className="trial-editor-grid", style={"marginTop": "1rem"}),
         html.Button("Save Trial Observation", id="trial-save-barony", n_clicks=0, style={"marginTop": "1rem", "padding": "0.65rem 1rem", "backgroundColor": "#4a7c7e", "color": "#fff", "border": "none"}),
         html.Div(id="barony-observation-message", style={"marginTop": "0.75rem", "color": "#9be28f"}),
     ], style={"padding": "1rem", "backgroundColor": "#242424", "border": "1px solid #3a3a3a", "marginTop": "0.75rem"})
@@ -621,6 +643,37 @@ def mark_county_inactive(n_clicks, county_id):
 
 
 @callback(
+    Output("county-observation-message", "children"),
+    Input("trial-save-county", "n_clicks"),
+    State("trial-county-editor-selector", "value"),
+    State("trial-county-control", "value"),
+    State("trial-county-development", "value"),
+    State("trial-county-popular-opinion", "value"),
+    State("trial-county-note", "value"),
+    State("trial-county-game-date", "value"),
+    State("trial-county-source", "value"),
+    prevent_initial_call=True,
+)
+def save_county_observation(n_clicks, county_id, control, development, popular_opinion, note, game_date, source):
+    if not n_clicks:
+        return ""
+    try:
+        result = record_county_observation(
+            county_id=county_id,
+            playthrough_id="trial_dead_run",
+            control=control,
+            development=development,
+            popular_opinion=popular_opinion,
+            note=note,
+            game_date=game_date,
+            source=source,
+        )
+    except ValueError as error:
+        return f"Observation rejected: {error}"
+    return f"County observation recorded: {result['observation_id']}"
+
+
+@callback(
     Output("trial-county-detail", "children"),
     Input("trial-county-selector", "value"),
     Input("trial-holding-mode", "value"),
@@ -652,9 +705,11 @@ def record_trial_acquisition(n_clicks, county_id, mode):
     State("trial-barony-levies", "value"),
     State("trial-barony-plague", "value"),
     State("trial-barony-notes", "value"),
+    State("trial-barony-game-date", "value"),
+    State("trial-barony-source", "value"),
     prevent_initial_call=True,
 )
-def save_barony_observation(n_clicks, barony_id, holder_type, tax, levies, plague_resistance, note):
+def save_barony_observation(n_clicks, barony_id, holder_type, tax, levies, plague_resistance, note, game_date, source):
     if not n_clicks:
         return ""
     try:
@@ -666,7 +721,8 @@ def save_barony_observation(n_clicks, barony_id, holder_type, tax, levies, plagu
             levies=levies,
             plague_resistance=plague_resistance,
             note=note,
-            observed_at="manual_entry",
+            game_date=game_date,
+            source=source,
         )
     except ValueError as error:
         return f"Observation rejected: {error}"

@@ -62,6 +62,24 @@ def build_top_nav():
             )
         )
 
+    nav_items.append(
+        html.A(
+            "Imports",
+            id="nav-imports",
+            href="/imports",
+            style={
+                "padding": "0.7rem 1rem",
+                "marginRight": "0.5rem",
+                "backgroundColor": "#2b2b2b",
+                "color": "#e0e0e0",
+                "textDecoration": "none",
+                "borderRadius": "6px",
+                "border": "1px solid #3a3a3a",
+                "cursor": "pointer",
+            },
+        )
+    )
+
     return html.Div(nav_items, style={"display": "flex", "flexWrap": "wrap", "gap": "0.5rem"})
 
 

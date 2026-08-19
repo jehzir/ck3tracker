@@ -16,6 +16,7 @@ STATE_TABLES = (
     "barony_state",
     "transaction_events",
     "barony_observations",
+    "county_state_observations",
 )
 
 
@@ -67,6 +68,23 @@ def connect() -> duckdb.DuckDBPyConnection:
                         tax DOUBLE,
                         levies DOUBLE,
                         plague_resistance DOUBLE,
+                        note VARCHAR,
+                        observed_at VARCHAR,
+                        source VARCHAR
+                    )
+                    """
+                )
+            elif table_name == "county_state_observations":
+                connection.execute(
+                    """
+                    CREATE TABLE county_state_observations (
+                        observation_id VARCHAR,
+                        transaction_id VARCHAR,
+                        playthrough_id VARCHAR,
+                        county_id VARCHAR,
+                        control DOUBLE,
+                        development DOUBLE,
+                        popular_opinion DOUBLE,
                         note VARCHAR,
                         observed_at VARCHAR,
                         source VARCHAR

@@ -32,6 +32,7 @@ The existing seeded data and dead-run placeholder are the initial implementation
 
 ### Map Profile Boundary
 - Use CK3 title IDs and the CK3 title hierarchy as the canonical source.
+- Canon law: `Barony -> County -> Duchy -> Kingdom -> Empire`. A County contains Baronies, and a Duchy contains Counties; never reverse these relationships in data models, UI labels, joins, or counts.
 - Treat the current small seeded map as a synthetic UI-test profile only.
 - Keep the seed profile separate from the full CK3 map; never combine their records.
 - Resolve goals and duchy membership by stable IDs, never by familiar display names.

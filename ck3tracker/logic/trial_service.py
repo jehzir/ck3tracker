@@ -32,7 +32,9 @@ def load_trial_tables() -> dict[str, pd.DataFrame]:
         "transaction_events",
         "barony_observations",
     )})
+    tables["county_state_observations"] = load_table("county_state_observations")
     tables["holding_observations"] = _with_latest_barony_observations(tables)
+    tables["county_observations"] = _with_latest_county_observations(tables)
     return tables
 
 
@@ -72,6 +74,24 @@ def _with_latest_barony_observations(tables: dict[str, pd.DataFrame]) -> pd.Data
         })
         holding_records.append(row)
     return pd.DataFrame(holding_records, columns=holding_columns)
+
+
+def _with_latest_county_observations(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Project the latest DuckDB county observations over immutable Parquet values."""
+    counties = tables["county_observations"].copy()
+    observations = tables["county_state_observations"]
+    if observations.empty:
+        return counties
+    latest = observations.sort_values("observed_at").drop_duplicates("county_id", keep="last")
+    for observation in latest.to_dict("records"):
+        matches = counties.index[counties["county_id"] == observation["county_id"]]
+        if len(matches) == 0:
+            continue
+        index = matches[0]
+        for field in ("control", "development", "popular_opinion", "observed_at"):
+            if observation[field] is not None:
+                counties.at[index, field] = observation[field]
+    return counties
 
 
 def get_active_trial_counties(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
