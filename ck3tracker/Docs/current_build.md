@@ -17,6 +17,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - Parquet is for immutable/reference/import snapshots.
 - DuckDB is for mutable run state, observations, lifecycle transitions, and transactions.
 - The ruler memory feed contains only what the character knows; it is not omniscient history.
+- `Docs/ruler_memories.md` is a template only; each run gets its own `run_ruler_memories.md`, and imported source content must not overwrite the template.
 - A memory sentence is a compressed completed puzzle; detailed facts are the dropped puzzle pieces.
 - The first memory entry, `2 January, 867`, is the Holdings-tree starting point.
 - The likely initial counties are Mayurqa, Ibiza, and Menorca, but unnamed counties must retain confidence/provenance.
