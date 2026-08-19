@@ -3,7 +3,7 @@
 - Build ID: `B001-ruler-memory-ingestion`
 - Build name: Ruler memory event-stream groundwork
 - Status: `suspended`
-- Last updated: 2026-08-17
+- Last updated: 2026-08-18
 
 ## Objective
 
@@ -23,8 +23,8 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Repository State
 
 - Branch: `master`
-- HEAD: `52d6934 docs: preserve ruler memory history`
-- Worktree: clean
+- HEAD: `27c8499 docs: close ruler memory build session`
+- Worktree: intentional DuckDB test-state change in `data/trial/run_state.duckdb`
 
 ## Completed
 
@@ -40,6 +40,10 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - The pasted ruler feed contains 53 dated memory ticks from 867 through 916.
 - The user-pasted ruler memory history is committed and must remain separate from factual observations.
 - The 867-01-02 "Mayurqa and 2 others" memory is treated as a county-level bootstrap that fans out to attached barony structure, with unresolved details retaining provenance.
+- Bronze barony observation transactions are now implemented in DuckDB.
+- The Barony Editor validates open slots, active county state, holder type, and non-negative numeric fields.
+- Valid observations write one `transaction_events` row and one `barony_observations` row atomically.
+- Current Barony views project the latest DuckDB observation over immutable Parquet without rewriting the source.
 
 ## Files That Matter
 
@@ -55,19 +59,20 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Validation
 
 - Lifecycle, reclaim, callback propagation, Barony filtering, and Duchy coverage were verified in the live Dash browser.
-- Latest completed checkpoint: `52d6934`.
+- Latest completed checkpoint: `27c8499`.
 - `git diff --check` passes.
+- Current DuckDB test state has Annaba and Constantine active with loss/reclaim events retained.
 
 ## Known Issues
 
 - The ruler feed has at least one paste ambiguity near `9 June, 916`, where a birth entry appears without its own date.
 - The memory feed is not yet parsed into structured DuckDB journal events.
-- The Bronze barony observation transaction is planned but not implemented.
+- The Bronze barony observation transaction is implemented; broader journal event parsing remains future work.
 - The exact identities of the two counties in “Mayurqa and 2 others” require external resolution; probable trial mapping is Ibiza and Menorca.
 
 ## Next Exact Action
 
-Design and implement the Bronze barony observation transaction in DuckDB, using the Annaba screenshot truth table for validation. Keep the user-pasted ruler memory separate from factual observations.
+Extend the Bronze observation transaction with explicit game-date/source inputs and integrity-test coverage, then add the first journal event-group projection without altering the character-memory feed.
 
 ## Resume Note
 

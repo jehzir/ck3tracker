@@ -4,6 +4,7 @@ import pandas as pd
 from dash import Input, Output, State, callback, dcc, html
 
 from logic.acquisition_service import record_county_acquisition, record_county_loss, record_county_reclamation
+from logic.barony_observation_service import record_barony_observation
 from logic.trial_service import get_active_trial_counties, load_trial_tables
 
 dash.register_page(__name__, path="/holdings", name="Holdings")
@@ -423,6 +424,7 @@ def _barony_editor(county_id, barony_id, mode):
             dcc.Input(id="trial-barony-notes", type="text", value="", placeholder="Optional observation note", style=input_style),
         ], style={"marginTop": "1rem", **field_style}),
         html.Button("Save Trial Observation", id="trial-save-barony", n_clicks=0, style={"marginTop": "1rem", "padding": "0.65rem 1rem", "backgroundColor": "#4a7c7e", "color": "#fff", "border": "none"}),
+        html.Div(id="barony-observation-message", style={"marginTop": "0.75rem", "color": "#9be28f"}),
     ], style={"padding": "1rem", "backgroundColor": "#242424", "border": "1px solid #3a3a3a", "marginTop": "0.75rem"})
 
 
@@ -639,6 +641,36 @@ def record_trial_acquisition(n_clicks, county_id, mode):
         return ""
     record_county_acquisition(county_id, "trial_dead_run", "realm", "vassal", "manual_trial_update")
     return f"Recorded acquisition for {county_id}: base barony state persisted."
+
+
+@callback(
+    Output("barony-observation-message", "children"),
+    Input("trial-save-barony", "n_clicks"),
+    State("trial-barony-selector", "value"),
+    State("trial-barony-holder-type", "value"),
+    State("trial-barony-tax", "value"),
+    State("trial-barony-levies", "value"),
+    State("trial-barony-plague", "value"),
+    State("trial-barony-notes", "value"),
+    prevent_initial_call=True,
+)
+def save_barony_observation(n_clicks, barony_id, holder_type, tax, levies, plague_resistance, note):
+    if not n_clicks:
+        return ""
+    try:
+        result = record_barony_observation(
+            barony_id=barony_id,
+            playthrough_id="trial_dead_run",
+            holder_type=holder_type,
+            tax=tax,
+            levies=levies,
+            plague_resistance=plague_resistance,
+            note=note,
+            observed_at="manual_entry",
+        )
+    except ValueError as error:
+        return f"Observation rejected: {error}"
+    return f"Observation recorded: {result['observation_id']}"
 
 
 @callback(

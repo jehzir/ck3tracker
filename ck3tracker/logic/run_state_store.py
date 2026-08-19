@@ -10,7 +10,13 @@ import pandas as pd
 
 TRIAL_DIR = Path(__file__).parents[1] / "data" / "trial"
 DB_PATH = TRIAL_DIR / "run_state.duckdb"
-STATE_TABLES = ("county_lifecycle", "acquisition_events", "barony_state")
+STATE_TABLES = (
+    "county_lifecycle",
+    "acquisition_events",
+    "barony_state",
+    "transaction_events",
+    "barony_observations",
+)
 
 
 def connect() -> duckdb.DuckDBPyConnection:
@@ -28,6 +34,44 @@ def connect() -> duckdb.DuckDBPyConnection:
                 connection.execute(
                     f"CREATE TABLE {table_name} AS SELECT * FROM read_parquet(?)",
                     [str(source_path)],
+                )
+            elif table_name == "transaction_events":
+                connection.execute(
+                    """
+                    CREATE TABLE transaction_events (
+                        transaction_id VARCHAR,
+                        playthrough_id VARCHAR,
+                        event_type VARCHAR,
+                        scope VARCHAR,
+                        target_id VARCHAR,
+                        observed_at VARCHAR,
+                        recorded_at_utc VARCHAR,
+                        source VARCHAR,
+                        note VARCHAR
+                    )
+                    """
+                )
+            elif table_name == "barony_observations":
+                connection.execute(
+                    """
+                    CREATE TABLE barony_observations (
+                        observation_id VARCHAR,
+                        transaction_id VARCHAR,
+                        playthrough_id VARCHAR,
+                        barony_id VARCHAR,
+                        county_id VARCHAR,
+                        duchy_id VARCHAR,
+                        barony_name VARCHAR,
+                        holding_type VARCHAR,
+                        holder_type VARCHAR,
+                        tax DOUBLE,
+                        levies DOUBLE,
+                        plague_resistance DOUBLE,
+                        note VARCHAR,
+                        observed_at VARCHAR,
+                        source VARCHAR
+                    )
+                    """
                 )
     return connection
 

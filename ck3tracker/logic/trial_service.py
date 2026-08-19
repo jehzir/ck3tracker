@@ -25,8 +25,53 @@ def load_trial_tables() -> dict[str, pd.DataFrame]:
         name: pd.read_parquet(TRIAL_DIR / f"{name}.parquet")
         for name in parquet_tables
     }
-    tables.update({name: load_table(name) for name in ("county_lifecycle", "acquisition_events", "barony_state")})
+    tables.update({name: load_table(name) for name in (
+        "county_lifecycle",
+        "acquisition_events",
+        "barony_state",
+        "transaction_events",
+        "barony_observations",
+    )})
+    tables["holding_observations"] = _with_latest_barony_observations(tables)
     return tables
+
+
+def _with_latest_barony_observations(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Project the latest DuckDB barony observations over immutable Parquet values."""
+    holdings = tables["holding_observations"].copy()
+    observations = tables["barony_observations"]
+    if observations.empty:
+        return holdings
+    holding_records = holdings.to_dict("records")
+    holding_columns = list(holdings.columns)
+    latest = observations.sort_values("observed_at").drop_duplicates("barony_id", keep="last")
+    base = tables["base_baronies"].set_index("barony_id")
+    for observation in latest.to_dict("records"):
+        matches = [index for index, row in enumerate(holding_records) if row["barony_id"] == observation["barony_id"]]
+        if matches:
+            row = holding_records[matches[-1]]
+            for field in ("holding_type", "holder_type", "tax", "levies", "plague_resistance", "observed_at"):
+                if observation.get(field) is not None:
+                    row[field] = observation[field]
+            continue
+        base_row = base.loc[observation["barony_id"]].to_dict()
+        row = {column: None for column in holdings.columns}
+        row.update({
+            "playthrough_id": observation["playthrough_id"],
+            "barony_id": observation["barony_id"],
+            "county_id": observation["county_id"],
+            "duchy_id": observation["duchy_id"],
+            "barony_name": observation["barony_name"],
+            "holding_type": observation["holding_type"],
+            "holder_type": observation["holder_type"],
+            "tax": observation["tax"],
+            "levies": observation["levies"],
+            "plague_resistance": observation["plague_resistance"],
+            "is_county_capital": base_row["is_county_capital"],
+            "observed_at": observation["observed_at"],
+        })
+        holding_records.append(row)
+    return pd.DataFrame(holding_records, columns=holding_columns)
 
 
 def get_active_trial_counties(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
