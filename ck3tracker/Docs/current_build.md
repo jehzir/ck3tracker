@@ -77,6 +77,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - The Bronze barony observation transaction is implemented; broader journal event parsing remains future work.
 - The exact identities of the two counties in “Mayurqa and 2 others” require external resolution; probable trial mapping is Ibiza and Menorca.
 - Imports currently remain client-side review artifacts; they are not yet persisted as import batches or pending acquisition records.
+- Screenshot archive limits are intentionally unresolved: record the bounded evidence-set rule for review, but do not choose numeric quotas yet.
 
 ## Next Exact Action
 

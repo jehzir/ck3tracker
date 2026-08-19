@@ -26,6 +26,10 @@ The project is currently in a Bronze holdings-first stabilization phase. The Hol
 
 `Docs/ruler_memories.md` is the reusable template only. It must never be overwritten with a user's pasted memory feed or a run's imported content. Each playthrough owns a separate `run_ruler_memories.md` record, linked to its import batches and reviewed memory entries. Imported clipboard text and screenshots remain source evidence until reviewed; they do not mutate the template or become factual observations automatically.
 
+### Evidence Archive Limits (Review)
+
+The screenshot archive is a bounded evidence archive, not a general image bucket. A retained image must belong to a declared evidence set for a Barony, County, Duchy, or ruler-memory import and have a stated capture role. Unassigned, duplicate, unrelated, or over-limit images must not receive permanent storage. Numeric limits per set, byte limits, image-dimension limits, and retention rules remain open review decisions; do not invent them during implementation.
+
 The application is the living journal of a Crusader Kings III run. A run begins at the tracked ruler's birth and remains active until the player explicitly declares the run dead. The app must preserve the story of the run across that entire lifetime rather than only showing the latest snapshot.
 
 Core lifecycle states:
