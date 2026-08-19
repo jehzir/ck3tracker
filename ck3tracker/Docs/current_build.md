@@ -78,6 +78,7 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - The exact identities of the two counties in “Mayurqa and 2 others” require external resolution; probable trial mapping is Ibiza and Menorca.
 - Imports currently remain client-side review artifacts; they are not yet persisted as import batches or pending acquisition records.
 - Screenshot archive limits are intentionally unresolved: record the bounded evidence-set rule for review, but do not choose numeric quotas yet.
+- Evidence-set scaffolding uses six-digit playthrough-local IDs such as `set_000000`; four digits are insufficient for a full 867-1453 run.
 
 ## Next Exact Action
 

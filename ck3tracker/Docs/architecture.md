@@ -30,6 +30,8 @@ The project is currently in a Bronze holdings-first stabilization phase. The Hol
 
 The screenshot archive is a bounded evidence archive, not a general image bucket. A retained image must belong to a declared evidence set for a Barony, County, Duchy, or ruler-memory import and have a stated capture role. Unassigned, duplicate, unrelated, or over-limit images must not receive permanent storage. Numeric limits per set, byte limits, image-dimension limits, and retention rules remain open review decisions; do not invent them during implementation.
 
+Evidence-set directories use six-digit zero-padded sequence IDs so a long 867-1453 run is not constrained by a four-digit namespace: `set_000000`, `set_000001`, and so on. The sequence is scoped to the playthrough and is an identifier, not a date or an observation count.
+
 The application is the living journal of a Crusader Kings III run. A run begins at the tracked ruler's birth and remains active until the player explicitly declares the run dead. The app must preserve the story of the run across that entire lifetime rather than only showing the latest snapshot.
 
 Core lifecycle states:
