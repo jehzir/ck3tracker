@@ -23,8 +23,8 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Repository State
 
 - Branch: `master`
-- HEAD: `27c8499 docs: close ruler memory build session`
-- Worktree: intentional DuckDB test-state change in `data/trial/run_state.duckdb`
+- HEAD: `fe8d574 feat: add bronze barony observation transaction`
+- Worktree: clean
 
 ## Completed
 
@@ -59,9 +59,10 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 ## Validation
 
 - Lifecycle, reclaim, callback propagation, Barony filtering, and Duchy coverage were verified in the live Dash browser.
-- Latest completed checkpoint: `27c8499`.
+- Latest completed checkpoint: `fe8d574`.
 - `git diff --check` passes.
 - Current DuckDB test state has Annaba and Constantine active with loss/reclaim events retained.
+- Current DuckDB test state includes one valid `b_annaba` barony observation and its transaction event.
 
 ## Known Issues
 
