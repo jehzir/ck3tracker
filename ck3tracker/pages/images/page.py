@@ -3,8 +3,18 @@
 from __future__ import annotations
 
 import dash
+import base64
+import io
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from dash import Input, Output, State, callback, dcc, html
 
+try:
+    import pytesseract
+except ModuleNotFoundError:
+    pytesseract = None
+
+if pytesseract is not None:
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 dash.register_page(__name__, path="/imports", name="Imports")
 
@@ -14,6 +24,25 @@ PAGE_STYLE = {
     "color": "#e0e0e0",
     "minHeight": "100vh",
 }
+
+
+def _ocr_screenshot(image: Image.Image) -> str:
+    """Extract visible UI text without inferring an expected game target.
+
+    A wrong screenshot is still useful evidence: return its actual text so review
+    can identify the mismatch instead of coercing it to the intended county or barony.
+    """
+    grayscale = ImageOps.grayscale(image)
+    enlarged = grayscale.resize((grayscale.width * 3, grayscale.height * 3))
+    enhanced = ImageEnhance.Contrast(enlarged).enhance(1.8).filter(ImageFilter.SHARPEN)
+    thresholded = enhanced.point(lambda pixel: 255 if pixel > 160 else 0)
+    candidates = []
+    for variant in (enhanced, thresholded):
+        for config in ("--psm 6", "--psm 11"):
+            text = pytesseract.image_to_string(variant, config=config).strip()
+            if text:
+                candidates.append(text)
+    return max(candidates, key=lambda text: len(text.split())) if candidates else ""
 
 
 def layout():
@@ -73,6 +102,24 @@ def layout():
                 style={"maxWidth": "64rem"},
             ),
             html.Div(id="image-intake-status", style={"marginTop": "1rem", "color": "#9be28f"}),
+            html.H3("OCR review draft", className="dhs-section-heading"),
+            dcc.Textarea(
+                id="image-ocr-draft",
+                readOnly=False,
+                placeholder="Dropped screenshot text will appear here for review...",
+                style={
+                    "width": "100%",
+                    "minHeight": "16rem",
+                    "boxSizing": "border-box",
+                    "padding": "0.85rem",
+                    "backgroundColor": "#242424",
+                    "color": "#e0e0e0",
+                    "border": "1px solid #4a4a4a",
+                    "fontFamily": "inherit",
+                    "fontSize": "1rem",
+                },
+            ),
+            html.Div(id="image-ocr-status", style={"marginTop": "0.75rem", "color": "#ffbe2e"}),
             html.Div(id="image-intake-previews", style={"marginTop": "1rem"}),
         ],
         style=PAGE_STYLE,
@@ -99,6 +146,8 @@ def accept_memory_copy(n_clicks, text):
 @callback(
     Output("image-intake-store", "data"),
     Output("image-intake-status", "children"),
+    Output("image-ocr-draft", "value"),
+    Output("image-ocr-status", "children"),
     Output("image-intake-previews", "children"),
     Input("image-intake-upload", "contents"),
     Input("image-intake-upload", "filename"),
@@ -106,14 +155,28 @@ def accept_memory_copy(n_clicks, text):
 )
 def accept_images(contents, filenames):
     if not contents or not filenames:
-        return [], "No images selected.", []
+        return [], "No images selected.", "", "", []
 
     accepted = []
     previews = []
+    extracted_text = []
+    ocr_errors = []
     for content, filename in zip(contents, filenames):
         if not filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")):
             continue
         accepted.append({"filename": filename, "contents": content})
+        try:
+            _, encoded = content.split(",", 1)
+            image = Image.open(io.BytesIO(base64.b64decode(encoded)))
+            if pytesseract is None:
+                raise RuntimeError("pytesseract is not installed")
+            text = _ocr_screenshot(image)
+            if text:
+                extracted_text.append(f"[{filename}]\n{text}")
+            else:
+                ocr_errors.append(f"{filename}: no text detected")
+        except Exception as error:
+            ocr_errors.append(f"{filename}: OCR unavailable ({error})")
         previews.append(
             html.Div(
                 [
@@ -126,4 +189,9 @@ def accept_images(contents, filenames):
                 style={"padding": "1rem", "backgroundColor": "#242424", "border": "1px solid #3a3a3a"},
             )
         )
-    return accepted, f"Accepted {len(accepted)} image(s).", previews
+    draft = "\n\n".join(extracted_text)
+    status = f"Accepted {len(accepted)} image(s)."
+    ocr_status = "OCR draft needs review."
+    if ocr_errors:
+        ocr_status += " " + " | ".join(ocr_errors)
+    return accepted, status, draft, ocr_status, previews
