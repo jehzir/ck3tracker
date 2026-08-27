@@ -98,6 +98,81 @@ The tier model is designed as an upgrade path:
 
 No premium feature should require users to surrender or invalidate their existing manual history.
 
+## Source-to-Table Registry and Patch Drift Planning
+
+The Gold tier should not treat CK3 game files as a loose pile of scraped inputs. It should instead maintain a source-to-table registry that maps each live game file or folder to a specific canonical table or extraction pipeline.
+
+The registry should answer three questions for every upstream source:
+
+1. Which file or folder is authoritative?
+2. What data does it yield?
+3. Which internal table or validation view consumes it?
+
+This becomes especially important when Paradox ships mass patches, DLC updates, or content changes in folders such as `common`, `history`, and `laws`.
+
+### Working Model
+
+The app should treat the live game install as an external source layer and the internal database as the operational layer.
+
+- Source layer: Steam install root, CK3 game root, `common` rules folders, DLC overlays, and version-specific files.
+- Extraction layer: parser or importer that turns game files into canonical tables.
+- Operational layer: DuckDB-managed tables for mutable run state, historical observations, lifecycle events, and normalized reference data.
+- Export layer: optional Parquet snapshots for archival use, not the primary workflow engine.
+
+This keeps the app resilient to patch churn without splitting the data model into two jagged partial systems.
+
+### Registry design
+
+Each source should have a row with:
+
+- source path
+- source type (folder or file)
+- CK3 version or build tag
+- patch sensitivity
+- extracted table name
+- canonical field set
+- destination database table
+- validation checks
+- drift warning behavior
+
+Example structure:
+
+```text
+source_path | source_type | build | patch_risk | extract_rule | destination_table | validation |
+--- | --- | --- | --- | --- | --- | ---
+C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\laws | folder | build-version | high | parse law definitions | ck3_law_rules | legal_branch_consistency |
+C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\landed_titles | file or folder | build-version | high | parse title hierarchy | ck3_title_hierarchy | title_relationship_checks |
+C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\cultures | folder | build-version | high | parse culture metadata | ck3_culture_rules | culture_region_checks |
+C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\history | folder | build-version | high | parse historical setup | ck3_history_reference | version_compatibility_checks |
+```
+
+### Why DuckDB should own the dynamic workflow
+
+DuckDB is the better operational home for the project because it can handle:
+
+- time-stamped observation history
+- mutable lifecycle state
+- validation queries against canonical reference data
+- historical comparisons and audit recovery
+- large table-driven analysis without forcing a split between reference and run-state workflows
+
+Parquet remains useful for export, snapshotting, and archival comparison, but it should not be the primary engine for a dynamic tracker that must adapt to game patch drift.
+
+### Deep-dive execution plan
+
+The next implementation pass should be a file-by-file analysis of the CK3 game folders, with a target outcome of building the actual source-to-table registry for the project.
+
+Priority order:
+
+1. `game\common\laws`
+2. `game\common\landed_titles`
+3. `game\common\cultures`
+4. `game\common\religions`
+5. `game\history`
+6. remaining `game\common` rule folders
+
+This work should be treated as a compatibility and truth-grounding pass. It will likely surface areas where the app should be refactored once the direct game-file data becomes the stronger source of truth.
+
 ## Return Point
 
 Return to the current implementation in this order:
