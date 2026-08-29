@@ -1,107 +1,129 @@
 # Current Build
 
-- Build ID: `B001-ruler-memory-ingestion`
-- Build name: Ruler memory event-stream groundwork
-- Status: `suspended`
-- Last updated: 2026-08-18
+- Build ID: `B002-scribe-promotion-readiness`
+- Build name: Scribe reference-catalog promotion readiness
+- Status: `active`
+- Last updated: 2026-08-29
 
 ## Objective
 
-Establish the CK3 Game Journal as a durable memory and event model. Treat pasted ruler memories as incomplete, character-bound summaries and preserve the dropped details as separately sourced Holdings, House, relationship, title, and consequence records.
+Produce one evidence-backed, immutable CK3 `1.19.0.6 (Scribe)` reference snapshot and 867 baseline in the repository-root DuckDB, then promote it only through an explicit atomic operation after a fresh readiness report has zero blockers.
 
-## User Decisions
+## Authority And Scope
 
-- The current application is Bronze-level manual data building, not a game-runtime mechanism.
-- The app must not write back to savegames or use Debug/mod mode.
-- Canon law: `Barony -> County -> Duchy -> Kingdom -> Empire`. Counties contain baronies; duchies contain counties. Never invert this hierarchy in views, joins, or counts.
-- Parquet is for immutable/reference/import snapshots.
-- DuckDB is for mutable run state, observations, lifecycle transitions, and transactions.
-- The ruler memory feed contains only what the character knows; it is not omniscient history.
-- `Docs/ruler_memories.md` is a template only; each run gets its own `run_ruler_memories.md`, and imported source content must not overwrite the template.
-- A memory sentence is a compressed completed puzzle; detailed facts are the dropped puzzle pieces.
-- The first memory entry, `2 January, 867`, is the Holdings-tree starting point.
-- The likely initial counties are Mayurqa, Ibiza, and Menorca, but unnamed counties must retain confidence/provenance.
+This file is the sole execution manifest and the only authoritative source for the current priority, next exact action, and resume instructions. Precedence is defined in `Docs/build_session_protocol.md`.
+
+Current scope is reference ingestion, validation, and promotion safety. Imports, dashboard redesign, broader journal workflows, buildings, decisions, army, council, and other product work remain deferred until this build is complete or the user explicitly changes scope.
+
+The workbook is a workflow and visual specification, not runtime storage. Installed CK3 files are build-specific evidence. CK3 Wiki revisions are the reference authority. Stable IDs and source provenance must be preserved, and no loader may promote as a side effect.
 
 ## Repository State
 
 - Branch: `master`
-- HEAD: `24dd967 feat: add screenshot OCR review draft`
-- Worktree: clean
+- HEAD at handoff refresh: `fa10740`
+- Worktree: intentionally dirty with the uncommitted Scribe reference pipeline, documentation updates, tests, root DuckDB, and backup databases. Do not revert unrelated changes.
+- Runtime: Dash development server at `http://127.0.0.1:8051/reference` when active.
+- Python: `C:\Python314\python.exe`
+- DuckDB: repository-root `ck3tracker_v2.duckdb`
 
 ## Completed
 
-- County inactive/reclaim lifecycle is implemented and tested with Annaba.
-- DuckDB run-state database is in place.
-- Active Barony, County, Duchy, and Summary views are lifecycle-aware.
-- Open barony slots are excluded from realized barony counts.
-- Duchy coverage separates base/observed counties and realized baronies.
-- Future Bronze/Silver/Gold/Platinum plan is documented.
-- Project plan and architecture are aligned around Bronze plus DuckDB.
-- Ruler memory template exists at `Docs/ruler_memories.md`.
-- Character-memory boundary was added above the pasted feed.
-- The pasted ruler feed contains 53 dated memory ticks from 867 through 916.
-- The user-pasted ruler memory history is committed and must remain separate from factual observations.
-- The 867-01-02 "Mayurqa and 2 others" memory is treated as a county-level bootstrap that fans out to attached barony structure, with unresolved details retaining provenance.
-- Bronze barony observation transactions are now implemented in DuckDB.
-- The Barony Editor validates open slots, active county state, holder type, and non-negative numeric fields.
-- Valid observations write one `transaction_events` row and one `barony_observations` row atomically.
-- Current Barony views project the latest DuckDB observation over immutable Parquet without rewriting the source.
-- County observation transactions are implemented with explicit game-date/source inputs and current-state projection.
-- Duchy views preserve `Barony -> County -> Duchy` order and display aligned Barony and County tables.
-- The active Imports page accepts pasted ruler-memory text and screenshot evidence as review-pending client-side imports.
-- Screenshot OCR is implemented with Pillow, pytesseract, and the configured Tesseract executable at `C:\Program Files\Tesseract-OCR\tesseract.exe`.
-- OCR review preserves the screenshot's actual detected subject; a wrong screenshot is evidence to review, not a target to coerce.
+- Root `source`, `reference`, `journal`, and `app` schemas and promoted-only selector views.
+- Candidate Scribe snapshot `ck3_1_19_0_6_build_23530548` and candidate 867 baseline `ck3_1_19_0_6_867`.
+- Installed landed titles, English localization, title history, character history, bookmarks, and static/dynamic capital ingestion with provenance.
+- Seven 867 bookmark collections and 35 direct featured rulers validated.
+- Capital semantics resolved for all selectable 867 titles.
+- Immutable promotion-readiness reports shown in the read-only Reference Inspector.
+- Duplicate title blocks classified by baseline impact; all 21 same-date singleton conflicts are resolved by reviewed vanilla source order while every raw block remains preserved.
+- Duplicate character blocks classified: 18 semantically identical IDs and two baseline conflicts remain.
+- Character parser `1.3.0` normalizes top-level `set_culture`, two proven non-projecting flag values, and pure relationship effects while preserving mixed effects.
+- Character review reduced to 109 subjects: two duplicate conflicts and 107 opaque states.
+- Grounded government catalog loaded from 18 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Government` revision `35874`; all 14 baseline-used government IDs resolve.
+- Grounded culture catalog loaded from 244 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Culture` revision `35845`; all 228 baseline-used culture IDs resolve.
+- Grounded faith catalog loaded from 140 installed definitions nested under 49 parent religions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Faith` revision `35751`; all 111 baseline-used faith IDs resolve.
+- Grounded dynasty catalog loaded from 10,338 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Dynasty` revision `35828`; all 10,180 baseline-used dynasty IDs resolve.
+- Grounded house catalog loaded from 558 installed definitions with the internal wiki path `Dynasty` revision `35828` to its versioned `Houses` section; all 459 baseline-used dynasty-house IDs resolve and all 235 parent dynasty IDs resolve.
+- Readiness now requires the deterministic latest run for each of ten parser groups to be completed at its explicit expected version; older successful runs cannot mask newer failures or obsolete versions.
+- All 1,698 source-file manifests are bound to the exact latest parser runs that produced them; readiness blocks missing, detached, and stale run bindings.
+- All nine installed bookmark DLC gates resolve through reviewed feature mappings to canonical installed package descriptors: `landless_adventurer -> dlc014_ep3`, `khans_of_the_steppe -> dlc020_ce2`, and `all_under_heaven -> dlc022_ep4`.
+- Raw feature flags remain preserved beside package identity, descriptor hashes, platform IDs, and permanent wiki-revision evidence; unknown feature flags remain unresolved and block readiness.
+- Bookmark parser is `1.1.0`, title-history parser is `1.4.0`, character history is `1.4.0`, and the other seven required parsers remain `1.0.0`.
+- Every readiness report now stores an immutable ten-row evidence ledger containing the exact latest parser-run ID, parser version/status, manifest count, and deterministic SHA-256 digest evaluated for each required source group.
+- Readiness retrieval compares stored bindings with current evidence and labels legacy or superseded reports stale without rewriting the persisted report, findings, or evidence ledger.
+- All 1,709 current source manifests are covered by the latest report evidence ledger; title history also binds installed TGP and law-definition evidence.
+- Title-history blocks now record explicit `winner`, `superseded`, or `unresolved` status and expose their source block order, path, conflicting fields, and resolution in the Reference Inspector.
+- The permanent `Modding` revision `35725` grounds the engine rule that later ASCII filenames override earlier top-level declarations; this evidence defines vanilla parsing behavior only and adds no mod support.
+- All 556 opaque title states are grouped into 19 operation/script shapes with complete source-path counts in `Docs/title_history_opaque_inventory.md`.
+- The exact `destroy_landless_title_no_tgp_dlc_effect` family is normalized as a no-op only when its invocation date matches, both installed definitions retain reviewed semantics, and validated package mapping `all_under_heaven -> dlc022_ep4` is present.
+- At 867 this records 385 no-op events across 371 titles while preserving every raw declaration. All 371 also contain unsupported `succession_laws`, so the opaque-title count correctly remains 556.
+- All 446 baseline-effective `succession_laws` declarations across 431 titles are preserved and normalized as ordered replacement state, including empty clears.
+- Fourteen law IDs used across complete installed title history resolve uniquely to bound definitions; the 867 cutoff uses 11 IDs and materializes 431 active rows across 430 titles with no unresolved IDs.
+- Active title laws and their definition provenance are visible in the Reference Inspector. Law normalization reduces opaque title states from 556 to 178 without changing unrelated title fields.
+- All 30 baseline-effective `de_jure_liege` declarations across 21 titles are preserved and normalized into separate dated parent state; all 14 targets resolve in the same baseline.
+- Static landed-title parentage remains immutable while the Reference Inspector displays it beside the 867-effective de-jure parent, date, and source declaration order.
+- De-jure normalization reduces opaque title states from 178 to 160; three affected titles retain unrelated unsupported operations.
+- The immediate unmodded `Sheikh_Lubb_of_Najera_867_01_01.ck3` save proves `b_logrono` is a city barony in Lubb's domain, distinct from his county `c_najera`; reviewed evidence adjudicates its 867 holder from deceased `73812` to living `73813` while preserving installed history.
+- All 44 repository tests pass; changed modules compile and editor diagnostics are clean.
 
-## Files That Matter
+## Current Evidence
 
-- `Docs/ruler_memories.md` - user-pasted character memory feed and template; preserve user content.
-- `Docs/project_plan.md` - Bronze MVP and implementation order.
-- `Docs/architecture.md` - Parquet snapshot and DuckDB transaction boundary.
-- `Docs/future_plan.md` - product tiers and deferred read-only import/analysis.
-- `logic/run_state_store.py` - DuckDB state access.
-- `logic/acquisition_service.py` - county lifecycle transactions.
-- `pages/holdings/page.py` - Holdings views and callbacks.
-- `data/trial/run_state.duckdb` - mutable trial state.
+- Latest readiness report: `ck3_1_19_0_6_867:readiness:c4194efd-a8ee-42cd-b067-11ea2062b714`.
+- Report evidence status: `current`, with ten parser bindings and 1,709 manifests represented by group digests.
+- Report status: blocked, with 2 blocking, 2 accepted-exception, 1 informational, and 20 passed findings.
+- Snapshot status: `candidate`.
+- Baseline status: `candidate`.
+- `historical_state_complete`: `false`.
+- `app.supported_baselines`: zero rows.
+- Holder validation: all 4,434 rows valid, including one reviewed runtime adjudication.
+- Root backups exist before each destructive candidate reload.
 
-## Validation
+## Known Blockers
 
-- Lifecycle, reclaim, callback propagation, Barony filtering, and Duchy coverage were verified in the live Dash browser.
-- Latest completed checkpoint: `fe8d574`.
-- `git diff --check` passes.
-- Current DuckDB test state has Annaba and Constantine active with loss/reclaim events retained.
-- Current DuckDB test state includes one valid `b_annaba` barony observation and its transaction event.
-- Latest completed checkpoint: `ab3b6ae`.
-- Latest completed checkpoint: `24dd967`.
-- OCR was verified in the live Imports page with an Annaba/Izan screenshot and the intended Murcia Barony screenshot; identity and core Barony fields were detected, with icon-related noise retained for review.
-- All touched Python modules compile with the configured Python 3.14 interpreter; `git diff --check` passes.
+- 160 title states contain baseline-effective opaque history.
+- Two character IDs have baseline-conflicting duplicate declarations.
+- 107 character states contain baseline-effective opaque effects.
+- No production atomic promotion service exists.
 
-## Known Issues
+## Deferred And Superseded Work
 
-- The ruler feed has at least one paste ambiguity near `9 June, 916`, where a birth entry appears without its own date.
-- The memory feed is not yet parsed into structured DuckDB journal events.
-- The Bronze barony observation transaction is implemented; broader journal event parsing remains future work.
-- The exact identities of the two counties in “Mayurqa and 2 others” require external resolution; probable trial mapping is Ibiza and Menorca.
-- Imports currently remain client-side review artifacts; they are not yet persisted as import batches or pending acquisition records.
-- Screenshot archive limits are intentionally unresolved: record the bounded evidence-set rule for review, but do not choose numeric quotas yet.
-- Evidence-set scaffolding uses six-digit playthrough-local IDs such as `set_000000`; four digits are insufficient for a full 867-1453 run.
-- OCR dependencies and the screenshot OCR page are committed; native Tesseract is installed outside the repository and configured by path.
+- B001 ruler-memory ingestion is preserved at `Docs/build_history/B001-ruler-memory-ingestion.md`; its Imports next action is suspended, not current.
+- Holdings, Bronze observation, dashboard, and tier roadmaps in architecture and planning documents are historical or long-range guidance unless activated here.
+- The old permanent 867-only product decision is superseded. 867 is the first candidate date profile, not a permanent product limit.
+- Do not promote or resume product feature work from an older document.
 
 ## Next Exact Action
 
-Build the first Imports review workflow: persist a pasted ruler-memory import batch and linked screenshot evidence with provenance, then create reviewed pending acquisition candidates without inventing exact game dates or modifying the character-memory feed.
+Review the 23 baseline-effective `tributary_of` declarations across 23 titles. Inventory their target IDs and installed script consumers, establish whether they represent durable dated title relationships at 867, and model only the evidence-supported projection.
+
+Target files:
+
+- `logic/root_database.py`
+- `logic/title_history_loader.py` and its tributary normalization boundary
+- `logic/promotion_readiness_service.py`
+- `logic/reference_inspector_provider.py`
+- focused title-history/readiness tests under `tests/`
+
+Preserve raw declarations and unsupported effects. Keep tributary state separate from liege and de-jure parentage, and keep any unresolved target or unsupported relationship semantics blocking.
+
+Do not combine opaque-effect classification, promotion, dashboard work, or journal work into this slice.
+
+## Acceptance Checks
+
+- All 23 declarations are inventoried by title, effective date, target ID, source path, and declaration order.
+- Installed definitions or script consumers establish the relationship semantics before any state is materialized.
+- Every materialized target resolves in the same snapshot or baseline, with deterministic replay covered by a focused test.
+- Raw `tributary_of` declarations and unsupported operations remain unchanged and auditable.
+- Readiness counts only title states that still contain baseline-effective unsupported operations after tributary normalization.
+- Report generation does not change snapshot status, baseline status, or `historical_state_complete`.
+- `app.supported_baselines` remains empty.
+- Focused readiness tests and the full repository suite pass.
 
 ## Resume Note
 
-Start the next chat with:
+Start a future chat with:
 
 ```text
 start build
 ```
 
-Then use this exact next-action prompt:
-
-```text
-Implement the Imports review-to-queue slice. Persist the pasted ruler-memory text and screenshot evidence as a provenance-preserving import batch, allow review without rewriting Docs/ruler_memories.md, and create pending acquisition candidates with nullable/uncertain event dates. Keep Barony -> County -> Duchy ordering and validate the Murcia screenshot path without fabricating observations.
-```
-
-Read this file first. Verify git state and the current ruler memory file before editing. Treat the character-memory feed as source content: do not rewrite its meaning or merge it with omniscient factual history.
+Read this file first, verify its repository and database claims, and execute only `Next Exact Action` unless the user changes scope.

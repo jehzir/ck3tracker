@@ -22,6 +22,7 @@ def build_top_nav():
     ready_tabs = {
         "Dashboard": "/",
         "Holdings": "/holdings",
+        "Reference": "/reference",
     }
     disabled_tabs = ["Ruler", "House", "Economy", "Military", "Innovations", "Council", "Goals"]
 

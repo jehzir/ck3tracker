@@ -6,7 +6,7 @@ This document groups the CK3 install into the sections that correspond to the ap
 
 ## 1. Game Reference Intake
 
-These are the live CK3 folders the app may read directly as external source material.
+The primary reference is the [Crusader Kings III Wiki](https://ck3.paradoxwikis.com/Crusader_Kings_III_Wiki). The live CK3 folders below are read-only implementation evidence used to verify stable IDs, relationships, rules, localization, DLC presence, and patch drift for a specific build.
 
 | App section | Path | Why it matters | Patch risk |
 |---|---|---|---|
@@ -15,8 +15,8 @@ These are the live CK3 folders the app may read directly as external source mate
 | Common root | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common | Primary source for game rules and definitions | High |
 | Laws folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\laws | Succession, government, and legal rule logic | High |
 | Titles folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\landed_titles | Title hierarchy and identity | High |
-| Cultures folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\cultures | Cultural rules and regional logic | High |
-| Religions folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\religions | Faith and doctrine rules | High |
+| Culture folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\culture | Cultural rules and regional logic | High |
+| Religion folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\religion | Faith and doctrine rules | High |
 | Buildings folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\buildings | Building definitions | Medium |
 | Decisions folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\decisions | Decision and event logic | Medium |
 | History folder | C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\history | Seeded historical setup | High |
@@ -24,7 +24,7 @@ These are the live CK3 folders the app may read directly as external source mate
 
 ## 2. Reference Normalization
 
-These are the normalized, app-owned versions of the raw game rules after extraction and cleanup.
+These are typed, normalized DuckDB tables produced from wiki and installed-game source blobs.
 
 | App section | Example content | Why it matters | Notes |
 |---|---|---|---|
@@ -41,7 +41,7 @@ These are the mutable app states captured from gameplay or screenshots, not from
 |---|---|---|---|
 | Manual observations | county/barony state entries | User-observed truth | Keeps time-stamped provenance |
 | Lifecycle events | acquisition, reclaim, loss, resolution | Timeline of change | Must not overwrite historical rows |
-| Transaction history | DuckDB transaction rows | Durable record of accepted changes | Separate from reference files |
+| Transaction history | DuckDB transaction rows | Durable record of accepted changes | Logically separate from versioned reference tables |
 | Current state views | latest accepted observations | Current app truth | Derived from the latest valid record |
 
 ## 4. Validation and Truth Layer
@@ -68,10 +68,11 @@ These are the app’s user-facing views.
 
 ## Design note
 
-The app should not treat the live CK3 folders as the same kind of thing as the user observations. The game directories are authoritative external input. The app’s internal data model should instead be layered like this:
+The app should not treat wiki references, live CK3 folders, and user observations as the same kind of evidence. The internal data model should be layered like this:
 
-- source game files
-- normalized extracted reference tables
+- versioned wiki reference catalog
+- installed core/DLC implementation evidence
+- normalized DuckDB reference tables
 - observed run-state history
 - derived validation and summaries
 - presentation views
@@ -80,9 +81,9 @@ This split makes future patch work much safer because it isolates the parts most
 
 ## Expected refactor direction
 
-Once direct use of the game files becomes the stronger truth source, a fair amount of the current app structure will probably be refactored to reflect this progression:
+As wiki-to-game-file mappings mature, the app structure should reflect this progression:
 
-- live game data ingestion becomes a first-class pipeline
+- wiki snapshot and game-file inventory become coordinated provenance pipelines
 - reference normalization becomes a formal stage
 - UI and run-state layers remain downstream consumers
 - patch/dlc drift detection becomes a built-in capability

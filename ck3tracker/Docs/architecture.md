@@ -1,24 +1,52 @@
 # Architecture Overview
 
+> **Authority:** This document defines durable architecture only. It does not define the current implementation sequence. `Docs/current_build.md` is the sole execution manifest and overrides roadmap or priority language below.
+
 The CK3 Tracker is built on a provider-based architecture:
 
 - Providers load and normalize data.
 - DashboardService aggregates metrics.
 - Dash pages render UI components.
-- Plotly figures provide charts.
+
 
 The architecture has five distinct layers:
 
-1. **Reference layer** — CK3 Scribe files and validated wiki extracts define the title map and decision vocabulary.
-2. **Snapshot layer** — normalized Parquet datasets preserve immutable game data, imports, and evidence snapshots.
+1. **Reference layer** — versioned CK3 Wiki snapshots define the domain catalog and player-facing vocabulary; installed core and DLC files supply build-specific implementation evidence.
+2. **Database layer** — `ck3tracker_v2.duckdb` stores source provenance, versioned normalized reference tables, journal state, and application views.
 3. **Transaction layer** — DuckDB stores mutable run state, observations, lifecycle transitions, and event history atomically.
 4. **Journal layer** — dated observations, goal changes, control updates, and milestones preserve the story.
 5. **Presentation layer** — Dash pages summarize current state and historical progress.
 
 This document describes the high-level structure and relationships between components.
 
+## Primary Database Boundary
+
+The application database is the repository-root `ck3tracker_v2.duckdb`. The source pipeline turns wiki HTML/text and installed CK3 text data into typed, relational DuckDB tables that the application can query directly.
+
+Recommended logical schemas:
+
+- `source`: wiki revisions, game scans, files, DLC metadata, parser runs, and provenance
+- `reference`: versioned titles, hierarchy, cultures, faiths, buildings, rules, and other normalized game concepts
+- `journal`: playthroughs, observations, lifecycle transitions, plans, memories, and transaction events
+- `app`: current-state and derived views consumed by providers and pages
+
+Reference rows are immutable within a `reference_snapshot_id`. A game update creates a new snapshot rather than overwriting the prior version. Mutable journal transactions remain scoped to a playthrough and reference the snapshot used by that run.
+
+Parquet and CSV are optional export, interchange, fixture, and archival formats. They are not the primary operational destination for parsed source data. The trial Parquet files and `data/trial/run_state.duckdb` are development fixtures, not the final database boundary.
+
 ## Current Status
-The project is currently in a Bronze holdings-first stabilization phase. The Holdings page is functional with realistic seeded data, lifecycle transactions, and a DuckDB run-state store. The next implementation milestone is a validated manual barony observation transaction. Savegame import, game-file analysis, and any write-back capability remain deferred.
+The project is validating a candidate Scribe reference catalog in the root DuckDB. Landed titles, English localization, title and character history, bookmarks, and capital semantics are loaded but remain unpromoted. The read-only Reference Inspector is the temporary proof surface while promotion blockers and gate integrity are resolved. Consult `Docs/current_build.md` for exact counts and the next action.
+
+## Workbook and Dashboard Boundary
+
+The seed workbook, including `ck3_bambino_starts_867_dashboard.xlsx`, is a visual and workflow specification for the eventual dashboard. Its sheets, Excel tables, ranges, formulas, and cell addresses are not runtime data contracts and must not be reproduced as production storage or exposed as application identifiers.
+
+- Preserve the workbook's visual hierarchy, grouping, questions, and player workflow as design evidence.
+- Build the complete normalized item catalog in `ck3tracker_v2.duckdb` before redesigning the main dashboard around that concept.
+- Read dashboard values through DuckDB-backed providers and services only.
+- Do not reference workbook sheet names, Excel table names, ranges, or formulas in page callbacks, providers, database schemas, or user-facing labels.
+- Replace workbook table layouts with appropriate interactive views, summaries, filters, and journal controls once the underlying catalog is complete.
+- Keep the Reference Inspector separate from the final dashboard. It is a read-only engineering and visual validation tool for candidate data, not the finished player journal experience.
 
 ## Product Model: Living Run Journal
 
@@ -68,16 +96,20 @@ Barony -> County -> Duchy -> Kingdom -> Empire
 - A Duchy count is derived from its Counties and their Baronies; it must not be used as the parent of a County's barony records.
 - UI labels, joins, summaries, and progress calculations must preserve this direction. When in doubt, resolve parentage from CK3 title IDs and the landed-title hierarchy, not from display names.
 
-The project has two distinct data profiles:
+The project has two distinct data profile classes:
 
 - `seed`: a small synthetic map used to prove UI behavior and interaction
-- `ck3_867`: the canonical game map used for real runs and goal resolution
+- promoted CK3 baselines: complete, versioned title and historical-state profiles used for real runs and goal resolution
 
 These profiles must not be mixed. A goal such as forming Sicily must resolve against the active profile's CK3 title records. The seed profile may use simplified or imperfect names, but it must never be treated as evidence of the real CK3 hierarchy.
 
-The application is permanently scoped to the 867 start date. There will be no start-date selector and no support for the 1066 or 1178 starts. The point of the journal is to measure how long a realm can survive from the 867 starting position as the run develops and stronger external powers begin to threaten it. All joins and goal calculations must use the title IDs defined by CK3 itself, not display-name matching. Any map-profile change must reload the complete title hierarchy together so counties, duchies, kingdoms, holdings, and goals remain internally consistent.
+The application may start a journal at any CK3 location contained in a promoted reference baseline. Run creation first selects a supported baseline or bookmark date, then narrows the title hierarchy through searchable, cascading filters such as Empire, Kingdom, Duchy, County, and Barony. The final selection is persisted by stable CK3 IDs; display names are labels only. Changing an upstream filter clears incompatible descendants, and the application must preview the fully resolved hierarchy before committing the run.
 
-The supported game data contract is CK3 `1.19.0.6 (Scribe)`. Reference snapshots and persisted runs must carry `game_version` and `start_date` metadata. Reference data from another CK3 version must be rejected or explicitly migrated rather than silently mixed into a Scribe run.
+A selectable baseline date is not the same as an arbitrary in-game observation date. The UI may offer only dates whose title hierarchy and historical state have been parsed, validated, and promoted for the selected reference snapshot. Later dates belong to the journal timeline unless a separate reference baseline exists for them. The current retained data proves only the 867 baseline; additional bookmarks such as 1066 or 1178 become selectable only after their source inputs and validation pass. Any baseline change must load the complete title hierarchy together so counties, duchies, kingdoms, holdings, rulers, and goals remain internally consistent.
+
+The current supported game data contract is CK3 `1.19.0.6 (Scribe)`. Reference snapshots and persisted runs must carry `game_version`, `reference_snapshot_id`, `baseline_id`, and `start_date` metadata. Reference data from another CK3 version or baseline must be rejected or explicitly migrated rather than silently mixed into a run.
+
+Reference updates follow `Docs/game_update_protocol.md`. Each game update creates a new candidate snapshot, compares wiki revisions and installed-file manifests, reparses affected loader groups, and promotes the snapshot only after validation. Existing runs remain pinned to their original reference snapshot.
 
 The duchy import must include only titles from the source's `De jure duchies` section. Titles listed under `Uncreatable duchies` are exempt and must be excluded from canonical duchy records, goal population, county progress, and title-creation calculations.
 
@@ -85,16 +117,16 @@ The duchy metadata should retain the source's special-building information. Spec
 
 ## County Capital Changes
 
-`b_capital` identifies the county's current primary castle, but it is not permanently immutable. A county can change its capital when the game conditions allow it, including the requirement that at least two castles exist in the county. This is a run-state change and must not rewrite the canonical 867 title reference.
+`b_capital` identifies the county's current primary castle, but it is not permanently immutable. A county can change its capital when the game conditions allow it, including the requirement that at least two castles exist in the county. This is a run-state change and must not rewrite the selected baseline's title reference.
 
 The journal must preserve both:
 
-- `original_capital_barony_id`: the capital from the 867 reference hierarchy
+- `original_capital_barony_id`: the capital from the selected baseline hierarchy
 - `current_capital_barony_id`: the capital after any in-run change
 
 Changing the capital can have irreversible economic consequences. The former capital may lose a duchy-level capital bonus and, where applicable, lose a building slot. A new capital does not automatically regain the lost slot or bonus. The model must therefore record the capital-change event and its resulting slot/bonus state rather than deriving current capacity only from the new capital.
 
-The domain/holding view should expose capital status, capital history, building slots, and lost-capital effects separately. In the captured Scribe `00_landed_titles.txt` source, the county block does not always contain an explicit `capital = b_*` field; the first barony listed under the county is the primary capital castle. The player's later capital decision belongs in parquet-backed run state.
+The domain/holding view should expose capital status, capital history, building slots, and lost-capital effects separately. In the captured Scribe `00_landed_titles.txt` source, the county block does not always contain an explicit `capital = b_*` field; the first barony listed under the county is the primary capital castle. The player's later capital decision belongs in DuckDB journal state.
 
 ## County Screen Icon Semantics
 
@@ -138,15 +170,19 @@ The inward-arrow duchy building slot is a visual indicator that the holding belo
 
 ## Reference Source Responsibilities
 
-`raw/ck3_867_00_landed_titles.txt` is authoritative for title identity and hierarchy. The parser must preserve CK3 IDs and resolve empire → kingdom → duchy → county → barony relationships.
+The [Crusader Kings III Wiki](https://ck3.paradoxwikis.com/Crusader_Kings_III_Wiki) is the project's primary reference catalog for mechanics, titles, decisions, buildings, cultures, faiths, warfare, DLC scope, and player-facing vocabulary. Every retained wiki extract must record its page URL, revision or permanent-link ID when available, retrieval timestamp, stated game version, and review status. A wiki page is reference evidence, not a live-run observation, and community-maintained content must not be assumed current without version review.
 
-`raw/duchies_source.html` is a validated 867 reference extract for duchy-level metadata. It contributes county count, barony count, average development, capital county, and special-building information. Its `Uncreatable duchies` section is excluded.
+The installed CK3 `game` tree is read-only build evidence. It supplies stable script IDs, hierarchy declarations, trigger/effect implementation, localization keys, history, map relationships, and the exact core/DLC content present in the inspected build. Game-file evidence validates and specializes the wiki model for a supported version; it does not replace the wiki as the reference catalog.
+
+`raw/ck3_867_00_landed_titles.txt` is a captured game-file extract used to verify title IDs and hierarchy for the supported build. The parser must preserve CK3 IDs and resolve empire → kingdom → duchy → county → barony relationships.
+
+`raw/duchies_source.html` is a validated 867 wiki extract for duchy-level metadata. It contributes county count, barony count, average development, capital county, and special-building information. Its `Uncreatable duchies` section is excluded.
 
 `raw/barony_source.html` is a candidate barony source, but its records must be validated against the landed-title hierarchy before becoming canonical.
 
 `ruler_decisions` is the source for goal definitions. A decision can describe result titles, regions, required duchies, alternative requirement groups, costs, prerequisites, and effects. It is not a source of current playthrough control.
 
-The reference layer and parquet data layer must remain separate. Static files explain what the game allows; parquet records explain what happened in the player's run. Manual updates are writes to parquet-backed run state and journal events.
+Reference evidence and run-state evidence must remain logically separate inside DuckDB. Wiki snapshots and installed game files explain the documented and build-specific game model. Versioned reference tables preserve normalized source facts; journal tables record what happened in the player's run through observations, transactions, and events. Parquet may export either layer without becoming its source of truth.
 
 ## Trial Evidence Model
 
@@ -188,7 +224,7 @@ For the current Kroumerie trial, `c_constantine` has five UI slots and `c_annaba
 
 ## Data Contract
 
-Parquet remains the immutable reference and export format for game-derived data. DuckDB is the transactional store for mutable playthrough state and event history. Datasets should be normalized around stable keys and retain history rather than overwrite it:
+The root DuckDB stores immutable versioned reference rows and transactional playthrough history in separate logical schemas. Tables should be normalized around stable keys and retain history rather than overwrite it:
 
 - `playthroughs`: run identity, ruler identity, `game_version`, `start_date`, lifecycle state
 - `holdings`: canonical holding records and latest run state
@@ -198,7 +234,7 @@ Parquet remains the immutable reference and export format for game-derived data.
 - `goal_progress_events`: manual control, completion, exception, and note updates
 - `journal_events`: dated observations, milestones, threats, and run lifecycle events
 
-The trial state database stores lifecycle transitions, acquisition events, and mutable barony snapshots in `data/trial/run_state.duckdb`. Static game data and evidence-backed observations remain in Parquet, while current-state views are queried from DuckDB without rewriting the source files. Historical rows must remain available for the living journal.
+The current trial state database stores lifecycle transitions, acquisition events, and mutable barony snapshots in `data/trial/run_state.duckdb`, with static fixtures in Parquet. These are development fixtures to migrate into the root DuckDB; they do not define the final storage boundary. Historical rows must remain available throughout migration and in the living journal.
 
 ### Bronze Transaction Boundary
 
@@ -232,6 +268,8 @@ Loads character/domain limit data.
 Aggregates all provider data into dashboard metrics.
 
 # Dashboard Requirements
+
+The workbook concept guides the eventual composition and information hierarchy of this page, but the implementation is deferred until the full reference item catalog is available. Every metric and item shown here must come from `DashboardService` or another DuckDB-backed read model; no spreadsheet table or cell reference may survive into the production UI contract.
 
 The dashboard displays:
 
@@ -307,7 +345,9 @@ DashboardService calls:
 
 Then computes metrics and returns a dictionary consumed by the UI.
 
-# Roadmap
+# Historical Implementation Roadmap
+
+This roadmap records the original application sequence. It is not a resume point and does not override `Docs/current_build.md`.
 
 ## Phase 1 — Core Providers
 - HoldingsProvider
@@ -338,5 +378,5 @@ Then computes metrics and returns a dictionary consumed by the UI.
 - Wars
 
 ## Priority Note
-The next engineering priority is to complete the holdings layer cleanly before reintroducing the new-run/admin creation workflow.
+Historical note: holdings completion preceded the current reference-catalog work. The active engineering priority is defined only in `Docs/current_build.md`.
 

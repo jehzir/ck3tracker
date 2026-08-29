@@ -1,5 +1,126 @@
 # Changelog
 
+## 2026-08-29
+- Superseded the permanent 867-only product decision. A playthrough may start at any CK3 location in a parsed, validated, and promoted reference baseline.
+- Defined run creation as searchable cascading filters over the stable title hierarchy, followed by an atomic playthrough baseline transaction.
+- Kept 867 as the only currently proven baseline; additional bookmarks become selectable only after their history and hierarchy inputs pass promotion validation.
+- Registered bookmarks and localization as baseline-selection source groups alongside landed titles and historical setup.
+- Bootstrapped the root DuckDB with `source`, `reference`, `journal`, and `app` schemas for snapshots, baselines, titles, playthrough creation, and selector/context views.
+- Added promoted-baseline and location-option providers plus an atomic playthrough-baseline service with rollback coverage.
+- Added a read-only CK3 save reader that streams only the bounded `meta_data` block from compressed saves and rejects malformed or oversized metadata.
+- Added lazy save-directory inventory so the UI can list the newest candidate saves without decompressing all 935 files.
+- Validated the reader against the Ucinaa save and confirmed its SHA-256 remained unchanged after parsing.
+- Resolved the metadata portrait through `played_character`, `living`, and ordered `landed_data.domain` records to stable character, primary-title, domain-title, and realm-capital identifiers.
+- Validated stable identity extraction across real county, duchy, and kingdom saves: `c_ucinaa`, `d_ruucuu`, and `k_ruucuu`, each with `b_simajiri` as the recorded realm capital.
+- Added a read-only save-to-baseline proposal that matches game version and save date to the newest eligible promoted reference baseline, validates all referenced titles, and previews the full capital hierarchy without creating journal rows.
+- Added an explicit confirmation boundary that delegates to the atomic playthrough transaction only after review; save dates remain distinct from immutable reference baseline dates.
+- Added versioned landed-title ingestion from all 10 installed Scribe source files, including SHA-256 manifests, parser-run audit records, source paths, and source line numbers.
+- Loaded candidate snapshot `ck3_1_19_0_6_build_23530548` and candidate baseline `ck3_1_19_0_6_867` into the root DuckDB with 17,452 unique titles and 15,912 structurally selectable titles.
+- Preserved 1,540 structurally exceptional or duplicate-key records as non-selectable warnings and recorded two additional duplicate declarations instead of silently overwriting them.
+- Verified the selectable installed hierarchy `e_nusantara -> k_ruucuu -> d_ruucuu -> c_ucinaa -> b_simajiri` used by the real Ucinaa save.
+- Kept the imported snapshot and baseline unpromoted with `historical_state_complete=false`; they remain absent from application selectors until history and localization validation is complete.
+- Added snapshot-scoped English localization ingestion with retained declarations, deterministic duplicate resolution, winning source provenance, parser-run audit records, and title-label enrichment.
+- Loaded all 287,888 resolved localization keys from 1,173 installed Scribe `.yml` files; no keys conflict in this build and all source files have SHA-256 manifests.
+- Localized 17,451 of 17,452 candidate titles, including `Nusantara`, `Ruucuu`, `Ucinaa`, and `Simajiri`; retained a fallback label for the non-selectable `c_nf_new_noble_dynasty` placeholder and recorded it as the sole coverage warning.
+- Kept snapshot and baseline status at `candidate` with `historical_state_complete=false`; title-history validation remains the promotion blocker.
+- Added candidate-only title-history ingestion with lossless dated-operation provenance, normalized holder/liege/government/development events, and a materialized 867 state row for every candidate title.
+- Loaded 108,186 operations and 104,629 normalized events from all 183 installed title-history files, using UTF-8 BOM, strict UTF-8, or CP1252 decoding according to each source file.
+- Preserved CK3 calendar dates such as `1002.2.30` as sortable canonical game-date strings instead of rejecting them as invalid Gregorian dates.
+- Materialized 17,452 title states at 867-01-01 and verified `c_ucinaa` has holder `ryukyuan_ucinaa_1`, `tribal_government`, and development 4, while `d_ruucuu` is explicitly independent.
+- Retained 567 operations from 27 duplicate title declarations as `review_required`; 585 materialized states carry duplicate-history or unevaluated-script warnings rather than inferred results.
+- Kept the snapshot and baseline unpromoted with `historical_state_complete=false`; character-history lifecycle checks, bookmark identity, static/dynamic capital semantics, and executable history effects remain promotion blockers.
+- Added candidate-only character-history ingestion with complete operation provenance, normalized lifecycle events, materialized 867 character identity/state, and separate title-holder validation.
+- Loaded 588,779 operations and 142,273 lifecycle events from all 207 installed character-history files, producing 71,122 character states and preserving 20 duplicate character IDs for review.
+- Recorded 177 embedded lifecycle dates that disagree with their enclosing CK3 event dates; enclosing dates remain authoritative for replay while both values are retained.
+- Validated all 4,434 non-null 867 title-holder rows against direct character declarations: 4,433 holders are alive and unique, with no missing or duplicate holder IDs.
+- Verified `ryukyuan_ucinaa_1` as Makamadu: male by default, Ryukyuan culture, Utaki faith, Ryukyuan Ucinaa dynasty, born 833-01-01, and alive at the 867 baseline.
+- Preserved the sole holder contradiction as review evidence: `b_logrono` names character `73812`, whose installed history records death on 862-09-26.
+- Kept the candidate closed; bookmark identity, capital semantics, duplicate/scripted-effect review, and the Logroño lifecycle contradiction remain promotion blockers.
+- Defined `ck3_bambino_starts_867_dashboard.xlsx` as the visual and workflow specification for the eventual player dashboard, not a runtime source or schema contract.
+- Deferred the main dashboard redesign until the normalized DuckDB reference item catalog is complete; production pages must contain no Excel sheet, table, range, formula, or cell-reference dependencies.
+- Added a candidate-only Reference Inspector as the temporary visual proof surface for hierarchy, 867 state, holder identity, provenance, and validation warnings.
+- Replaced the synthetic baseline bookmark identity with an installed date-profile mapping: the 867 baseline now links to all seven themed 867 bookmark collections without restricting world geography.
+- Loaded three bookmark groups, 19 bookmark collections, 110 direct featured rulers, 120 related portraits, 52 preserved challenge declarations, and nine raw DLC gates from all six installed bookmark source files.
+- Validated all 35 direct 867 featured rulers against loaded title, character, and localization reference data; no 867 bookmark references are unresolved.
+- Added the seven localized 867 start themes, featured-ruler counts, and raw DLC gates to the read-only Reference Inspector.
+- Persisted 2,641 installed static capital declarations and derived 3,476 county capitals from first-barony source ordering.
+- Normalized safe `set_capital_county`, `set_capital_barony`, and exact `game_start_date` conditional history effects while retaining their raw source declarations.
+- Replayed capital history at 867: `k_england -> c_hampton` and `c_coburg -> b_lichtenfels` are the only applicable overrides.
+- Verified the Ucinaa chain capitals: `e_nusantara -> c_PHI_tondo`, `k_ruucuu -> c_ucinaa`, `d_ruucuu -> c_ucinaa`, and `c_ucinaa -> b_simajiri`.
+- Added capital provenance status to the Reference Inspector; the baseline remains candidate-only and unpromoted.
+- Started the promotion-readiness milestone with an immutable, read-only report run containing 14 grouped findings: six blocking, one accepted exception, one informational, and six passed.
+- Confirmed completed build identity, parser groups, selectable hierarchy, bookmark profile, capital resolution, and selectable-title localization checks.
+- Classified duplicate title declarations, opaque title and character history, the Logroño holder contradiction, missing versioned wiki provenance, and unloaded stable-ID definition catalogs as promotion blockers.
+- Added the latest readiness report to the Reference Inspector without adding a promotion action or changing candidate status.
+- Began promotion-anomaly resolution by retaining 58 source blocks for 27 duplicated title-history IDs and linking all operations to their source block.
+- Classified duplicated history IDs by baseline impact: 21 conflict at 867, two conflict only after 867, two are additive, and two are semantically identical.
+- Replaced lexical winners with explicit `ambiguous_duplicate` state for 21 governments and two holders; no duplicate affects liege, development, or dynamic capital state.
+- Reclassified the two nonselectable noble-family structural capital conflicts as accepted exceptions and reduced the duplicate-history readiness blocker from 29 warning rows to 21 distinct baseline-conflicting IDs.
+- Kept `b_logrono -> 73812` blocking: installed comments strongly indicate successor `73813`, but an unmodded 867 startup or immediate save is still required before an adjudicated correction can be accepted.
+- Retained 40 source blocks for 20 duplicated character IDs and classified 18 IDs as semantically identical with only two baseline conflicts.
+- Replaced lexical winners with explicit ambiguity for `71419.culture_id` and for `bobo0050` name, faith, dynasty, birth, and death fields while preserving their consensus lifecycle state.
+- Verified neither conflicted character is referenced by an 867 title holder or bookmark recommendation; reduced the character-history readiness finding from 185 subjects to two duplicate conflicts plus 165 opaque states.
+- Normalized unconditional top-level `set_culture = culture:<id>` character effects into provenance-linked history events while retaining conditional and cross-projection effects for review.
+- Corrected `upali_1` from the static Mon declaration to the baseline-effective Burmese culture effect; confirmed `sulayman_al_tajir_1` remains Persian.
+- Preserved nine culture effects across all history, applied the two effective by 867, and reduced the character-history readiness finding to two duplicate conflicts plus 163 opaque states without promoting the candidate.
+- Classified only `has_scripted_appearance` and `do_not_generate_starting_family` character flags as outside the identity/lifecycle projection, based on their installed-script usage.
+- Kept unknown flags and mixed title, realm, government, claim, military, relationship, and conditional effect bodies blocking; raw declarations remain available for future projections.
+- Cleared 22 character-state warnings without changing any projected identity, lifecycle, or holder value, reducing the character-history readiness finding to two duplicate conflicts plus 141 opaque states.
+- Classified pure top-level relationship effects as interpreted outside the current identity/lifecycle projection while retaining their complete source declarations for a future versioned relationship model.
+- Kept relationship bodies mixed with claims, capitals, titles, government, armies, traits, language, flags, or conditional logic blocking rather than certifying incomplete projections.
+- Cleared 34 additional character-state warnings without emitting synthetic relationship rows or changing projected character and holder values, reducing the character-history readiness finding to two duplicate conflicts plus 107 opaque states.
+- Established `Docs/current_build.md` as the sole execution manifest, archived the suspended B001 handoff, and marked architecture, future-plan, project-plan, update-protocol, and source-registry documents with explicit non-competing authority roles.
+- Replaced stale Imports, Holdings, Bronze, and deep-dive resume paths with B002 Scribe promotion readiness; corrected documentation that incorrectly described the candidate 867 baseline as promoted.
+- Reordered B002 so grounded catalog and wiki-provenance contracts precede broad readiness-gate hardening; selected government definitions as the first bounded loader because title baseline states already consume those stable IDs.
+- Captured the internal wiki link from root revision `32094` to Government revision `35874` without using wiki presentation tables as structured data.
+- Loaded 18 snapshot-scoped installed government definitions with source hashes and line provenance; all 14 government IDs used by the 867 title state resolve.
+- Replaced table-name readiness inference with reviewed Government wiki evidence and a stable-ID coverage join, reducing the candidate from six to five blocker categories without promotion.
+- Captured the internal wiki link from root revision `32094` to Culture revision `35845`, reviewed for CK3 `1.19`, without treating wiki presentation tables as structured source data.
+- Loaded 244 snapshot-scoped installed culture definitions from 56 source files with hashes, raw blocks, and line provenance; all 228 culture IDs used by the 867 character state resolve.
+- Added concrete Culture wiki-provenance and stable-ID coverage findings; Faith, Dynasty, and House remain the only unloaded definition catalogs, and the candidate remains unpromoted.
+- Captured the internal wiki link from root revision `32094` to Faith revision `35751`, reviewed for CK3 `1.19`, while retaining installed religion files as build-specific structured evidence.
+- Loaded 140 snapshot-scoped installed faith definitions from 49 source files with hashes, raw blocks, line provenance, and their parent religion IDs; all 111 faith IDs used by the 867 character state resolve.
+- Added concrete Faith wiki-provenance and stable-ID coverage findings; Dynasty and House remain the only unloaded definition catalogs, and the candidate remains unpromoted.
+- Captured the internal wiki link from root revision `32094` to Dynasty revision `35828`, reviewed for CK3 `1.19`, while keeping Dynasty and House as separate stable-ID contracts.
+- Loaded 10,338 snapshot-scoped installed dynasty definitions from eight source files with hashes, raw blocks, and line provenance; all 10,180 dynasty IDs used by the 867 character state resolve.
+- Added concrete Dynasty wiki-provenance and stable-ID coverage findings; House is the only unloaded definition catalog, and the candidate remains unpromoted.
+- Grounded House in the versioned `Houses` section of Dynasty revision `35828`, preserving House as a separate stable-ID catalog linked back to its parent Dynasty evidence.
+- Loaded 558 snapshot-scoped installed dynasty-house definitions from five source files with hashes, raw blocks, line provenance, and parent dynasty IDs; all 459 baseline-used house IDs and all 235 referenced parent dynasties resolve.
+- Replaced the final table-name catalog blocker with concrete House provenance and stable-ID coverage findings; all required definition catalogs are now loaded and the candidate remains unpromoted.
+- Replaced historical parser-completion inference with an explicit ten-group parser-version policy and deterministic latest-run selection by start time and run ID.
+- Made newer failed runs and newer completed runs at obsolete versions block readiness even when an older successful run exists; the current candidate passes all ten parser checks without promotion.
+- Added parser-run identity to source-file manifests, updated all ten required loaders to write it atomically, and deterministically backfilled all 1,698 legacy manifests to their latest completed producing runs.
+- Added manifest readiness checks that block missing groups and manifests detached from the exact latest run; the current candidate passes with all source hashes and file metadata preserved.
+- Added snapshot-scoped installed DLC package evidence with canonical package IDs, descriptor hashes, Steam/Paradox/Microsoft identifiers, and permanent wiki revisions for Roads to Power, Khans of the Steppe, and All Under Heaven.
+- Resolved all nine raw bookmark feature gates without rewriting them: one `landless_adventurer` gate maps to `dlc014_ep3`, two `khans_of_the_steppe` gates map to `dlc020_ce2`, and six `all_under_heaven` gates map to `dlc022_ep4`.
+- Added snapshot-wide readiness enforcement that blocks unknown, missing, or invalid bookmark DLC package mappings; core-game bookmarks are explicitly labeled in the Reference Inspector.
+- Versioned the expanded bookmark-plus-package parser as `1.1.0` and generated readiness report `ck3_1_19_0_6_867:readiness:0c473846-defa-4bbb-b670-c12ada2fcc6f`: all nine DLC gates pass, the four unrelated blocker categories remain, and no candidate or promotion state changed.
+- Added an immutable per-report evidence ledger for all ten required parser groups, recording exact parser-run identity/version/status, manifest count, and a deterministic SHA-256 digest over sorted source-manifest records.
+- Added read-time report currency checks: a newer parser run or manifest-only hash change marks the stored report stale while leaving its report, findings, and evidence rows unchanged; legacy reports without bindings are explicitly stale.
+- Generated current report `ck3_1_19_0_6_867:readiness:e8aa3800-bdd4-4a7f-a832-89b0f6404560`, bound to ten parser runs and all 1,701 current manifests; candidate status and promoted selectors remain unchanged.
+- Grounded vanilla top-level title precedence in permanent CK3 Wiki `Modding` revision `35725`: later ASCII source filenames use LIOS, while character-history duplicates remain outside this rule.
+- Versioned title history as parser `1.1.0`; all 21 same-date conflicts now select `k_otuken.txt` over `k_naimania.txt`, preserving 21 winner and 21 superseded raw blocks with source order and conflicting fields.
+- Refreshed dependent holder validation and generated current report `ck3_1_19_0_6_867:readiness:0b97b5b1-9347-4606-b481-5632fc484eeb`; duplicate title history now passes, three unrelated blocker categories remain, and candidate/promotion state is unchanged.
+- Inventoried all 556 opaque 867 title states into 19 operation/script shapes with complete path and overlap counts in `Docs/title_history_opaque_inventory.md`.
+- Versioned title history as parser `1.2.0` and bound the installed TGP scripted-effect and DLC-trigger definitions; exact date-matched `destroy_landless_title_no_tgp_dlc_effect` calls now produce auditable no-op events only when reviewed `all_under_heaven -> dlc022_ep4` evidence is valid.
+- Normalized 385 baseline invocations across 371 titles while preserving all raw declarations. Every affected title also retains unsupported `succession_laws`, so the opaque-title blocker remains 556 rather than being understated.
+- Generated current report `ck3_1_19_0_6_867:readiness:4b49b6d3-5a80-48e5-96e3-9a81b4216200`, bound to ten parser runs and 1,703 manifests; candidate status and promoted selectors remain unchanged.
+- Versioned title history as parser `1.3.0` and modeled all 446 baseline-effective `succession_laws` declarations as ordered replacement state, including explicit empty clears, while preserving every raw declaration.
+- Bound 14 uniquely resolved installed law definitions with raw script, hashes, groups, source paths, line ranges, and source order; the 867 cutoff uses 11 IDs and materializes 431 active rows across 430 titles with zero unresolved IDs.
+- Added active succession-law state and installed-definition provenance to the Reference Inspector. `k_asturias` correctly has no active explicit law after its 843 clear.
+- Reduced the opaque-title readiness finding from 556 to 178 without changing unrelated title fields, snapshot/baseline candidate status, `historical_state_complete`, or promoted selectors.
+- Generated current report `ck3_1_19_0_6_867:readiness:e799523e-a95c-4c5d-a3e8-79172e9ccb0c`, bound to ten parser runs and 1,709 manifests; three blocker categories remain.
+- Versioned title history as parser `1.4.0` and modeled all 30 baseline-effective `de_jure_liege` declarations across 21 titles as deterministic dated replacement state.
+- Preserved immutable landed-title parentage separately from 21 baseline de-jure rows; all 14 target IDs resolve in the same baseline, and complete installed history establishes scalar `0` as an explicit clear.
+- Added static and 867-effective de-jure parentage, effective date, and source declaration order to the Reference Inspector.
+- Reduced the opaque-title readiness finding from 178 to 160; three affected titles retain unrelated unsupported operations.
+- Generated current report `ck3_1_19_0_6_867:readiness:036c8aa7-73a4-4542-ae6a-b3cdd452b344` without changing candidate or promotion state.
+- Added reviewed immediate-save holder adjudications without rewriting installed title history. Adjudications are rejected when their recorded declaration no longer matches current source evidence.
+- Bound `Sheikh_Lubb_of_Najera_867_01_01.ck3` at SHA-256 `b7ec35196c8577957adbbd71323a7925b37652ebf26f5cff735f9376a91ad48f` to the 867 baseline.
+- Confirmed `b_logrono` is the City of Logrono under `c_najera`, not a county; the save records it in Sheikh Lubb's domain and resolves save-local player `12876` to historical character `73813` through his primary title.
+- Preserved the installed `b_logrono -> 73812` declaration while adjudicating the effective 867 holder as living character `73813`; all 4,434 holder validations now pass.
+- Versioned character history as parser `1.4.0` and generated current readiness report `ck3_1_19_0_6_867:readiness:c4194efd-a8ee-42cd-b067-11ea2062b714`, leaving two blocker categories and no promotion-state changes.
+
 ## 2026-08-16
 - Initial project scaffold created.
 - Added PROJECT_PLAN.md.

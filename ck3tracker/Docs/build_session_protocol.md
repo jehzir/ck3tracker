@@ -34,6 +34,28 @@ The agent must:
 
 `Docs/current_build.md` is the canonical handoff document. It is not a diary of every chat message. It contains only the information needed to resume safely.
 
+### Authority And Precedence
+
+Use this order when instructions or status claims disagree:
+
+1. The user's explicit instruction in the current session.
+2. Observable worktree, database, source-manifest, and executable-validation state.
+3. `Docs/current_build.md` for the sole current objective and next exact action.
+4. `Docs/game_update_protocol.md` for snapshot, update, validation, and promotion procedure.
+5. `Docs/architecture.md` for durable system boundaries and invariants.
+6. `Docs/future_plan.md` for product tiers and long-range sequencing.
+7. Changelog, project plan, decisions, inventories, registries, build history, and prior transcripts as historical or advisory evidence.
+
+No document other than `Docs/current_build.md` may define an authoritative current priority, return point, resume prompt, or next action. Imperative roadmap language in lower-precedence documents is historical unless the current build explicitly activates it.
+
+The word `manifest` has three distinct meanings in this repository:
+
+- `Docs/current_build.md`: the execution manifest and sole resumable path.
+- `source.source_files` in the root DuckDB: generated installed-file evidence manifests.
+- `Docs/source_table.json`: an advisory source-to-table planning registry.
+
+Never use the planning registry or an older roadmap as a substitute for the execution manifest.
+
 Every build checkpoint must include:
 
 - build ID

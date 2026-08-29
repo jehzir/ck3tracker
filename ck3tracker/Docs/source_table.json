@@ -1,0 +1,139 @@
+{
+  "registry_version": "1.0.0",
+  "ck3_build": "unknown",
+  "destination_database": "ck3tracker_v2.duckdb",
+  "destination_schema": "reference",
+  "sources": [
+    {
+      "source_path": "game/common/laws",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "high",
+      "extract_rule": "parse_law_definitions",
+      "destination_table": "ck3_law_rules",
+      "canonical_fields": [
+        "law_id",
+        "category",
+        "requirements",
+        "effects",
+        "version_tag"
+      ],
+      "validation": [
+        "legal_branch_consistency",
+        "version_compatibility"
+      ]
+    },
+    {
+      "source_path": "game/common/bookmarks",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "high",
+      "extract_rule": "parse_bookmark_definitions",
+      "destination_table": "ck3_reference_baselines",
+      "canonical_fields": [
+        "bookmark_id",
+        "start_date",
+        "character_ids",
+        "title_ids",
+        "version_tag"
+      ],
+      "validation": [
+        "supported_date_checks",
+        "bookmark_reference_checks"
+      ]
+    },
+    {
+      "source_path": "game/common/landed_titles",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "high",
+      "extract_rule": "parse_title_hierarchy",
+      "destination_table": "ck3_title_hierarchy",
+      "canonical_fields": [
+        "title_id",
+        "rank",
+        "parent_title",
+        "de_jure_liege",
+        "holding_slots",
+        "culture_group"
+      ],
+      "validation": [
+        "title_relationship_checks",
+        "slot_structure_checks"
+      ]
+    },
+    {
+      "source_path": "game/common/culture",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "high",
+      "extract_rule": "parse_culture_metadata",
+      "destination_table": "ck3_culture_rules",
+      "canonical_fields": [
+        "culture_id",
+        "heritage",
+        "language",
+        "traditions",
+        "ethos"
+      ],
+      "validation": [
+        "culture_region_checks"
+      ]
+    },
+    {
+      "source_path": "game/common/religion",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "high",
+      "extract_rule": "parse_religion_metadata",
+      "destination_table": "ck3_religion_rules",
+      "canonical_fields": [
+        "religion_id",
+        "faiths",
+        "doctrines",
+        "holy_sites"
+      ],
+      "validation": [
+        "doctrine_consistency",
+        "holy_site_reference_checks"
+      ]
+    },
+    {
+      "source_path": "game/history",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "high",
+      "extract_rule": "parse_historical_setup",
+      "destination_table": "ck3_history_reference",
+      "canonical_fields": [
+        "title_id",
+        "holder",
+        "start_date",
+        "end_date",
+        "historical_notes"
+      ],
+      "validation": [
+        "version_compatibility_checks",
+        "historical_continuity"
+      ]
+    },
+    {
+      "source_path": "game/localization",
+      "source_type": "folder",
+      "build": "build-version",
+      "patch_risk": "medium",
+      "extract_rule": "parse_reference_localization",
+      "destination_table": "ck3_localization",
+      "canonical_fields": [
+        "language",
+        "localization_key",
+        "display_value",
+        "version_tag"
+      ],
+      "validation": [
+        "stable_id_label_coverage",
+        "duplicate_key_checks"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # CK3 Tracker Future Plan
 
+> **Authority:** This document defines product tiers and long-range options. It does not define the current implementation sequence, return point, or next action. Use `Docs/current_build.md` as the sole execution manifest.
+
 ## Product Direction
 
 CK3 Tracker can grow from a safe manual journal into a progressively richer analysis product. Each tier should add capability without invalidating observations created by lower tiers.
@@ -24,7 +26,7 @@ Free manual observation and run tracking.
 - Validate relationships, required fields, ranges, and holding-specific fields.
 - Keep historical observations instead of overwriting them.
 
-Current implementation priority:
+Historical Bronze implementation priorities (not the current resume point):
 
 - Complete the basic barony status observation transaction.
 - Keep County, Barony, Duchy, Summary, and lifecycle views consistent.
@@ -36,7 +38,7 @@ Import a savegame without modifying it.
 
 - Detect supported CK3 version and save metadata.
 - Parse the save into a time-stamped import snapshot.
-- Normalize save data into Parquet reference/import tables.
+- Normalize save data into versioned DuckDB import tables.
 - Write accepted observations and provenance into DuckDB.
 - Compare savegame snapshots against manual observations and prior imports.
 - Never write back to the original savegame.
@@ -47,10 +49,11 @@ Sources should be labeled clearly:
 - `savegame_import`
 - `game_file_reference`
 
-## Gold: Game-File Analysis
+## Gold: Wiki-Grounded Game-File Analysis
 
-Analyze CK3 game files such as the `00` and `80` data sets.
+Use the [Crusader Kings III Wiki](https://ck3.paradoxwikis.com/Crusader_Kings_III_Wiki) as the primary reference catalog, then analyze installed CK3 core and DLC files to verify the exact supported implementation.
 
+- Capture wiki page URL, revision ID, retrieval time, stated version, and review status.
 - Parse landed titles, counties, baronies, holding types, buildings, and rules.
 - Resolve de jure and structural relationships.
 - Detect version-specific definitions and changes.
@@ -58,7 +61,7 @@ Analyze CK3 game files such as the `00` and `80` data sets.
 - Identify open barony slots separately from realized baronies.
 - Enrich summaries with game-rule context without pretending it is run-state evidence.
 
-Game-file data remains immutable/reference data in Parquet. It must not silently overwrite observations in DuckDB.
+Wiki extracts and game-file data become versioned reference tables in the repository-root `ck3tracker_v2.duckdb`. A refresh appends a new reference snapshot and must not silently overwrite prior reference rows or journal observations.
 
 ## Platinum: Isolated Debug/Mod Service
 
@@ -73,14 +76,14 @@ This is a separate, future commercial service, not part of the tracker core.
 - Verify the result after the operation.
 - Warn that unsupported versions or mods may invalidate a run.
 
-This tier must remain isolated because write-back can create checksum problems, corrupt saves, or cause a dead run. The core tracker should remain read-only with respect to authoritative game files.
+This tier must remain isolated because write-back can create checksum problems, corrupt saves, or cause a dead run. The core tracker must treat installed game files and savegames as read-only evidence.
 
 ## Shared Data Principles
 
 Every tier should use stable CK3 IDs and preserve provenance.
 
-- Parquet stores immutable game/reference and import snapshots.
-- DuckDB stores mutable run state, observations, lifecycle transitions, and transaction history.
+- DuckDB stores source provenance, immutable versioned reference snapshots, imports, mutable run state, observations, lifecycle transitions, and transaction history in separate logical schemas.
+- Parquet and CSV are optional export, interchange, archival, and fixture formats.
 - Current views derive from the latest accepted observation.
 - Historical rows remain available for comparison.
 - A screenshot is an observation at a point in time, not a continuously true value.
@@ -100,11 +103,13 @@ No premium feature should require users to surrender or invalidate their existin
 
 ## Source-to-Table Registry and Patch Drift Planning
 
-The Gold tier should not treat CK3 game files as a loose pile of scraped inputs. It should instead maintain a source-to-table registry that maps each live game file or folder to a specific canonical table or extraction pipeline.
+The repeatable release procedure is defined in `Docs/game_update_protocol.md`. Its first target is the By God Alone Core Expansion scheduled for September 30, 2026. The current Scribe data remains the prerelease baseline; the release patch version must be discovered from post-install evidence rather than assumed in advance.
+
+The Gold tier should not treat wiki pages or CK3 game files as a loose pile of scraped inputs. It should maintain a source-to-table registry that maps each versioned wiki page and each registered game-file loader group to a specific canonical table or extraction pipeline.
 
 The registry should answer three questions for every upstream source:
 
-1. Which file or folder is authoritative?
+1. Which wiki page defines the reference concept, and which file group verifies its implementation?
 2. What data does it yield?
 3. Which internal table or validation view consumes it?
 
@@ -114,9 +119,10 @@ This becomes especially important when Paradox ships mass patches, DLC updates, 
 
 The app should treat the live game install as an external source layer and the internal database as the operational layer.
 
-- Source layer: Steam install root, CK3 game root, `common` rules folders, DLC overlays, and version-specific files.
-- Extraction layer: parser or importer that turns game files into canonical tables.
-- Operational layer: DuckDB-managed tables for mutable run state, historical observations, lifecycle events, and normalized reference data.
+- Reference catalog: versioned CK3 Wiki pages and validated extracts.
+- Implementation evidence: Steam install root, the full CK3 `game` tree, interleaved core/DLC scripts, package descriptors, and build-specific files.
+- Extraction layer: parser or importer that turns wiki and game-file blobs into typed canonical tables.
+- Database layer: repository-root `ck3tracker_v2.duckdb`, with separate source, reference, journal, and application-view schemas.
 - Export layer: optional Parquet snapshots for archival use, not the primary workflow engine.
 
 This keeps the app resilient to patch churn without splitting the data model into two jagged partial systems.
@@ -125,6 +131,8 @@ This keeps the app resilient to patch churn without splitting the data model int
 
 Each source should have a row with:
 
+- reference page URL and revision ID
+- wiki retrieval timestamp and stated game version
 - source path
 - source type (folder or file)
 - CK3 version or build tag
@@ -142,38 +150,45 @@ source_path | source_type | build | patch_risk | extract_rule | destination_tabl
 --- | --- | --- | --- | --- | --- | ---
 C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\laws | folder | build-version | high | parse law definitions | ck3_law_rules | legal_branch_consistency |
 C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\landed_titles | file or folder | build-version | high | parse title hierarchy | ck3_title_hierarchy | title_relationship_checks |
-C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\cultures | folder | build-version | high | parse culture metadata | ck3_culture_rules | culture_region_checks |
+C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\common\culture | folder | build-version | high | parse culture metadata | ck3_culture_rules | culture_region_checks |
 C:\Program Files (x86)\Steam\steamapps\common\Crusader Kings III\game\history | folder | build-version | high | parse historical setup | ck3_history_reference | version_compatibility_checks |
 ```
 
-### Why DuckDB should own the dynamic workflow
+### Why DuckDB should own the complete queryable model
 
-DuckDB is the better operational home for the project because it can handle:
+DuckDB is the primary database for the project because it can handle:
 
+- typed normalized tables parsed from source text blobs
+- versioned reference snapshots and source provenance
 - time-stamped observation history
 - mutable lifecycle state
 - validation queries against canonical reference data
 - historical comparisons and audit recovery
 - large table-driven analysis without forcing a split between reference and run-state workflows
 
-Parquet remains useful for export, snapshotting, and archival comparison, but it should not be the primary engine for a dynamic tracker that must adapt to game patch drift.
+Parquet remains useful for export, snapshotting, test fixtures, and archival interchange, but it is not the primary destination or query engine.
 
 ### Deep-dive execution plan
 
-The next implementation pass should be a file-by-file analysis of the CK3 game folders, with a target outcome of building the actual source-to-table registry for the project.
+This is retained planning history. Its priority order is advisory and is activated only when `Docs/current_build.md` explicitly selects it.
+
+A future catalog pass may pair wiki topic areas with a generated inventory of the complete CK3 `game` tree when activated by `Docs/current_build.md`. Inventory collection and semantic parsing are separate: the generated evidence manifest records every file automatically, while the source-to-table planning registry records only meaningful wiki-to-loader-group mappings.
 
 Priority order:
 
 1. `game\common\laws`
 2. `game\common\landed_titles`
-3. `game\common\cultures`
-4. `game\common\religions`
+3. `game\common\culture`
+4. `game\common\religion`
 5. `game\history`
-6. remaining `game\common` rule folders
+6. `game\events`, `game\localization`, and `game\map_data`
+7. remaining `game` roots, including DLC descriptors and package assets
 
-This work should be treated as a compatibility and truth-grounding pass. It will likely surface areas where the app should be refactored once the direct game-file data becomes the stronger source of truth.
+This work is a compatibility and implementation-verification pass. It should refine the wiki-grounded reference model without making the live install the product vocabulary or mixing reference evidence with run state.
 
-## Return Point
+## Historical Return Point
+
+This return point is superseded by `Docs/current_build.md` and must not be used to resume work.
 
 Return to the current implementation in this order:
 
@@ -1280,7 +1295,17 @@ This is a live-install inventory of `game\common`, processed in alphabetical ord
 | `message_filter_types` | `00_message_filter_types.txt` | 2026-05-09 10:35:02 -07:00 | 2 | High |
 | `message_group_types` | `_message_group_types.info` | 2026-05-09 10:35:11 -07:00 | 2 | High |
 | `message_group_types` | `00_message_group_types.txt` | 2025-12-11 09:48:32 -07:00 | 2 | High |
-
+| `men_at_arms_types` | `_men_at_arms_types.info` | 2026-05-09 10:35:02 -07:00 | 11 | High |
+| `men_at_arms_types` | `00_cultural_maa_types.txt` | 2026-05-09 10:35:02 -07:00 | 11 | High |
+| `men_at_arms_types` | `00_fp3_maa_types.txt` | 2025-11-15 09:19:39 -07:00 | 11 | High |
+| `men_at_arms_types` | `00_holy_order_maa_types.txt` | 2025-10-28 09:58:53 -07:00 | 11 | High |
+| `men_at_arms_types` | `00_maa_types.txt` | 2026-05-09 10:35:02 -07:00 | 11 | High |
+| `men_at_arms_types` | `00_regional_maa_types.txt` | 2025-10-28 09:58:54 -07:00 | 11 | High |
+| `men_at_arms_types` | `01_accolade_maa_types.txt` | 2026-05-09 10:35:02 -07:00 | 11 | High |
+| `men_at_arms_types` | `01_fp1_maa_types.txt` | 2026-05-09 10:35:02 -07:00 | 11 | High |
+| `men_at_arms_types` | `07_ep3_maa_types.txt` | 2025-11-15 09:19:39 -07:00 | 11 | High |
+| `men_at_arms_types` | `09_mpo_maa_types.txt` | 2026-05-09 10:35:02 -07:00 | 11 | High |
+| `men_at_arms_types` | `10_tgp_maa_types.txt` | 2026-05-09 10:35:02 -07:00 | 11 | High |
 | `modifiers` | `_modifiers.info` | 2024-03-09 16:30:36 -07:00 | 132 | High |
 | `modifiers` | `00_activity_feast_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 132 | High |
 | `modifiers` | `00_activity_hold_court_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 132 | High |
@@ -1860,6 +1885,172 @@ This is a live-install inventory of `game\common`, processed in alphabetical ord
 | `scripted_character_templates` | `10_ach_character_templates.txt` | 2025-10-28 09:58:54 -07:00 | 42 | Medium |
 | `scripted_character_templates` | `tgp_character_templates.txt` | 2026-05-09 10:35:01 -07:00 | 42 | Medium |
 | `scripted_costs` | `00_costs.txt` | 2026-05-09 10:35:02 -07:00 | 1 | High |
+| `scripted_effects` | `00_accolades_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_achievement_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_activity_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_administrative_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_adultery_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_adventure_effects.txt` | 2024-03-09 16:30:39 -07:00 | 166 | High |
+| `scripted_effects` | `00_ai_budget_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_ai_conqueror_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_ai_value_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_alert_actions_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `00_almohad_invasion_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_animal_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_antiquarian_artifact_improvement_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_bastard_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_board_game_effects.txt` | 2024-09-24 09:02:56 -07:00 | 166 | High |
+| `scripted_effects` | `00_bookmark_effects.txt` | 2024-03-09 16:30:36 -07:00 | 166 | High |
+| `scripted_effects` | `00_bp1_artifact_creation_effects.txt` | 2024-09-24 09:02:57 -07:00 | 166 | High |
+| `scripted_effects` | `00_building_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_camp_officer_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_casus_belli_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `00_childhood_effects.txt` | 2025-10-28 09:58:53 -07:00 | 166 | High |
+| `scripted_effects` | `00_commander_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_compliment_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `00_councillor_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_county_corruption_effects.txt` | 2025-05-11 14:31:09 -07:00 | 166 | High |
+| `scripted_effects` | `00_court_position_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_courtier_guest_management_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_culture_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_custom_loc_effects.txt` | 2024-09-24 09:02:56 -07:00 | 166 | High |
+| `scripted_effects` | `00_death_management_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `00_debug_and_shortcut_effects.txt` | 2025-10-28 09:58:53 -07:00 | 166 | High |
+| `scripted_effects` | `00_decisions_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_diarchy_scripted_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `00_diplomacy_lifestyle_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_diplomacy_perk_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_dummy_gender_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_education_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep1_artifact_creation_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep1_artifact_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep1_court_type_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep1_hold_court_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep1_inspiration_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep1_inspiration_effects_sean.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_ep3_decision_effects.txt` | 2025-11-15 09:19:39 -07:00 | 166 | High |
+| `scripted_effects` | `00_experience_effects.txt` | 2025-10-28 09:58:56 -07:00 | 166 | High |
+| `scripted_effects` | `00_faction_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_feast_scripted_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `00_flavorization_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_funeral_scripted_effects.txt` | 2025-09-09 05:59:33 -07:00 | 166 | High |
+| `scripted_effects` | `00_game_rule_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_governance_lifestyle_effects.txt` | 2024-03-09 17:07:48 -07:00 | 166 | High |
+| `scripted_effects` | `00_historical_characters_scripted_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `00_history_effects.txt` | 2025-10-28 09:58:57 -07:00 | 166 | High |
+| `scripted_effects` | `00_holy_order_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_hook_effects.txt` | 2024-09-24 09:02:56 -07:00 | 166 | High |
+| `scripted_effects` | `00_hunt_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_interaction_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_intercourse_effects.txt` | 2024-03-09 16:30:39 -07:00 | 166 | High |
+| `scripted_effects` | `00_intrigue_lifestyle_effects.txt` | 2024-03-09 16:30:40 -07:00 | 166 | High |
+| `scripted_effects` | `00_intrigue_perk_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `00_journey_effects.txt` | 2024-11-04 10:06:29 -07:00 | 166 | High |
+| `scripted_effects` | `00_laamp_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_learning_lifestyle_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_lifestyle_focus_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_lover_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_major_decisions_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_major_decisions_scripted_effects_2.txt` | 2025-05-13 16:02:09 -07:00 | 166 | High |
+| `scripted_effects` | `00_major_decisions_scripted_effects_3.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_marriage_effects.txt` | 2025-03-29 06:45:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_marriage_interaction_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_martial_lifestyle_effects.txt` | 2025-10-28 09:58:53 -07:00 | 166 | High |
+| `scripted_effects` | `00_men_at_arms_effects.txt` | 2024-09-24 09:02:56 -07:00 | 166 | High |
+| `scripted_effects` | `00_mongol_invasion_effects.txt` | 2026-05-09 10:34:58 -07:00 | 166 | High |
+| `scripted_effects` | `00_murder_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_music_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `00_nickname_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `00_parent_effects.txt` | 2024-03-09 16:30:40 -07:00 | 166 | High |
+| `scripted_effects` | `00_personal_details_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_personality_trait_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `00_petition_liege_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_pilgrimage_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_playdate_scripted_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_poetry_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `00_pool_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_pregnancy_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_prison_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `00_realm_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_regional_scripted_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_relation_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_religion_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_religious_interaction_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `00_roaming_effects.txt` | 2024-11-04 10:06:29 -07:00 | 166 | High |
+| `scripted_effects` | `00_romance_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_scheme_scripted_effects.txt` | 2026-05-09 10:34:58 -07:00 | 166 | High |
+| `scripted_effects` | `00_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_secret_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_setup_tests_effect.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_sibling_effects.txt` | 2024-09-24 09:02:57 -07:00 | 166 | High |
+| `scripted_effects` | `00_single_combat_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_skill_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_spouse_effects.txt` | 2024-09-24 09:02:57 -07:00 | 166 | High |
+| `scripted_effects` | `00_stewardship_lifestyle_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `00_stewardship_perk_effects.txt` | 2024-03-09 16:30:40 -07:00 | 166 | High |
+| `scripted_effects` | `00_story_cycle_same_gender_pen_pal_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_stress_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_task_contract_scripted_effects.txt` | 2025-10-28 09:58:56 -07:00 | 166 | High |
+| `scripted_effects` | `00_tax_rivalry_effects.txt` | 2025-10-28 09:58:57 -07:00 | 166 | High |
+| `scripted_effects` | `00_title_effects.txt` | 2024-11-04 10:06:28 -07:00 | 166 | High |
+| `scripted_effects` | `00_travel_effects.txt` | 2024-11-04 10:06:28 -07:00 | 166 | High |
+| `scripted_effects` | `00_tributary_setup_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_unity_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_wanderer_lifestyle_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_wanderer_perk_effects.txt` | 2024-11-04 10:06:29 -07:00 | 166 | High |
+| `scripted_effects` | `00_war_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `00_while_loop_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_witch_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `00_yearly_event_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `01_building_upgrade_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `01_dlc_bp1_filippa_scripted_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `01_dlc_fp1_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `01_dlc_fp3_scripted_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `01_ep1_court_artifact_creation_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `01_ep1_court_event_effects.txt` | 2024-09-24 09:02:56 -07:00 | 166 | High |
+| `scripted_effects` | `01_ep1_interaction_scripted_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `01_exp1_historical_artifacts_creation_effect.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `02_dlc_ep1_decision_scripted_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `02_ep2_artifact_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `03_bp1_haunted_by_ghosts_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `03_bp1_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `03_bp2_scripted_effects.txt` | 2026-03-16 06:57:31 -07:00 | 166 | High |
+| `scripted_effects` | `03_dlc_fp2_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `03_dlc_fp3_artifact_creation_effects.txt` | 2025-09-09 05:59:33 -07:00 | 166 | High |
+| `scripted_effects` | `03_dlc_fp3_scripted_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `04_dlc_ep2_tour_effects.txt` | 2025-11-15 09:19:39 -07:00 | 166 | High |
+| `scripted_effects` | `04_dlc_ep2_tournament_effects.txt` | 2025-10-28 09:58:51 -07:00 | 166 | High |
+| `scripted_effects` | `04_dlc_ep2_wedding_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `05_bp2_hostage_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `05_dlc_bp2_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `05_dlc_fp3_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `06_dlc_ce1_epidemics_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `06_dlc_ce1_leg_b_effects.txt` | 2024-03-09 16:30:40 -07:00 | 166 | High |
+| `scripted_effects` | `06_dlc_ce1_legend_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `06_dlc_ce1_legitimacy_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `07_dlc_ep3_scripted_effects.txt` | 2026-05-09 10:34:58 -07:00 | 166 | High |
+| `scripted_effects` | `07_dlc_ep3_story_cycle_adventurer_ai_scripted_effects.txt` | 2025-10-28 09:58:54 -07:00 | 166 | High |
+| `scripted_effects` | `07_frankokratia_scripted_effects.txt` | 2025-10-28 09:58:53 -07:00 | 166 | High |
+| `scripted_effects` | `08_bp3_effects.txt` | 2025-11-15 09:19:39 -07:00 | 166 | High |
+| `scripted_effects` | `09_dlc_mpo_scripted_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `09_mpo_greatest_of_khans_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `09_mpo_settlement_issue_effects.txt` | 2025-05-11 14:31:10 -07:00 | 166 | High |
+| `scripted_effects` | `10_ach_effects.txt` | 2026-05-09 10:35:01 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_dynastic_cycle_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_house_bloc_scripted_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_house_relation_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_japan_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_korea_scripted_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_natural_disaster_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_scripted_effects.txt` | 2026-05-09 10:34:58 -07:00 | 166 | High |
+| `scripted_effects` | `10_dlc_tgp_silk_road_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `20_health_balancing_effects.txt` | 2024-03-09 16:30:37 -07:00 | 166 | High |
+| `scripted_effects` | `20_health_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `easteregg_historical_artifact_creation_effects.txt` | 2026-05-09 10:35:13 -07:00 | 166 | High |
+| `scripted_effects` | `tgp_debate_scripted_effects.txt` | 2025-12-11 09:48:32 -07:00 | 166 | High |
+| `scripted_effects` | `tgp_imperial_examination_scripted_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
+| `scripted_effects` | `tgp_mandala_scripted_effects.txt` | 2026-05-09 10:35:02 -07:00 | 166 | High |
+| `scripted_effects` | `tgp_tribute_mission_scripted_effects.txt` | 2026-05-09 10:35:03 -07:00 | 166 | High |
 | `scripted_guis` | `00_character.txt` | 2024-03-09 16:30:37 -07:00 | 7 | Low |
 | `scripted_guis` | `00_religion.txt` | 2025-10-28 09:58:54 -07:00 | 7 | Low |
 | `scripted_guis` | `ce1_funeral_scripted_guis.txt` | 2024-03-09 16:30:40 -07:00 | 7 | Low |
@@ -1867,7 +2058,54 @@ This is a live-install inventory of `game\common`, processed in alphabetical ord
 | `scripted_guis` | `knight_permissions_sguis.txt` | 2026-05-09 10:35:12 -07:00 | 7 | Low |
 | `scripted_guis` | `tgp_examination.txt` | 2025-10-28 09:58:57 -07:00 | 7 | Low |
 | `scripted_guis` | `tgp_scripted_guis.txt` | 2026-05-09 10:35:13 -07:00 | 7 | Low |
-
+| `scripted_lists` | `00_scripted_lists.txt` | 2025-05-11 14:31:10 -07:00 | 1 | Medium |
+| `scripted_modifiers` | `_scripted_modifiers.info` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_activity_scripted_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_ai_value_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_building_modifiers.txt` | 2026-05-09 10:35:03 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_character_selection_scripted_modifiers.txt` | 2024-03-09 16:30:40 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_councillor_scripted_modifiers.txt` | 2024-03-09 16:30:38 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_decisions_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_diarchy_scripted_modifiers.txt` | 2025-03-29 06:45:03 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_elective_successions_scripted_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_ep1_amenities_modifiers.txt` | 2024-03-09 17:07:48 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_ep1_artifact_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_ep1_inspiration_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_faction_modifiers.txt` | 2026-05-09 10:35:03 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_hold_court_modifiers.txt` | 2024-09-24 09:02:56 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_lifestyle_scripted_modifiers.txt` | 2024-03-09 16:30:38 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_marriage_scripted_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_military_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_perk_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_portrait_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_religion_scripted_modifiers.txt` | 2025-12-11 09:48:32 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_romance_and_seduction_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_scheme_scripted_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_scripted_relations_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_single_combat_scripted_modifiers.txt` | 2024-03-09 16:30:40 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_spouse_scripted_modifiers.txt` | 2024-03-09 16:30:38 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_statecraft_lifestyle_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_trait_specific_scripted_modifiers.txt` | 2024-03-09 16:30:38 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_voter_strength_scripted_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_weather_modifiers.txt` | 2024-03-09 16:30:38 -07:00 | 44 | High |
+| `scripted_modifiers` | `00_yearly_events_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `01_bp1_scripted_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `01_fp1_scripted_modifiers.txt` | 2024-03-09 16:30:40 -07:00 | 44 | High |
+| `scripted_modifiers` | `02_ep1_scripted_modifiers.txt` | 2024-09-24 09:02:56 -07:00 | 44 | High |
+| `scripted_modifiers` | `03_fp2_scripted_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `04_ep2_scripted_modifiers.txt` | 2024-09-24 09:02:57 -07:00 | 44 | High |
+| `scripted_modifiers` | `05_bp2_scripted_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `05_fp3_scripted_modifiers.txt` | 2024-03-09 16:30:37 -07:00 | 44 | High |
+| `scripted_modifiers` | `07_ep3_scripted_modifiers.txt` | 2025-10-28 09:58:54 -07:00 | 44 | High |
+| `scripted_modifiers` | `09_mpo_scripted_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 44 | High |
+| `scripted_modifiers` | `10_ach_scripted_modifiers.txt` | 2025-09-09 05:59:34 -07:00 | 44 | High |
+| `scripted_modifiers` | `10_tgp_faction_modifiers.txt` | 2025-12-11 09:48:32 -07:00 | 44 | High |
+| `scripted_modifiers` | `10_tgp_japan_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 44 | High |
+| `scripted_modifiers` | `10_tgp_scripted_modifiers.txt` | 2026-05-09 10:35:02 -07:00 | 44 | High |
+| `scripted_modifiers` | `tgp_mandala_scripted_modifiers.txt` | 2025-10-28 09:58:57 -07:00 | 44 | High |
+| `scripted_relations` | `_scripted_relations.info` | 2024-09-24 09:02:56 -07:00 | 2 | Medium |
+| `scripted_relations` | `00_scripted_relations.txt` | 2025-10-28 09:58:54 -07:00 | 2 | Medium |
+| `scripted_rules` | `00_rules.txt` | 2026-05-09 10:35:02 -07:00 | 1 | High |
 | `scripted_triggers` | `00_activity_triggers.txt` | 2025-12-11 09:48:32 -07:00 | 135 | High |
 | `scripted_triggers` | `00_adultery_triggers.txt` | 2024-09-24 09:02:57 -07:00 | 135 | High |
 | `scripted_triggers` | `00_ai_acceptance_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 135 | High |
@@ -2244,4 +2482,94 @@ This is a live-install inventory of `game\common`, processed in alphabetical ord
 | `suggestions` | `_suggestions.info` | 2024-03-09 16:30:38 -07:00 | 2 | Medium |
 | `suggestions` | `01_suggestions.txt` | 2025-10-28 09:58:54 -07:00 | 2 | Medium |
 
-**Current stopping point:** `suggestions` completed. The `S` folders are complete. Continue with `task_contracts`.
+| `task_contracts` | `_task_contracts.info` | 2024-09-24 09:02:57 -07:00 | 12 | High |
+| `task_contracts` | `admin_contracts.txt` | 2025-11-15 09:19:39 -07:00 | 12 | High |
+| `task_contracts` | `laamp_base_contracts.txt` | 2026-05-09 10:34:58 -07:00 | 12 | High |
+| `task_contracts` | `laamp_extra_contracts.txt` | 2026-05-09 10:35:02 -07:00 | 12 | High |
+| `task_contracts` | `laamp_nm_contracts.txt` | 2025-10-28 09:58:54 -07:00 | 12 | High |
+| `task_contracts` | `laamp_transport_contracts.txt` | 2026-05-09 10:35:02 -07:00 | 12 | High |
+| `task_contracts` | `nomads_migration_contracts.txt` | 2025-05-11 14:31:10 -07:00 | 12 | High |
+| `task_contracts` | `tgp_admin_contracts.txt` | 2025-12-11 09:48:32 -07:00 | 12 | High |
+| `task_contracts` | `tgp_admin_contracts_tova.txt` | 2025-11-15 09:19:39 -07:00 | 12 | High |
+| `task_contracts` | `tgp_admin_military_contracts.txt` | 2025-10-28 09:58:57 -07:00 | 12 | High |
+| `task_contracts` | `tgp_mandala_contracts.txt` | 2025-10-28 09:58:57 -07:00 | 12 | High |
+| `task_contracts` | `tgp_natural_disaster_contracts.txt` | 2026-05-09 10:35:02 -07:00 | 12 | High |
+| `tax_slots` | `obligations\_tax_obligation.info` | 2025-10-28 09:58:57 -07:00 | 4 | High |
+| `tax_slots` | `obligations\clan_tax_collector.txt` | 2025-10-28 09:58:54 -07:00 | 4 | High |
+| `tax_slots` | `types\_tax_slot_type.info` | 2024-03-09 16:30:38 -07:00 | 4 | High |
+| `tax_slots` | `types\00_tax_slot_types.txt` | 2026-05-09 10:35:02 -07:00 | 4 | High |
+| `terrain_types` | `_terrains.info` | 2025-05-11 14:31:10 -07:00 | 2 | High |
+| `terrain_types` | `00_terrains.txt` | 2025-10-28 09:58:54 -07:00 | 2 | High |
+| `traits` | `_traits.info` | 2025-10-28 09:58:54 -07:00 | 4 | High |
+| `traits` | `00_traits.txt` | 2026-05-09 10:34:58 -07:00 | 4 | High |
+| `traits` | `old_trait_indexes.lookup` | 2024-03-09 16:30:38 -07:00 | 4 | High |
+| `traits` | `trait_conversion.lookup` | 2024-03-09 16:30:40 -07:00 | 4 | High |
+| `travel` | `point_of_interest_types\_travel_point_of_interest_types.info` | 2024-03-09 16:30:38 -07:00 | 5 | High |
+| `travel` | `point_of_interest_types\travel_point_of_interest_types.txt` | 2026-05-09 10:35:03 -07:00 | 5 | High |
+| `travel` | `travel_options\_travel_options.info` | 2024-03-09 16:30:38 -07:00 | 5 | High |
+| `travel` | `travel_options\travel_options.txt` | 2025-10-28 09:58:54 -07:00 | 5 | High |
+| `travel` | `travel_options\travel_options_modifiers.txt` | 2024-03-09 16:30:38 -07:00 | 5 | High |
+| `trigger_localization` | `_trigger_localization.info` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_achievement_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `00_adultery_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `00_building_requirement_triggers.txt` | 2025-12-11 09:48:32 -07:00 | 52 | High |
+| `trigger_localization` | `00_building_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `00_character_relation_triggers.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `00_character_script_list_triggers.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `00_character_triggers.txt` | 2026-05-09 10:35:03 -07:00 | 52 | High |
+| `trigger_localization` | `00_culture_triggers.txt` | 2024-09-24 09:02:58 -07:00 | 52 | High |
+| `trigger_localization` | `00_custom_triggers.txt` | 2025-12-11 09:48:32 -07:00 | 52 | High |
+| `trigger_localization` | `00_debug_triggers.txt` | 2025-05-11 14:31:10 -07:00 | 52 | High |
+| `trigger_localization` | `00_dlc_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `00_doctrine_triggers.txt` | 2024-09-24 09:02:57 -07:00 | 52 | High |
+| `trigger_localization` | `00_dynasty_triggers.txt` | 2024-10-08 06:33:07 -07:00 | 52 | High |
+| `trigger_localization` | `00_faction_triggers.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `00_ghw_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_government_triggers.txt` | 2025-12-11 09:48:32 -07:00 | 52 | High |
+| `trigger_localization` | `00_holy_order_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_landed_title_triggers.txt` | 2025-11-15 09:19:39 -07:00 | 52 | High |
+| `trigger_localization` | `00_law_triggers.txt` | 2025-10-28 09:58:57 -07:00 | 52 | High |
+| `trigger_localization` | `00_legend_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_lifestyle_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_logic_triggers.txt` | 2025-11-15 09:19:39 -07:00 | 52 | High |
+| `trigger_localization` | `00_province_script_list_triggers.txt` | 2025-09-17 05:34:27 -07:00 | 52 | High |
+| `trigger_localization` | `00_province_triggers.txt` | 2025-05-11 14:31:11 -07:00 | 52 | High |
+| `trigger_localization` | `00_religion_triggers.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `00_scheme_script_list_triggers.txt` | 2024-09-24 09:02:58 -07:00 | 52 | High |
+| `trigger_localization` | `00_scope_comparison_triggers_l_english.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `00_script_list_triggers.txt` | 2025-11-15 09:19:39 -07:00 | 52 | High |
+| `trigger_localization` | `00_secret_script_list_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `00_secret_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_travel_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `00_tutorial_triggers.txt` | Intentionally skipped | 52 | Out of scope |
+| `trigger_localization` | `00_unity_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `00_war_triggers.txt` | 2024-10-08 06:33:07 -07:00 | 52 | High |
+| `trigger_localization` | `01_character_interaction_triggers.txt` | 2025-11-15 09:19:39 -07:00 | 52 | High |
+| `trigger_localization` | `01_decision_triggers.txt` | 2024-11-04 10:06:28 -07:00 | 52 | High |
+| `trigger_localization` | `01_fp1_achievement_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `02_ep1_achievement_triggers.txt` | 2024-03-09 16:30:40 -07:00 | 52 | High |
+| `trigger_localization` | `02_ep1_royal_court_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `03_fp2_struggle_triggers.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `04_ep2_diarchy_triggers.txt` | 2025-11-15 09:19:39 -07:00 | 52 | High |
+| `trigger_localization` | `04_fp3_struggle_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `05_ep2_achievement_triggers.txt` | 2025-10-28 09:58:54 -07:00 | 52 | High |
+| `trigger_localization` | `06_bp2_hostage_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `07_ce1_achievement_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `08_ep3_admin_triggers.txt` | 2024-09-24 09:02:59 -07:00 | 52 | High |
+| `trigger_localization` | `08_ep3_laamp_triggers.txt` | 2026-05-09 10:35:01 -07:00 | 52 | High |
+| `trigger_localization` | `09_mpo_achievement_triggers.txt` | 2025-05-11 14:31:10 -07:00 | 52 | High |
+| `trigger_localization` | `09_mpo_triggers.txt` | 2025-05-11 14:31:11 -07:00 | 52 | High |
+| `trigger_localization` | `ce1_legend_triggers.txt` | 2024-03-09 16:30:38 -07:00 | 52 | High |
+| `trigger_localization` | `tgp_triggers.txt` | 2025-12-11 09:48:32 -07:00 | 52 | High |
+| `tutorial_lessons` | `[intentionally skipped: tutorials are not part of this app]` | Not collected | 10 | Out of scope |
+| `tutorial_lesson_chains` | `[intentionally skipped: tutorials are not part of this app]` | Not collected | 2 | Out of scope |
+| `vassal_stances` | `_vassal_stances.info` | 2024-03-09 16:30:40 -07:00 | 2 | High |
+| `vassal_stances` | `00_vassal_stances.txt` | 2025-10-28 09:58:54 -07:00 | 2 | High |
+
+**Scope marker:** Tutorial-only entries in `trigger_localization`, `tutorial_lessons`, and `tutorial_lesson_chains` are intentionally skipped because tutorials are not part of this app.
+
+| `common (root-level file)` | `achievement_groups.txt` | 2025-10-28 09:58:53 -07:00 | 1 immediate file (2,677 recursive files) | Low |
+
+**Scope marker:** Tutorial-only entries remain intentionally skipped because tutorials are not part of this app.
+
+**Current stopping point:** Top-down missing-folder sync completed through `scripted_rules`. The only intentionally deferred inventory remains `bookmark_portraits`.

@@ -3,6 +3,8 @@
 # 📘 CK3 Tracker — Project Blueprint  
 *A clean, structured, GitHub‑ready plan for the CK3 Tracker Dash App.*
 
+> **Historical blueprint:** This checklist preserves early project intent and completed scaffolding history. It is not authoritative for current status, storage contracts, or implementation order. Use `Docs/current_build.md` for the sole current path and `Docs/architecture.md` for durable boundaries.
+
 ---
 
 ## ✅ Overview
@@ -38,12 +40,13 @@ The existing seeded data and dead-run placeholder are the initial implementation
 - Resolve goals and duchy membership by stable IDs, never by familiar display names.
 - Load one internally consistent map profile for a run before calculating dashboard progress.
 - Import only de jure duchies; exclude all uncreatable duchies because they are exempt from the goal workflow.
-- Permanently limit the application to 867 starts; do not add start-date switching or support for 1066/1178.
+- Allow a run to start at any location in a promoted CK3 baseline by filtering the canonical hierarchy and persisting stable title IDs.
+- Offer only baseline or bookmark dates that have complete parsed history and have passed promotion validation for the selected reference snapshot.
 - Preserve CK3-defined title IDs exactly as the canonical keys.
 - Preserve the source special-building list on duchy metadata records.
 
 ### Survival Journal Objective
-The central question of the run is: how long can the realm survive from the 867 start before larger external powers overwhelm it? Features should support recording the realm's growth, goals, pressures, threats, and eventual survival or death across that timeline. Alternate start dates are outside the product scope.
+The central question of a run is: how does this ruler and realm develop from the selected CK3 baseline until the player declares the journal complete or dead? Features should support recording the realm's growth, goals, pressures, threats, and eventual outcome across that timeline. The current retained reference data supports 867; additional bookmarks become available only after their historical state is parsed and promoted.
 
 ---
 
@@ -57,11 +60,13 @@ The central question of the run is: how long can the realm survive from the 867 
 
 Reference snapshot metadata:
 - game version: `1.19.0.6 (Scribe)`
-- start date: `867`
+- candidate baseline date under promotion review: `867` (not selectable until explicit promotion)
 - title hierarchy source: installed CK3 game files
 - wiki metadata source: CK3 Wiki pages captured for the matching game data
 
 ### Reference and Run-State Sources
+Current development fixtures:
+
 - `holdings.parquet`
 - `playthrough_holdings.parquet`
 - `counties.parquet`
@@ -69,10 +74,13 @@ Reference snapshot metadata:
 - `characters.parquet`
 - `data/trial/run_state.duckdb`
 
-Reference sources define what exists in CK3. Parquet stores immutable game/reference data and import snapshots. DuckDB is the durable transactional layer for mutable run state, observations, lifecycle transitions, and journal events. Manual updates write transactions into DuckDB rather than replacing reference sources.
+The final application database is the repository-root `ck3tracker_v2.duckdb`. It stores source provenance, immutable versioned reference tables, imports, mutable run state, observations, lifecycle transitions, journal events, and application views in separate logical schemas. The files above are fixtures used by the current trial and must be migrated without losing history.
 
-### Hybrid Data Backbone
-All persistent application records should be normalized around `playthrough_id`, stable CK3 IDs, observation/event dates, and provenance. Parquet stores immutable CK3 reference data and import snapshots; DuckDB stores transactional run state, current-state projections, observations, lifecycle changes, and event history. DuckDB-backed records include:
+### Unified DuckDB Backbone
+All persistent application records should be normalized in the root DuckDB around `reference_snapshot_id`, `playthrough_id`, stable CK3 IDs, observation/event dates, and provenance. Parquet and CSV are optional export, archival interchange, and fixture formats. DuckDB-backed records include:
+
+- wiki revisions, installed-file scans, DLC metadata, and parser runs
+- versioned normalized CK3 reference tables
 - run identity and lifecycle
 - ruler history
 - current and historical holdings
@@ -82,6 +90,18 @@ All persistent application records should be normalized around `playthrough_id`,
 - journal observations, milestones, threats, and completion events
 
 Every persisted run must record the reference snapshot it was created against, including `game_version` and `start_date`. A Scribe run must not silently load reference data from another game version.
+
+### Playthrough Baseline Selector
+Run creation establishes an immutable starting context before observations begin:
+
+1. Select a supported game reference snapshot and promoted baseline or bookmark date.
+2. Search and filter the title hierarchy using stable parent relationships: Empire, Kingdom, Duchy, County, then Barony where applicable.
+3. Select or enter the tracked ruler identity supported by the baseline evidence.
+4. Preview the resolved location chain, baseline date, ruler, culture, faith, holder, and capital facts; unknown values remain explicitly unknown.
+5. Atomically create the playthrough, its baseline selection, and a `playthrough_created` transaction event.
+6. Load Dashboard, Holdings, and journal views from one shared playthrough context.
+
+The selectors display localized names but persist `reference_snapshot_id`, `baseline_id`, and stable CK3 title IDs. Changing an upstream selector clears incompatible descendants. Unsupported dates, incomplete title chains, and titles marked non-selectable by validation must be rejected before commit.
 
 ### Bronze MVP: Barony Observation Editor
 The first functioning editor milestone is a manual barony observation workflow:
@@ -396,6 +416,8 @@ Dashboard reads the dictionary and updates:
 
 ## 🧩 Implementation Steps (Checklist)
 
+This checklist is historical and must not be used as a current resume sequence unless `Docs/current_build.md` explicitly activates a step.
+
 ### **Phase 0: Scaffolding & Setup** ✅ COMPLETE
 - [x] Step 1 — Create project structure
 - [x] Step 2 — Initialize Dash app
@@ -442,7 +464,7 @@ Dashboard reads the dictionary and updates:
 - [ ] Real parquet-backed provider replacement is next once the UI shell is stable.
 
 ### **Refined Next Session Plan**
-The next implementation pass should remain narrow and use Restore Carthage as the proving example.
+Historical proposal: a narrow decision-model pass could use Restore Carthage as the proving example if activated by `Docs/current_build.md`.
 
 1. **Freeze the Scribe reference contract**
     - Record `1.19.0.6 (Scribe)` and `867` as required run metadata.
@@ -472,17 +494,21 @@ The next implementation pass should remain narrow and use Restore Carthage as th
 
 Do not build the full goal catalog, barony import, or broad dashboard redesign until this vertical slice is validated visually and against the manual bridge.
 
+The attached 867 dashboard workbook is the visual concept for the eventual player dashboard, not an import format or runtime dependency. Complete the normalized DuckDB reference item catalog first. When dashboard work resumes, translate its visual grouping and player questions into provider-backed components and remove all Excel sheet, table, range, formula, and cell-reference terminology from the implementation.
+
+The read-only Reference Inspector may evolve during catalog construction because it exists to make candidate data visually reviewable. It must remain visibly marked as candidate tooling and must not bypass promotion gates for playthrough creation.
+
 ### **Phase 2: Dashboard Service**
-- [ ] Step 28 — Implement DashboardService `get_dashboard_metrics()`
+- [ ] Step 28 — Complete the normalized reference item catalog and promotion report
+- [ ] Step 29 — Implement DashboardService `get_dashboard_metrics()` from DuckDB-backed providers
 
 ### **Phase 3: Dashboard UI**
-- [ ] Step 29 — Update dashboard page layout
-- [ ] Step 30 — Bind metrics to dashboard cards
-- [ ] Step 31 — Add first Plotly chart (terrain distribution)
-- [ ] Step 32 — Add filters/dropdowns
-- [ ] Step 33 — Update holdings page with data table
-- [ ] Step 34 — Add counties tab
-- [ ] Step 35 — Add duchies tab
+- [ ] Step 30 — Translate the workbook's visual concept into the dashboard page layout
+- [ ] Step 31 — Bind dashboard components to service fields without spreadsheet references
+- [ ] Step 32 — Add the first evidence-backed visualization
+- [ ] Step 33 — Add filters and dropdowns
+- [ ] Step 34 — Update the holdings page with provider-backed records
+- [ ] Step 35 — Add counties and duchies views
 
 ### **Phase 4: Polish & Advanced Features**
 - [ ] Step 36 — Add development trend chart
