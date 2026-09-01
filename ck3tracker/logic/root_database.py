@@ -408,6 +408,26 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
     )
     connection.execute(
         """
+        CREATE TABLE IF NOT EXISTS reference.title_baseline_state_faiths (
+            baseline_id VARCHAR NOT NULL,
+            title_id VARCHAR NOT NULL,
+            reference_snapshot_id VARCHAR NOT NULL,
+            faith_id VARCHAR NOT NULL,
+            effective_date DATE NOT NULL,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, title_id),
+            FOREIGN KEY (baseline_id, title_id)
+                REFERENCES reference.titles (baseline_id, title_id),
+            FOREIGN KEY (reference_snapshot_id, faith_id)
+                REFERENCES reference.faiths (reference_snapshot_id, faith_id)
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS reference.dynasties (
             reference_snapshot_id VARCHAR NOT NULL,
             dynasty_id VARCHAR NOT NULL,

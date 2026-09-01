@@ -3,9 +3,9 @@
 - Snapshot: `ck3_1_19_0_6_build_23530548`
 - Baseline: `ck3_1_19_0_6_867` (`0867-01-01`)
 - Review date: 2026-08-31
-- Current parser: `installed_title_history` `1.18.0`
-- Current readiness report: `ck3_1_19_0_6_867:readiness:8b174297-d096-4740-a8c8-4467f8223c60`
-- Current unresolved count: 4 title states; the twelve-title table below is the reviewed source ledger.
+- Current parser: `installed_title_history` `1.21.0`
+- Current readiness report: `ck3_1_19_0_6_867:readiness:06f75cc3-cdfd-4873-af43-40de33745a74`
+- Current unresolved count: one title state, `k_balhae`; the twelve-title table below is the reviewed source ledger.
 
 ## Why The Count Is 12
 
@@ -19,8 +19,8 @@ Reviewed mapping `royal_court -> dlc004_ep1` resolves to the valid installed The
 
 | Title | Display name | Selectable | Remaining declaration(s) | Category | Recommended disposition |
 |---|---|---:|---|---|---|
-| `e_byzantium` | Byzantine Empire | yes | `#1028`, `history/titles/00_other_titles.txt:3706-3733` | Orthodox administrative-state initialization, optional Royal Court Intrigue Court initialization, and an inactive no-Roads-to-Power fallback | Do not treat current government or succession as unresolved. At 867 the title is administrative with `acclamation_succession_law`; the fallback to feudal plus `single_heir_succession_law` does not run when Roads to Power is installed. Only state-faith/court initialization remains outside current projections. |
-| `e_japan` | Japan | yes | `#15088`, `history/titles/e_japan.txt:18-35` | Royal Court language plus TGP administrative UI title variable | Keep blocking until the TGP variable is modeled and the court branch is scoped. |
+| `e_byzantium` | Byzantine Empire | yes | `#1028`, `history/titles/00_other_titles.txt:3706-3733` | Orthodox administrative-state initialization, optional Royal Court Intrigue Court initialization, and an inactive no-Roads-to-Power fallback | Normalized in parser `1.21.0` as durable Orthodox state faith, holder-bound Intrigue Court, and an installed-package fallback no-op without changing personal faith. |
+| `e_japan` | Japan | yes | `#15088`, `history/titles/e_japan.txt:18-35` | Royal Court language plus TGP administrative UI title variable | Normalized in parser `1.20.0` as holder-bound Chinese court state and a resolved `administrative_ui_special_title` reference. |
 | `k_balhae` | Bóhai | yes | `#27271`, `history/titles/k_balhae.txt:8-16` | Installed history requests Chinese; observed game UI reports Tungusic as new court-language state and exposes the five-year adoption lock | Do not waive as generic mutable presentation. Reconcile the source/runtime language difference and decide whether the initial 1,825-day lock belongs to supported baseline state. |
 | `k_bengal` | Bengal | yes | `#29829`, `history/titles/k_bengal.txt:23-33` | Scholarly Court initialization for Narayanapala's Pala Kingdom | Known, screenshot-confirmed baseline court state. It may be excluded only through an explicit policy that court type is outside the supported contract, not because the declaration is unresolved. |
 | `k_bulgaria` | Bulgaria | yes | `#33203`, `history/titles/k_bulgaria.txt:71-85` | Greek court language for Boris's Bulgarian kingdom; Boris learns Greek if needed | Resolved baseline court and character-language state. Any exception must explicitly exclude both dimensions; this is not an ambiguous effect. |
@@ -40,7 +40,7 @@ All 12 titles and 13 declarations now have title-by-title dispositions. Domain o
 
 The evidence-review sequence is complete. The next action is the strict complete-state versus journal-required baseline policy decision; there is no next title to inspect in this twelve-title set.
 
-These reviews refine the eventual policy decision; they do not alter the current 12-title readiness count, parser behavior, candidate statuses, or production database.
+These reviews preserve the original twelve-title evidence ledger. Exact replay has since reduced the production opaque-title count to only `k_balhae`; candidate statuses remain unchanged.
 
 ## Baseline Completeness Decision
 

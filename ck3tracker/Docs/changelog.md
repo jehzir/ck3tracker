@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-01
+- Replayed exact `e_byzantium` declaration `1028` in title-history parser `1.21.0`, adding provenance-bearing Orthodox administrative state faith while retaining holder `70490`'s Intrigue Court and recording the installed-Roads-to-Power fallback as inactive.
+- Added exact wrong-title and non-administrative rejection, personal-faith separation, title-history-owned replacement, and second-load idempotency coverage; opaque title states fall from 2 to only `k_balhae`, and all 66 repository tests pass.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:06f75cc3-cdfd-4873-af43-40de33745a74`; classifications remain blocked at 2/2/1/20 with no promotion.
+- Added durable `reference.title_baseline_state_faiths` storage with one row per baseline title, explicit snapshot/faith identity, effective date, source group/declaration provenance, validation state, and enforced foreign keys to baseline titles and snapshot faiths.
+- Added exact schema-contract, valid-parent insertion, duplicate/missing-parent rejection, and reconnect-idempotency coverage; bootstrapped the candidate database with zero rows and no parser, readiness, opaque-count, or promotion changes. All 65 tests pass.
+- Replayed exact `e_japan` declaration `15088` in title-history parser `1.20.0`, retaining its holder-bound Chinese court state and adding provenance-bearing `administrative_ui_special_title=title:k_chrysanthemum_throne` under reviewed Royal Court and All Under Heaven evidence.
+- Added exact wrong-title/body-order rejection, no-personal-language-inference, and second-load idempotency coverage; opaque title states fall from 3 to 2 and all 64 repository tests pass.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:3e00ddd4-b439-4a00-b1dd-c84be7d31102`; classifications remain blocked at 2/2/1/20 with no promotion.
+- Replayed exact `k_chrysanthemum_throne` declaration `16444` in title-history parser `1.19.0`, adding provenance-bearing `single_heir_succession_law` state and a date-matched All Under Heaven destruction no-op without changing its existing ceremonial variable or court language.
+- Added exact title/body-order rejection and second-load idempotency coverage; opaque title states fall from 4 to 3 and all 63 repository tests pass.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:aa5e787a-afbc-4f63-a2ab-7b3d5e99fc01`; classifications remain blocked at 2/2/1/20 with no promotion.
+
 ## 2026-08-31
 - Replayed all five exact Royal Court conditional language-learning bodies in title-history parser `1.18.0`, adding four provenance-bearing `history_granted` rows for the Bulgarian, Italian, Lotharingian, and Sindhi holders and recording Tajik Nasr's Iranian branch as an already-native no-op.
 - Added exact learned/no-op, unresolved-language, Balhae-exclusion, and second-load idempotency coverage; opaque title states fall from 9 to 4 and all 62 repository tests pass.

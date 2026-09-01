@@ -3,7 +3,7 @@
 - Snapshot: `ck3_1_19_0_6_build_23530548`
 - Baseline: `ck3_1_19_0_6_867` (`0867-01-01`)
 - Inventory date: 2026-08-29
-- Parser introducing this projection: `installed_title_history` `1.16.0`; current parser: `1.18.0`
+- Parser introducing this projection: `installed_title_history` `1.16.0`; current parser: `1.21.0`
 
 ## Ceremonial Title Evidence
 
@@ -28,6 +28,8 @@ Parser `1.16.0` accepts only an effect body containing one `set_variable` block 
 
 The accepted declaration creates one `reference.title_baseline_variables` row with `value_kind = title`, `text_value = e_japan`, its effective date, and source declaration order. It also emits one provenance-linked `title_variable_set` event. The raw declaration remains unchanged.
 
-This declaration normalizes independently, but `k_chrysanthemum_throne` retains separate Royal Court and law-plus-destruction effect bodies. The opaque-title count therefore remains 12. Snapshot and baseline remain candidates, `historical_state_complete` remains false, and `app.supported_baselines` remains empty.
+Parser `1.20.0` also certifies exact `e_japan` declaration `15088` as an ordered Chinese Royal Court branch followed by a reviewed All Under Heaven branch setting `administrative_ui_special_title=title:k_chrysanthemum_throne`. The second durable title-reference row and both court/variable events retain declaration `15088`; the body creates no personal language knowledge.
+
+The current opaque-title count is 2 after separate exact replay of the Chrysanthemum Throne's court and law bodies and Japan's administrative UI variable. Snapshot and baseline remain candidates, `historical_state_complete` remains false, and `app.supported_baselines` remains empty.
 
 The throne is nonselectable only under geographic start-location rules because it lacks a canonical de jure chain. It remains functional title state: installed ceremonial-liege logic uses its holder as the Tenno beneath fractured imperial authority, and observed 867 runtime evidence shows its guaranteed protection and Male Preference Primogeniture succession.

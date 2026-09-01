@@ -32,7 +32,7 @@ if = {
 
 Reviewed mapping `roads_to_power -> dlc014_ep3` resolves to the valid installed Roads to Power descriptor. Therefore the negative DLC condition is false for this snapshot regardless of holder state, and the complete exact body is a no-op. Parser `1.8.0` emits `dlc_gated_conditional_noop`; changed values, ordering, or extra fields remain opaque.
 
-Reviewed mapping `royal_court -> dlc004_ep1` resolves to the valid installed descriptor `dlc/dlc004_ep1/dlc004.dlc`, its SHA-256 manifest, and CK3 Wiki Royal Court revision `35819`. Parser `1.18.0` binds adjudicated assignments to their execution-time holder, writes durable court state, and evaluates the five exact `knows_court_language_of` branches against durable personal language knowledge. Four holders gain provenance-bearing `history_granted` rows; Tajik Nasr's Iranian branch is a proven already-native no-op.
+Reviewed mapping `royal_court -> dlc004_ep1` resolves to the valid installed descriptor `dlc/dlc004_ep1/dlc004.dlc`, its SHA-256 manifest, and CK3 Wiki Royal Court revision `35819`. Parser `1.21.0` retains the `1.18.0` behavior that binds adjudicated assignments to their execution-time holder, writes durable court state, and evaluates the five exact `knows_court_language_of` branches against durable personal language knowledge. Four holders gain provenance-bearing `history_granted` rows; Tajik Nasr's Iranian branch is a proven already-native no-op. It also retains Japan's exact court-plus-administrative-variable replay and certifies Byzantium's holder-bound Intrigue Court, Orthodox administrative state faith, and inactive no-Roads-to-Power fallback without changing personal faith.
 
 ## Declaration Inventory
 

@@ -1576,6 +1576,604 @@ k_islands = {
                         declarations,
                 )
 
+    def test_exact_chrysanthemum_title_law_body_is_fully_replayed(self) -> None:
+        titles = self.game_root / "common" / "landed_titles" / "00_titles.txt"
+        titles.write_text(
+                        """
+e_world = {
+    k_chrysanthemum_throne = {
+        d_chrysanthemum = { c_chrysanthemum = { b_chrysanthemum = { } } }
+    }
+    k_islands = { d_ruucuu = { c_ucinaa = { b_simajiri = { } } } }
+}
+""",
+            encoding="utf-8",
+        )
+        load_landed_titles_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            game_version="1.19.0.6",
+            steam_build_id="23530548",
+            database_path=self.database_path,
+        )
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+k_chrysanthemum_throne = {
+  867.1.1 = { effect = {
+    add_title_law = single_heir_succession_law
+    destroy_landless_title_no_tgp_dlc_effect = { DATE = 867.1.1 }
+  } }
+}
+k_islands = {
+  867.1.1 = { effect = {
+    add_title_law = single_heir_succession_law
+    destroy_landless_title_no_tgp_dlc_effect = { DATE = 867.1.1 }
+  } }
+}
+d_ruucuu = {
+  867.1.1 = { effect = {
+    destroy_landless_title_no_tgp_dlc_effect = { DATE = 867.1.1 }
+    add_title_law = single_heir_succession_law
+  } }
+}
+""",
+            encoding="utf-8",
+        )
+        laws = self.game_root / "common" / "laws"
+        laws.mkdir(parents=True)
+        (laws / "00_succession_laws.txt").write_text(
+                        """
+succession_order_laws = {
+    single_heir_succession_law = {
+        succession = { order_of_succession = inheritance }
+    }
+}
+""",
+            encoding="utf-8",
+        )
+        effects = self.game_root / "common" / "scripted_effects"
+        effects.mkdir(parents=True)
+        (effects / "10_dlc_tgp_scripted_effects.txt").write_text(
+            """
+destroy_landless_title_no_tgp_dlc_effect = {
+  if = {
+    limit = {
+      NOT = { has_dlc_feature = all_under_heaven }
+      game_start_date = $DATE$
+    }
+    holder ?= {
+      empty_treasury_when_abandoning_landed_life_effect = yes
+      destroy_title = prev
+    }
+  }
+}
+""",
+            encoding="utf-8",
+        )
+        triggers = self.game_root / "common" / "scripted_triggers"
+        triggers.mkdir(parents=True)
+        (triggers / "00_has_dlc_scripted_triggers.txt").write_text(
+            "has_tgp_dlc_trigger = { has_dlc_feature = all_under_heaven }\n",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_packages
+                VALUES ('scribe_build', 'dlc022_ep4', 'All Under Heaven', NULL,
+                        NULL, NULL, 'dlc/dlc022_ep4/dlc022.dlc', 'hash',
+                        'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_feature_mappings
+                VALUES ('scribe_build', 'all_under_heaven', 'dlc022_ep4',
+                        'reviewed', 'test evidence')
+                """
+            )
+        finally:
+            connection.close()
+
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        load_title_history_candidate(**arguments)
+        load_title_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            laws = connection.execute(
+                """
+                SELECT title_id, law_order, law_id, effective_date,
+                       source_declaration_order
+                FROM reference.title_baseline_laws
+                ORDER BY title_id, law_order
+                """
+            ).fetchall()
+            events = connection.execute(
+                """
+                SELECT event_type, text_value, required_game_start_date
+                FROM reference.title_history_events
+                WHERE title_id = 'k_chrysanthemum_throne'
+                ORDER BY event_sequence
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                ORDER BY title_id
+                """
+            ).fetchall()
+            states = connection.execute(
+                """
+                SELECT title_id, validation_status
+                FROM reference.title_baseline_states
+                WHERE title_id IN ('k_chrysanthemum_throne', 'k_islands', 'd_ruucuu')
+                ORDER BY title_id
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [("k_chrysanthemum_throne", 1, "single_heir_succession_law",
+              date(867, 1, 1), 1)],
+            laws,
+        )
+        self.assertEqual(
+            [
+                ("title_law_added", "single_heir_succession_law", None),
+                ("dlc_gated_noop", "all_under_heaven", "0867-01-01"),
+            ],
+            events,
+        )
+        self.assertEqual(
+            [
+                ("d_ruucuu", "preserved"),
+                ("k_chrysanthemum_throne", "normalized"),
+                ("k_islands", "preserved"),
+            ],
+            declarations,
+        )
+        self.assertEqual(
+            [
+                ("k_chrysanthemum_throne", "valid"),
+                ("k_islands", "warning"),
+            ],
+            states,
+        )
+
+    def test_exact_e_japan_court_and_administrative_variable_body_replays(self) -> None:
+                titles = self.game_root / "common" / "landed_titles" / "00_titles.txt"
+                titles.write_text(
+                        """
+e_world = {
+    e_japan = { k_japan = { d_japan = { c_japan = { b_japan = { } } } } }
+    k_chrysanthemum_throne = {
+        d_chrysanthemum = { c_chrysanthemum = { b_chrysanthemum = { } } }
+    }
+    k_islands = { d_ruucuu = { c_ucinaa = { b_simajiri = { } } } }
+}
+""",
+                        encoding="utf-8",
+                )
+                load_landed_titles_candidate(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        game_version="1.19.0.6",
+                        steam_build_id="23530548",
+                        database_path=self.database_path,
+                )
+                history = self.game_root / "history" / "titles" / "titles.txt"
+                exact_body = """
+        if = {
+            limit = { exists = holder has_dlc_feature = royal_court }
+            holder = { set_court_language = language_chinese }
+        }
+        if = {
+            limit = { has_tgp_dlc_trigger = yes }
+            set_variable = {
+                name = administrative_ui_special_title
+                value = title:k_chrysanthemum_throne
+            }
+        }
+"""
+                history.write_text(
+                        f"""
+e_japan = {{
+    858.1.1 = {{ holder = japanese_holder }}
+    867.1.1 = {{ effect = {{{exact_body}  }} }}
+}}
+k_islands = {{
+    858.1.1 = {{ holder = wrong_title_holder }}
+    867.1.1 = {{ effect = {{{exact_body}  }} }}
+}}
+d_ruucuu = {{
+    858.1.1 = {{ holder = reversed_holder }}
+    867.1.1 = {{ effect = {{
+        if = {{
+            limit = {{ has_tgp_dlc_trigger = yes }}
+            set_variable = {{
+                name = administrative_ui_special_title
+                value = title:k_chrysanthemum_throne
+            }}
+        }}
+        if = {{
+            limit = {{ exists = holder has_dlc_feature = royal_court }}
+            holder = {{ set_court_language = language_chinese }}
+        }}
+    }} }}
+}}
+""",
+                        encoding="utf-8",
+                )
+                effects = self.game_root / "common" / "scripted_effects"
+                effects.mkdir(parents=True)
+                (effects / "10_dlc_tgp_scripted_effects.txt").write_text(
+                        """
+destroy_landless_title_no_tgp_dlc_effect = {
+    if = {
+        limit = {
+            NOT = { has_dlc_feature = all_under_heaven }
+            game_start_date = $DATE$
+        }
+        holder ?= {
+            empty_treasury_when_abandoning_landed_life_effect = yes
+            destroy_title = prev
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                triggers = self.game_root / "common" / "scripted_triggers"
+                triggers.mkdir(parents=True)
+                (triggers / "00_has_dlc_scripted_triggers.txt").write_text(
+                        "has_tgp_dlc_trigger = { has_dlc_feature = all_under_heaven }\n",
+                        encoding="utf-8",
+                )
+                connection = connect(self.database_path)
+                try:
+                        connection.execute(
+                                """
+                                INSERT INTO reference.languages
+                                VALUES ('scribe_build', 'language_chinese', 'common/culture/test.txt',
+                                                1, 1, 1, '{}', '1.1.0', 'valid', NULL)
+                                """
+                        )
+                        for package_id, name, feature, path in (
+                                ('dlc004_ep1', 'The Royal Court', 'royal_court',
+                                 'dlc/dlc004_ep1/dlc004.dlc'),
+                                ('dlc022_ep4', 'All Under Heaven', 'all_under_heaven',
+                                 'dlc/dlc022_ep4/dlc022.dlc'),
+                        ):
+                                connection.execute(
+                                        """
+                                        INSERT INTO reference.dlc_packages
+                                        VALUES ('scribe_build', ?, ?, NULL, NULL, NULL, ?, 'hash',
+                                                        'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                                        """,
+                                        [package_id, name, path],
+                                )
+                                connection.execute(
+                                        """
+                                        INSERT INTO reference.dlc_feature_mappings
+                                        VALUES ('scribe_build', ?, ?, 'reviewed', 'test evidence')
+                                        """,
+                                        [feature, package_id],
+                                )
+                finally:
+                        connection.close()
+
+                arguments = dict(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        database_path=self.database_path,
+                )
+                load_title_history_candidate(**arguments)
+                load_title_history_candidate(**arguments)
+                connection = connect(self.database_path)
+                try:
+                        variables = connection.execute(
+                                """
+                                SELECT title_id, variable_name, value_kind, text_value,
+                                             source_declaration_order
+                                FROM reference.title_baseline_variables
+                                ORDER BY title_id, variable_name
+                                """
+                        ).fetchall()
+                        events = connection.execute(
+                                """
+                                SELECT event_type, text_value, validation_note
+                                FROM reference.title_history_events
+                                WHERE title_id = 'e_japan'
+                                    AND event_type IN ('court_language_set',
+                                                       'title_variable_set')
+                                ORDER BY event_sequence
+                                """
+                        ).fetchall()
+                        declarations = connection.execute(
+                                """
+                                SELECT title_id, resolution_status
+                                FROM source.title_history_declarations
+                                WHERE operation_key = 'effect'
+                                ORDER BY title_id
+                                """
+                        ).fetchall()
+                        court_state = connection.execute(
+                                """
+                                SELECT character_id, court_language_id,
+                                             court_language_source_declaration_order
+                                FROM reference.character_baseline_court_states
+                                ORDER BY character_id
+                                """
+                        ).fetchall()
+                        personal_languages = connection.execute(
+                                "SELECT count(*) FROM reference.character_baseline_languages"
+                        ).fetchone()
+                finally:
+                        connection.close()
+
+                self.assertEqual(
+                        [("e_japan", "administrative_ui_special_title", "title",
+                            "k_chrysanthemum_throne", 2)],
+                        variables,
+                )
+                self.assertEqual(
+                        [
+                                ("court_language_set", "language_chinese",
+                                 "holder=japanese_holder; installed royal_court"),
+                                ("title_variable_set",
+                                 "administrative_ui_special_title=k_chrysanthemum_throne",
+                                 "value_kind=title"),
+                        ],
+                        events,
+                )
+                self.assertEqual(
+                        [
+                                ("d_ruucuu", "preserved"),
+                                ("e_japan", "normalized"),
+                                ("k_islands", "preserved"),
+                        ],
+                        declarations,
+                )
+                self.assertEqual(
+                        [
+                                ("japanese_holder", "language_chinese", 2),
+                                ("reversed_holder", "language_chinese", 6),
+                                ("wrong_title_holder", "language_chinese", 4),
+                        ],
+                        court_state,
+                )
+                self.assertEqual((0,), personal_languages)
+
+    def test_exact_byzantine_administrative_state_faith_body_replays(self) -> None:
+                titles = self.game_root / "common" / "landed_titles" / "00_titles.txt"
+                titles.write_text(
+                        """
+e_world = {
+    e_byzantium = { k_byzantium = { d_byzantium = { c_byzantium = { b_byzantium = { } } } } }
+    k_islands = { d_ruucuu = { c_ucinaa = { b_simajiri = { } } } }
+}
+""",
+                        encoding="utf-8",
+                )
+                load_landed_titles_candidate(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        game_version="1.19.0.6",
+                        steam_build_id="23530548",
+                        database_path=self.database_path,
+                )
+                exact_effect = """
+    effect = {
+        if = {
+            limit = {
+                exists = holder
+                holder = { has_government = administrative_government }
+            }
+            set_state_faith = faith:orthodox
+        }
+        if = {
+            limit = { exists = holder has_dlc_feature = royal_court }
+            holder = { set_court_type = court_intrigue }
+        }
+        if = {
+            limit = {
+                exists = holder
+                NOT = { has_dlc_feature = roads_to_power }
+            }
+            holder = {
+                change_government = feudal_government
+                add_realm_law_skip_effects = single_heir_succession_law
+            }
+        }
+    }
+"""
+                history = self.game_root / "history" / "titles" / "titles.txt"
+                history.write_text(
+                        f"""
+e_byzantium = {{
+    800.1.1 = {{ holder = byzantine_holder }}
+    866.1.1 = {{ government = administrative_government {exact_effect} }}
+}}
+k_islands = {{
+    800.1.1 = {{ holder = wrong_title_holder }}
+    866.1.1 = {{ government = administrative_government {exact_effect} }}
+}}
+""",
+                        encoding="utf-8",
+                )
+                effects = self.game_root / "common" / "scripted_effects"
+                effects.mkdir(parents=True)
+                (effects / "07_dlc_ep3_scripted_effects.txt").write_text(
+                        """
+destroy_landless_title_no_dlc_effect = {
+    if = {
+        limit = {
+            NOT = { has_dlc_feature = roads_to_power }
+            game_start_date = $DATE$
+        }
+        holder ?= {
+            empty_treasury_when_abandoning_landed_life_effect = yes
+            destroy_title = prev
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                connection = connect(self.database_path)
+                try:
+                        connection.execute(
+                                """
+                                INSERT INTO reference.faiths VALUES
+                                ('scribe_build', 'orthodox', 'christianity_religion',
+                                 'common/religion/faiths/test.txt', 1, 2, 1, '{}', '1.0.0',
+                                 'faith', 'valid', NULL)
+                                """
+                        )
+                        connection.execute(
+                                """
+                                INSERT INTO reference.character_baseline_states VALUES
+                                ('scribe_867', 'byzantine_holder', 'Basileios', 'male',
+                                 'declared', NULL, 'orthodox', 'history', NULL, NULL, NULL,
+                                 NULL, 'alive', 'valid', NULL)
+                                """
+                        )
+                        for package_id, name, feature, path in (
+                                ('dlc004_ep1', 'The Royal Court', 'royal_court',
+                                 'dlc/dlc004_ep1/dlc004.dlc'),
+                                ('dlc014_ep3', 'Roads to Power', 'roads_to_power',
+                                 'dlc/dlc014_ep3/dlc014.dlc'),
+                        ):
+                                connection.execute(
+                                        """
+                                        INSERT INTO reference.dlc_packages
+                                        VALUES ('scribe_build', ?, ?, NULL, NULL, NULL, ?, 'hash',
+                                                        'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                                        """,
+                                        [package_id, name, path],
+                                )
+                                connection.execute(
+                                        """
+                                        INSERT INTO reference.dlc_feature_mappings
+                                        VALUES ('scribe_build', ?, ?, 'reviewed', 'test evidence')
+                                        """,
+                                        [feature, package_id],
+                                )
+                finally:
+                        connection.close()
+
+                arguments = dict(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        database_path=self.database_path,
+                )
+                load_title_history_candidate(**arguments)
+                load_title_history_candidate(**arguments)
+                connection = connect(self.database_path)
+                try:
+                        state_faiths = connection.execute(
+                                """
+                                SELECT title_id, faith_id, effective_date, source_group,
+                                             source_declaration_order
+                                FROM reference.title_baseline_state_faiths
+                                ORDER BY title_id
+                                """
+                        ).fetchall()
+                        events = connection.execute(
+                                """
+                                SELECT event_type, text_value, validation_note
+                                FROM reference.title_history_events
+                                WHERE title_id = 'e_byzantium'
+                                    AND event_type IN ('court_type_set', 'state_faith_set',
+                                                                         'dlc_gated_conditional_noop')
+                                ORDER BY event_sequence
+                                """
+                        ).fetchall()
+                        declarations = connection.execute(
+                                """
+                                SELECT title_id, resolution_status
+                                FROM source.title_history_declarations
+                                WHERE operation_key = 'effect'
+                                ORDER BY title_id
+                                """
+                        ).fetchall()
+                        personal_faith = connection.execute(
+                                """
+                                SELECT faith_id, faith_source_key
+                                FROM reference.character_baseline_states
+                                WHERE baseline_id = 'scribe_867'
+                                    AND character_id = 'byzantine_holder'
+                                """
+                        ).fetchone()
+                finally:
+                        connection.close()
+
+                self.assertEqual(
+                        [("e_byzantium", "orthodox", date(866, 1, 1), "title_history", 3)],
+                        state_faiths,
+                )
+                self.assertEqual(
+                        [
+                                ("court_type_set", "court_intrigue",
+                                 "holder=byzantine_holder; installed royal_court"),
+                                ("state_faith_set", "orthodox",
+                                 "holder=byzantine_holder; government=administrative_government"),
+                                ("dlc_gated_conditional_noop", "roads_to_power",
+                                 "installed dlc014_ep3 makes government fallback condition false"),
+                        ],
+                        events,
+                )
+                self.assertEqual(
+                        [("e_byzantium", "normalized"), ("k_islands", "preserved")],
+                        declarations,
+                )
+                self.assertEqual(("orthodox", "history"), personal_faith)
+
+                history.write_text(
+                        f"""
+e_byzantium = {{
+    800.1.1 = {{ holder = byzantine_holder }}
+    866.1.1 = {{ government = feudal_government {exact_effect} }}
+}}
+""",
+                        encoding="utf-8",
+                )
+                load_title_history_candidate(**arguments)
+                connection = connect(self.database_path)
+                try:
+                        self.assertEqual(
+                                (0,),
+                                connection.execute(
+                                        "SELECT count(*) FROM reference.title_baseline_state_faiths"
+                                ).fetchone(),
+                        )
+                        self.assertEqual(
+                                ("warning",),
+                                connection.execute(
+                                        """
+                                        SELECT validation_status FROM reference.title_baseline_states
+                                        WHERE baseline_id = 'scribe_867' AND title_id = 'e_byzantium'
+                                        """
+                                ).fetchone(),
+                        )
+                finally:
+                        connection.close()
+
     def test_succession_laws_replace_and_clear_with_installed_definitions(self) -> None:
         history = self.game_root / "history" / "titles"
         (history / "law_history.txt").write_text(

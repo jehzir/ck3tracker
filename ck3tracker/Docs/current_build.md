@@ -2,8 +2,8 @@
 
 - Build ID: `B002-scribe-promotion-readiness`
 - Build name: Scribe reference-catalog promotion readiness
-- Status: `active — Royal Court language learning replayed`
-- Last updated: 2026-08-31
+- Status: `active — administrative state-faith schema bootstrapped`
+- Last updated: 2026-09-01
 
 ## Objective
 
@@ -44,11 +44,11 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - Grounded dynasty catalog loaded from 10,338 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Dynasty` revision `35828`; all 10,180 baseline-used dynasty IDs resolve.
 - Grounded house catalog loaded from 558 installed definitions with the internal wiki path `Dynasty` revision `35828` to its versioned `Houses` section; all 459 baseline-used dynasty-house IDs resolve and all 235 parent dynasty IDs resolve.
 - Readiness now requires the deterministic latest run for each of ten parser groups to be completed at its explicit expected version; older successful runs cannot mask newer failures or obsolete versions.
-- All 1,698 source-file manifests are bound to the exact latest parser runs that produced them; readiness blocks missing, detached, and stale run bindings.
+- All 1,714 source-file manifests are bound to the exact latest parser runs that produced them; readiness blocks missing, detached, and stale run bindings.
 - All nine installed bookmark DLC gates resolve through reviewed feature mappings to canonical installed package descriptors: `landless_adventurer -> dlc014_ep3`, `khans_of_the_steppe -> dlc020_ce2`, and `all_under_heaven -> dlc022_ep4`.
 - Required snapshot evidence now also resolves `royal_court -> dlc004_ep1` independently of bookmark requirements, binding the valid installed The Royal Court descriptor, platform IDs, SHA-256 manifest, and CK3 Wiki revision `35819`.
 - Raw feature flags remain preserved beside package identity, descriptor hashes, platform IDs, and permanent wiki-revision evidence; unknown feature flags remain unresolved and block readiness.
-- Bookmark parser is `1.2.0`, title-history parser is `1.18.0`, culture parser is `1.1.0`, character history is `1.5.0`, and the other six required parsers remain `1.0.0`.
+- Bookmark parser is `1.2.0`, title-history parser is `1.21.0`, culture parser is `1.1.0`, character history is `1.5.0`, and the other six required parsers remain `1.0.0`.
 - Every readiness report now stores an immutable ten-row evidence ledger containing the exact latest parser-run ID, parser version/status, manifest count, and deterministic SHA-256 digest evaluated for each required source group.
 - Readiness retrieval compares stored bindings with current evidence and labels legacy or superseded reports stale without rewriting the persisted report, findings, or evidence ledger.
 - All 1,714 current source manifests are covered by the latest report evidence ledger; culture evidence includes the installed language pillar and title history binds installed TGP and law-definition evidence.
@@ -100,13 +100,20 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - Opaque title states fall from 12 to 9. All 62 repository tests pass, and the candidate remains unpromoted with `historical_state_complete=false`.
 - Title-history parser `1.18.0` replays all five exact conditional `learn_court_language_of = this` branches against durable baseline language knowledge. Boris learns Greek, Louis II and Lothair II learn High German, Umar I Habbari learns Arabic, and Tajik Nasr's Iranian branch records an already-native no-op.
 - Four `history_granted` rows retain their effective dates and title-declaration provenance; reload ignores and replaces stale title-history-owned learned rows idempotently. Opaque title states fall from 9 to 4 while `k_balhae` remains excluded.
-- The `e_byzantium` warning does not mean its government or succession is unknown: the baseline resolves administrative government and `acclamation_succession_law`; only the mixed initialization body's state-faith/court branches lack projections, while its no-Roads-to-Power feudal fallback is inactive in this build.
+- Title-history parser `1.19.0` fully replays `k_chrysanthemum_throne` declaration `16444` as an additive `single_heir_succession_law` operation plus a date-matched All Under Heaven no-op. Both events and the active law retain declaration provenance.
+- The raw declaration remains preserved, two reloads are idempotent, and altered title/body order remains opaque. Opaque title states fall from 4 to 3; all 63 repository tests pass without promotion.
+- Title-history parser `1.20.0` fully replays `e_japan` declaration `15088` as its holder-bound Chinese court assignment plus `administrative_ui_special_title=title:k_chrysanthemum_throne` under reviewed Royal Court and All Under Heaven evidence.
+- Both events and the durable title variable retain declaration provenance; no personal Chinese knowledge is inferred. Wrong-title and reordered bodies remain opaque, two reloads are idempotent, and opaque title states fall from 3 to 2 with all 64 tests passing.
+- Durable `reference.title_baseline_state_faiths` storage now owns one administrative state-faith row per baseline title, with explicit snapshot/faith identity, effective date, source group/declaration provenance, validation state, and enforced title/faith foreign keys.
+- The candidate database is bootstrapped with zero state-faith rows. Parser `1.20.0`, readiness report `3e00ddd4-b439-4a00-b1dd-c84be7d31102`, both opaque title warnings, candidate statuses, false historical completeness, and zero supported baselines remain unchanged; all 65 tests pass.
+- Title-history parser `1.21.0` fully replays exact `e_byzantium` declaration `1028`: resolved holder `70490` retains Intrigue Court, the title gains durable Orthodox administrative state faith, and the no-Roads-to-Power feudal/law fallback is recorded as inactive under the reviewed installed package.
+- State faith remains separate from holder `70490`'s source-derived personal faith. Exact wrong-title and non-administrative cases remain opaque, two reloads are idempotent, and opaque title states fall from 2 to only `k_balhae`; all 66 repository tests pass.
 - `k_chrysanthemum_throne` is a functional ceremonial kingdom beneath `e_japan` during fractured imperial authority, not disposable structural noise. Nonselectability applies only to geographic start selection; observed 867 evidence confirms its protected Tenno role and Male Preference Primogeniture succession.
 - A full documentation consistency pass found no broken relative Markdown links or stale current parser, readiness-report, and opaque-count claims; archived B001 and deferred design tasks are explicitly non-authoritative.
 
 ## Current Evidence
 
-- Latest readiness report: `ck3_1_19_0_6_867:readiness:8b174297-d096-4740-a8c8-4467f8223c60`.
+- Latest readiness report: `ck3_1_19_0_6_867:readiness:06f75cc3-cdfd-4873-af43-40de33745a74`.
 - Report evidence status: `current`, with ten parser bindings and both installed EP3 helper definitions bound to title-history evidence.
 - Report status: blocked, with 2 blocking, 2 accepted-exception, 1 informational, and 20 passed findings.
 - Snapshot status: `candidate`.
@@ -118,7 +125,7 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 
 ## Known Blockers
 
-- The current readiness implementation classifies 4 title states with baseline-effective opaque history as one blocking finding: `e_byzantium`, `e_japan`, `k_balhae`, and `k_chrysanthemum_throne`.
+- The current readiness implementation classifies one title state with baseline-effective opaque history as one blocking finding: `k_balhae`.
 - Two character IDs have baseline-conflicting duplicate declarations.
 - 107 character states contain baseline-effective opaque effects.
 - No production atomic promotion service exists.
@@ -132,20 +139,18 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 
 ## Next Exact Action
 
-Replay only `k_chrysanthemum_throne` declaration `16444` at `0867-01-01`. Certify its complete two-operation body by adding `single_heir_succession_law` through the existing durable title-law projection and evaluating the date-matched `destroy_landless_title_no_tgp_dlc_effect` invocation as an inactive no-op because validated All Under Heaven is installed.
+Reconcile only `k_balhae` declaration `27271` at `0867-01-01`. Follow the installed title-history links and reviewed runtime evidence to explain why source requests Chinese while the observed 867 court reports Tungusic as its new language with a five-year change restriction. Determine whether the discrepancy is a baseline-effective state transition, bookmark/runtime initialization, or presentation artifact, and record the evidence chain and exact 1,825-day lock semantics.
 
-Require exact body shape, operation order, invocation date, installed law definition, title resolution, and TGP package evidence. Emit provenance-linked law and no-op events, preserve the raw declaration, and make two candidate reloads idempotent. Altered, mixed, unresolved, or date-mismatched bodies must remain opaque.
-
-This action should clear only the `k_chrysanthemum_throne` warning and reduce opaque title states from 4 to 3. Its existing `ceremonial_title=title:e_japan` variable and Chinese court language remain unchanged.
+Do not normalize declaration `27271`, create a court-language row, waive the warning, or change parser behavior until one interpretation is supported by reproducible source/runtime evidence. Preserve the raw declaration and keep `k_balhae` as the sole opaque title throughout this reconciliation action.
 
 Target files:
 
-- `logic/title_history_loader.py`
-- focused title-history loader tests
-- `logic/promotion_readiness_service.py` for the explicit parser-version contract
-- `Docs/current_build.md` and `Docs/changelog.md` after validation
+- `Docs/current_build.md`
+- `Docs/remaining_title_history_review.md`
+- `Docs/title_conditional_effect_inventory.md`
+- source/runtime evidence artifacts only if the reconciliation requires them
 
-Keep `k_balhae` excluded. Do not add administrative state-faith, new title-variable families, unrelated character effects, dashboard work, journal work, or promotion in this slice.
+Keep `k_balhae` excluded from projections. Do not change parser code, court or personal language state, dashboard/journal behavior, readiness policy, or promotion in this slice.
 
 `k_balhae` requires reconciliation before any court-only exception: installed 867 history requests Chinese, while observed game UI reports Tungusic as new court-language state and a five-year change restriction. The standard Royal Court adoption cooldown is 1,825 days, so this may affect playable baseline state rather than presentation alone.
 

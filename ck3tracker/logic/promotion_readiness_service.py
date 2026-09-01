@@ -22,7 +22,7 @@ EXPECTED_PARSERS = {
     "installed_governments": "1.0.0",
     "installed_landed_titles": "1.0.0",
     "installed_localization_english": "1.0.0",
-    "installed_title_history": "1.18.0",
+    "installed_title_history": "1.21.0",
 }
 
 

@@ -14,7 +14,7 @@ from logic.root_database import connect
 
 
 PARSER_NAME = "installed_title_history"
-PARSER_VERSION = "1.18.0"
+PARSER_VERSION = "1.21.0"
 DATE_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 TITLE_PATTERN = re.compile(r"^[ekdcb]_[A-Za-z0-9_-]+$")
 NORMALIZED_OPERATIONS = {
@@ -285,7 +285,11 @@ def load_title_history_candidate(
     started_at = datetime.now(timezone.utc)
     parser_run_id = f"{reference_snapshot_id}:{PARSER_NAME}:{uuid4()}"
     operations, blocks, parse_warnings, manifests = parse_title_history(game_root)
-    if any(_tgp_no_dlc_invocation_date(operation) for operation in operations):
+    if any(
+        _tgp_no_dlc_invocation_date(operation)
+        or _e_japan_administrative_title_variable(operation)
+        for operation in operations
+    ):
         manifests.extend(_verify_tgp_no_dlc_evidence(Path(game_root).resolve()))
     dynasty_prestige_helper_manifest = None
     if any(_is_tgp_dynasty_prestige_invocation(operation) for operation in operations):
@@ -299,6 +303,7 @@ def load_title_history_candidate(
     if (
         any(_ep3_no_dlc_invocation_date(operation) for operation in operations)
         or has_historical_adventurer_effects
+        or any(_byzantine_state_faith(operation) for operation in operations)
     ):
         manifests.extend(_verify_ep3_no_dlc_evidence(
             Path(game_root).resolve(),
@@ -309,8 +314,13 @@ def load_title_history_candidate(
         for operation in operations
         for law_id in (_succession_law_ids(operation) or ())
     }
+    required_law_ids.update(
+        fields[0]
+        for operation in operations
+        if (fields := _chrysanthemum_title_law_fields(operation)) is not None
+    )
     law_definitions: list[LawDefinition] = []
-    if any(operation.operation_key == "succession_laws" for operation in operations):
+    if required_law_ids:
         law_definitions, law_manifests = _load_required_law_definitions(
             Path(game_root).resolve(), required_law_ids
         )
@@ -425,6 +435,16 @@ def load_title_history_candidate(
                 [reference_snapshot_id],
             ).fetchall()
         }
+        installed_faith_ids = {
+            str(row[0])
+            for row in connection.execute(
+                """
+                SELECT faith_id FROM reference.faiths
+                WHERE reference_snapshot_id = ? AND validation_status = 'valid'
+                """,
+                [reference_snapshot_id],
+            ).fetchall()
+        }
         known_language_pairs = {
             (str(row[0]), str(row[1]))
             for row in connection.execute(
@@ -452,6 +472,38 @@ def load_title_history_candidate(
             installed_language_ids,
             known_language_pairs,
         )
+        chrysanthemum_law_orders = {
+            operation.declaration_order
+            for operation in effective_operations
+            if tgp_package_id is not None
+            and operation.title_id in installed_title_ids
+            and (
+                (fields := _chrysanthemum_title_law_fields(operation)) is not None
+                and fields[0] in installed_law_ids
+            )
+        }
+        e_japan_variables_by_order = {
+            operation.declaration_order: target_title_id
+            for operation in effective_operations
+            if royal_court_package_id is not None
+            and tgp_package_id is not None
+            and operation.declaration_order in court_assignments_by_order
+            and (
+                target_title_id := _e_japan_administrative_title_variable(operation)
+            ) is not None
+            and target_title_id in installed_title_ids
+        }
+        baseline_state_faiths, byzantine_state_faith_by_order = (
+            _materialize_byzantine_state_faiths(
+                effective_operations,
+                baseline_date,
+                installed_title_ids,
+                installed_faith_ids,
+                royal_court_package_id,
+                ep3_package_id,
+                court_assignments_by_order,
+            )
+        )
         events = _normalized_events(
             effective_operations,
             title_rows,
@@ -465,6 +517,9 @@ def load_title_history_candidate(
             name_localizations=name_localizations,
             court_assignments_by_order=court_assignments_by_order,
             court_language_learning_by_order=court_language_learning_by_order,
+            chrysanthemum_law_orders=chrysanthemum_law_orders,
+            e_japan_variables_by_order=e_japan_variables_by_order,
+            byzantine_state_faith_by_order=byzantine_state_faith_by_order,
         )
         states = _materialize_states(
             title_rows,
@@ -480,15 +535,19 @@ def load_title_history_candidate(
             ep3_package_id=ep3_package_id,
             historical_adventurer_orders=historical_adventurer_orders,
             dynasty_prestige_orders=set(dynasty_prestige_by_order),
+            chrysanthemum_law_orders=chrysanthemum_law_orders,
             name_localizations=name_localizations,
             normalized_court_orders={
                 order
                 for order, assignment in court_assignments_by_order.items()
                 if assignment[3]
-            },
+            } | set(e_japan_variables_by_order) | set(byzantine_state_faith_by_order),
         )
         baseline_laws = _materialize_title_laws(
-            effective_operations, baseline_date, installed_law_ids
+            effective_operations,
+            baseline_date,
+            installed_law_ids,
+            chrysanthemum_law_orders,
         )
         baseline_de_jure_lieges = _materialize_de_jure_lieges(
             effective_operations, baseline_date, installed_title_ids
@@ -504,6 +563,7 @@ def load_title_history_candidate(
             baseline_date,
             historical_adventurer_orders,
             installed_title_ids,
+            e_japan_variables_by_order,
         )
         baseline_name_overrides = _materialize_title_name_overrides(
             effective_operations, baseline_date, name_localizations
@@ -574,6 +634,13 @@ def load_title_history_candidate(
         )
         connection.execute(
             "DELETE FROM reference.title_baseline_variables WHERE baseline_id = ?",
+            [baseline_id],
+        )
+        connection.execute(
+            """
+            DELETE FROM reference.title_baseline_state_faiths
+            WHERE baseline_id = ? AND source_group = 'title_history'
+            """,
             [baseline_id],
         )
         connection.execute(
@@ -690,6 +757,9 @@ def load_title_history_candidate(
                     )
                     or item.declaration_order in historical_adventurer_orders
                     or item.declaration_order in dynasty_prestige_by_order
+                    or item.declaration_order in chrysanthemum_law_orders
+                    or item.declaration_order in e_japan_variables_by_order
+                    or item.declaration_order in byzantine_state_faith_by_order
                     or _ceremonial_title_variable(item, installed_title_ids) is not None
                     or _has_valid_succession_laws(item, installed_law_ids)
                     or _has_valid_de_jure_liege(item, installed_title_ids)
@@ -808,6 +878,20 @@ def load_title_history_candidate(
                 """,
                 [(baseline_id, *state) for state in baseline_variables],
             )
+        if baseline_state_faiths:
+            connection.executemany(
+                """
+                INSERT INTO reference.title_baseline_state_faiths
+                (baseline_id, title_id, reference_snapshot_id, faith_id,
+                 effective_date, source_group, source_declaration_order,
+                 validation_status, validation_note)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (baseline_id, state[0], reference_snapshot_id, *state[1:])
+                    for state in baseline_state_faiths
+                ],
+            )
         if dynasty_prestige_constraints:
             connection.executemany(
                 """
@@ -908,6 +992,9 @@ def _normalized_events(
     name_localizations: dict[str, str] | None = None,
     court_assignments_by_order: dict[int, tuple[str, str, str, bool]] | None = None,
     court_language_learning_by_order: dict[int, tuple[str, str, bool]] | None = None,
+    chrysanthemum_law_orders: set[int] | None = None,
+    e_japan_variables_by_order: dict[int, str] | None = None,
+    byzantine_state_faith_by_order: dict[int, tuple[str, str]] | None = None,
 ) -> list[tuple[object, ...]]:
     installed_law_ids = installed_law_ids or set()
     installed_title_ids = installed_title_ids or set()
@@ -917,6 +1004,9 @@ def _normalized_events(
     name_localizations = name_localizations or {}
     court_assignments_by_order = court_assignments_by_order or {}
     court_language_learning_by_order = court_language_learning_by_order or {}
+    chrysanthemum_law_orders = chrysanthemum_law_orders or set()
+    e_japan_variables_by_order = e_japan_variables_by_order or {}
+    byzantine_state_faith_by_order = byzantine_state_faith_by_order or {}
     events: list[tuple[object, ...]] = []
     parents = {str(row[0]): row[2] for row in title_rows}
     ranks = {str(row[0]): str(row[1]) for row in title_rows}
@@ -954,6 +1044,37 @@ def _normalized_events(
                 ))
             if fully_normalized:
                 continue
+        e_japan_target = e_japan_variables_by_order.get(operation.declaration_order)
+        if e_japan_target is not None:
+            sequence += 1
+            events.append((
+                operation.title_id, operation.effective_date, sequence,
+                "title_variable_set",
+                f"administrative_ui_special_title={e_japan_target}", None,
+                operation.declaration_order, "valid", "value_kind=title", None,
+            ))
+            continue
+        byzantine_state_faith = byzantine_state_faith_by_order.get(
+            operation.declaration_order
+        )
+        if byzantine_state_faith is not None:
+            faith_id, character_id = byzantine_state_faith
+            sequence += 1
+            events.append((
+                operation.title_id, operation.effective_date, sequence,
+                "state_faith_set", faith_id, None,
+                operation.declaration_order, "valid",
+                f"holder={character_id}; government=administrative_government", None,
+            ))
+            sequence += 1
+            events.append((
+                operation.title_id, operation.effective_date, sequence,
+                "dlc_gated_conditional_noop", EP3_FEATURE_FLAG, None,
+                operation.declaration_order, "valid",
+                f"installed {ep3_package_id} makes government fallback condition false",
+                None,
+            ))
+            continue
         dynasty_prestige = dynasty_prestige_by_order.get(operation.declaration_order)
         if dynasty_prestige is not None:
             sequence += 1
@@ -1012,6 +1133,27 @@ def _normalized_events(
                     target_id, None, operation.declaration_order, status, note,
                     required_date,
                 ))
+            continue
+        if operation.declaration_order in chrysanthemum_law_orders:
+            law_fields = _chrysanthemum_title_law_fields(operation)
+            if law_fields is None:
+                raise ValueError("Certified Chrysanthemum law body no longer matches")
+            law_id, required_date = law_fields
+            sequence += 1
+            events.append((
+                operation.title_id, operation.effective_date, sequence,
+                "title_law_added", law_id, None,
+                operation.declaration_order, "valid",
+                "installed law ID added to the active explicit title-law set", None,
+            ))
+            sequence += 1
+            events.append((
+                operation.title_id, operation.effective_date, sequence,
+                "dlc_gated_noop", TGP_FEATURE_FLAG, None,
+                operation.declaration_order, "valid",
+                f"installed {tgp_package_id} makes destruction condition false",
+                str(required_date),
+            ))
             continue
         tgp_date = _tgp_no_dlc_invocation_date(operation)
         if tgp_package_id is not None and tgp_date is not None:
@@ -1183,6 +1325,7 @@ def _materialize_states(
     ep3_package_id: str | None = None,
     historical_adventurer_orders: set[int] | None = None,
     dynasty_prestige_orders: set[int] | None = None,
+    chrysanthemum_law_orders: set[int] | None = None,
     name_localizations: dict[str, str] | None = None,
     normalized_court_orders: set[int] | None = None,
 ) -> list[tuple[object, ...]]:
@@ -1193,6 +1336,7 @@ def _materialize_states(
     installed_tributary_contract_group_ids = installed_tributary_contract_group_ids or set()
     historical_adventurer_orders = historical_adventurer_orders or set()
     dynasty_prestige_orders = dynasty_prestige_orders or set()
+    chrysanthemum_law_orders = chrysanthemum_law_orders or set()
     name_localizations = name_localizations or {}
     normalized_court_orders = normalized_court_orders or set()
     cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
@@ -1254,6 +1398,8 @@ def _materialize_states(
                 if operation.declaration_order in historical_adventurer_orders:
                     continue
                 if operation.declaration_order in dynasty_prestige_orders:
+                    continue
+                if operation.declaration_order in chrysanthemum_law_orders:
                     continue
                 if _ceremonial_title_variable(operation, installed_title_ids) is not None:
                     continue
@@ -1350,18 +1496,27 @@ def _materialize_title_laws(
     operations: list[HistoryOperation],
     baseline_date: date,
     installed_law_ids: set[str],
+    chrysanthemum_law_orders: set[int],
 ) -> list[tuple[object, ...]]:
     cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
-    latest: dict[str, tuple[HistoryOperation, tuple[str, ...]]] = {}
+    active: dict[str, list[tuple[str, HistoryOperation]]] = {}
     ordered = sorted(operations, key=lambda item: (item.effective_date, item.declaration_order))
     for operation in ordered:
         if operation.effective_date > cutoff:
             continue
         law_ids = _succession_law_ids(operation)
         if law_ids is not None and set(law_ids) <= installed_law_ids:
-            latest[operation.title_id] = (operation, law_ids)
+            active[operation.title_id] = [(law_id, operation) for law_id in law_ids]
+        elif operation.declaration_order in chrysanthemum_law_orders:
+            law_fields = _chrysanthemum_title_law_fields(operation)
+            if law_fields is None:
+                raise ValueError("Certified Chrysanthemum law body no longer matches")
+            law_id, _ = law_fields
+            title_laws = active.setdefault(operation.title_id, [])
+            if all(existing_id != law_id for existing_id, _ in title_laws):
+                title_laws.append((law_id, operation))
     rows: list[tuple[object, ...]] = []
-    for title_id, (operation, law_ids) in latest.items():
+    for title_id, title_laws in active.items():
         rows.extend(
             (
                 title_id,
@@ -1372,7 +1527,7 @@ def _materialize_title_laws(
                 "valid",
                 None,
             )
-            for law_order, law_id in enumerate(law_ids, start=1)
+            for law_order, (law_id, operation) in enumerate(title_laws, start=1)
         )
     return rows
 
@@ -1693,6 +1848,35 @@ def _tgp_no_dlc_invocation_date(operation: HistoryOperation) -> CK3Date | None:
     return required_date if required_date == operation.effective_date else None
 
 
+def _chrysanthemum_title_law_fields(
+    operation: HistoryOperation,
+) -> tuple[str, CK3Date] | None:
+    if (
+        operation.title_id != "k_chrysanthemum_throne"
+        or operation.effective_date != CK3Date(867, 1, 1)
+        or operation.operation_key != "effect"
+        or operation.value_kind != "block"
+    ):
+        return None
+    fields = list(_assignments(operation.raw_script[1:-1], operation.source_line_start))
+    if (
+        len(fields) != 2
+        or fields[0].key != "add_title_law"
+        or fields[0].value_kind != "scalar"
+        or _scalar_value(fields[0].raw_value) != "single_heir_succession_law"
+        or fields[1].key != "destroy_landless_title_no_tgp_dlc_effect"
+        or fields[1].value_kind != "block"
+    ):
+        return None
+    arguments = list(_assignments(fields[1].raw_value[1:-1], fields[1].line_start))
+    if len(arguments) != 1 or arguments[0].key != "DATE":
+        return None
+    required_date = _parse_date(_scalar_value(arguments[0].raw_value))
+    if required_date != operation.effective_date:
+        return None
+    return "single_heir_succession_law", required_date
+
+
 def _ep3_no_dlc_invocation_date(operation: HistoryOperation) -> CK3Date | None:
     if operation.operation_key != "effect" or operation.value_kind != "block":
         return None
@@ -1911,6 +2095,69 @@ def _materialize_court_states(
     return rows, assignments_by_order, learned_languages, learning_by_order
 
 
+def _materialize_byzantine_state_faiths(
+    operations: list[HistoryOperation],
+    baseline_date: date,
+    installed_title_ids: set[str],
+    installed_faith_ids: set[str],
+    royal_court_package_id: str | None,
+    ep3_package_id: str | None,
+    court_assignments_by_order: dict[int, tuple[str, str, str, bool]],
+) -> tuple[list[tuple[object, ...]], dict[int, tuple[str, str]]]:
+    if royal_court_package_id is None or ep3_package_id is None:
+        return [], {}
+    cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
+    holders: dict[str, str | None] = {}
+    governments: dict[str, str | None] = {}
+    latest: dict[str, tuple[HistoryOperation, str, str]] = {}
+    by_order: dict[int, tuple[str, str]] = {}
+    for operation in sorted(
+        operations, key=lambda item: (item.effective_date, item.declaration_order)
+    ):
+        if operation.effective_date > cutoff:
+            continue
+        if operation.operation_key in {
+            "holder",
+            "holder_ignore_head_of_faith_requirement",
+        } and operation.scalar_value is not None:
+            holders[operation.title_id] = (
+                None if operation.scalar_value == "0" else operation.scalar_value
+            )
+            continue
+        if operation.operation_key == "government":
+            governments[operation.title_id] = operation.scalar_value
+            continue
+        faith_id = _byzantine_state_faith(operation)
+        character_id = holders.get(operation.title_id)
+        court_assignment = court_assignments_by_order.get(operation.declaration_order)
+        if (
+            faith_id is None
+            or operation.title_id not in installed_title_ids
+            or faith_id not in installed_faith_ids
+            or character_id is None
+            or governments.get(operation.title_id) != "administrative_government"
+            or court_assignment is None
+            or court_assignment[:3]
+            != (character_id, "court_type", "court_intrigue")
+        ):
+            continue
+        latest[operation.title_id] = (operation, faith_id, character_id)
+        by_order[operation.declaration_order] = (faith_id, character_id)
+    rows = [
+        (
+            title_id,
+            faith_id,
+            str(operation.effective_date),
+            "title_history",
+            operation.declaration_order,
+            "valid",
+            None,
+        )
+        for title_id, (operation, faith_id, _) in sorted(latest.items())
+    ]
+    return rows, by_order
+
+
 def _historical_adventurer_fields(
     operation: HistoryOperation,
 ) -> tuple[str, str, CK3Date | None] | None:
@@ -1973,6 +2220,187 @@ def _ceremonial_title_variable(
         return None
     target_title_id = raw_value.removeprefix("title:")
     return target_title_id if target_title_id in installed_title_ids else None
+
+
+def _e_japan_administrative_title_variable(
+    operation: HistoryOperation,
+) -> str | None:
+    if (
+        operation.title_id != "e_japan"
+        or operation.effective_date != CK3Date(867, 1, 1)
+        or operation.operation_key != "effect"
+        or operation.value_kind != "block"
+    ):
+        return None
+    branches = list(
+        _assignments(operation.raw_script[1:-1], operation.source_line_start)
+    )
+    if len(branches) != 2 or any(
+        branch.key != "if" or branch.value_kind != "block" for branch in branches
+    ):
+        return None
+    court = list(_assignments(branches[0].raw_value[1:-1], branches[0].line_start))
+    if [field.key for field in court] != ["limit", "holder"] or any(
+        field.value_kind != "block" for field in court
+    ):
+        return None
+    court_limits = list(
+        _assignments(court[0].raw_value[1:-1], court[0].line_start)
+    )
+    holder_fields = list(
+        _assignments(court[1].raw_value[1:-1], court[1].line_start)
+    )
+    if (
+        [field.key for field in court_limits] != ["exists", "has_dlc_feature"]
+        or any(field.value_kind != "scalar" for field in court_limits)
+        or _scalar_value(court_limits[0].raw_value) != "holder"
+        or _scalar_value(court_limits[1].raw_value) != ROYAL_COURT_FEATURE_FLAG
+        or len(holder_fields) != 1
+        or holder_fields[0].key != "set_court_language"
+        or holder_fields[0].value_kind != "scalar"
+        or _scalar_value(holder_fields[0].raw_value) != "language_chinese"
+    ):
+        return None
+    variable_branch = list(
+        _assignments(branches[1].raw_value[1:-1], branches[1].line_start)
+    )
+    if [field.key for field in variable_branch] != ["limit", "set_variable"]:
+        return None
+    if any(field.value_kind != "block" for field in variable_branch):
+        return None
+    tgp_limits = list(
+        _assignments(
+            variable_branch[0].raw_value[1:-1], variable_branch[0].line_start
+        )
+    )
+    variable_fields = list(
+        _assignments(
+            variable_branch[1].raw_value[1:-1], variable_branch[1].line_start
+        )
+    )
+    if (
+        len(tgp_limits) != 1
+        or tgp_limits[0].key != "has_tgp_dlc_trigger"
+        or tgp_limits[0].value_kind != "scalar"
+        or _scalar_value(tgp_limits[0].raw_value) != "yes"
+        or [field.key for field in variable_fields] != ["name", "value"]
+        or any(field.value_kind != "scalar" for field in variable_fields)
+        or _scalar_value(variable_fields[0].raw_value)
+        != "administrative_ui_special_title"
+    ):
+        return None
+    raw_target = _scalar_value(variable_fields[1].raw_value)
+    return (
+        raw_target.removeprefix("title:")
+        if raw_target.startswith("title:")
+        else None
+    )
+
+
+def _byzantine_state_faith(operation: HistoryOperation) -> str | None:
+    if (
+        operation.title_id != "e_byzantium"
+        or operation.effective_date != CK3Date(866, 1, 1)
+        or operation.operation_key != "effect"
+        or operation.value_kind != "block"
+    ):
+        return None
+    branches = list(
+        _assignments(operation.raw_script[1:-1], operation.source_line_start)
+    )
+    if len(branches) != 3 or any(
+        branch.key != "if" or branch.value_kind != "block" for branch in branches
+    ):
+        return None
+    parsed = [
+        list(_assignments(branch.raw_value[1:-1], branch.line_start))
+        for branch in branches
+    ]
+    if any(
+        [field.key for field in branch] != ["limit", "holder"]
+        if index != 0
+        else [field.key for field in branch] != ["limit", "set_state_faith"]
+        for index, branch in enumerate(parsed)
+    ):
+        return None
+    if any(field.value_kind != "block" for field in parsed[0][:1]):
+        return None
+    if parsed[0][1].value_kind != "scalar":
+        return None
+    state_limits = list(
+        _assignments(parsed[0][0].raw_value[1:-1], parsed[0][0].line_start)
+    )
+    if (
+        [field.key for field in state_limits] != ["exists", "holder"]
+        or state_limits[0].value_kind != "scalar"
+        or _scalar_value(state_limits[0].raw_value) != "holder"
+        or state_limits[1].value_kind != "block"
+    ):
+        return None
+    holder_government = list(
+        _assignments(
+            state_limits[1].raw_value[1:-1], state_limits[1].line_start
+        )
+    )
+    raw_faith = _scalar_value(parsed[0][1].raw_value)
+    if (
+        len(holder_government) != 1
+        or holder_government[0].key != "has_government"
+        or holder_government[0].value_kind != "scalar"
+        or _scalar_value(holder_government[0].raw_value)
+        != "administrative_government"
+        or raw_faith != "faith:orthodox"
+    ):
+        return None
+    court_limits = list(
+        _assignments(parsed[1][0].raw_value[1:-1], parsed[1][0].line_start)
+    )
+    court_holder = list(
+        _assignments(parsed[1][1].raw_value[1:-1], parsed[1][1].line_start)
+    )
+    if (
+        [field.key for field in court_limits] != ["exists", "has_dlc_feature"]
+        or any(field.value_kind != "scalar" for field in court_limits)
+        or _scalar_value(court_limits[0].raw_value) != "holder"
+        or _scalar_value(court_limits[1].raw_value) != ROYAL_COURT_FEATURE_FLAG
+        or len(court_holder) != 1
+        or court_holder[0].key != "set_court_type"
+        or court_holder[0].value_kind != "scalar"
+        or _scalar_value(court_holder[0].raw_value) != "court_intrigue"
+    ):
+        return None
+    fallback_limits = list(
+        _assignments(parsed[2][0].raw_value[1:-1], parsed[2][0].line_start)
+    )
+    fallback_holder = list(
+        _assignments(parsed[2][1].raw_value[1:-1], parsed[2][1].line_start)
+    )
+    if (
+        [field.key for field in fallback_limits] != ["exists", "NOT"]
+        or fallback_limits[0].value_kind != "scalar"
+        or _scalar_value(fallback_limits[0].raw_value) != "holder"
+        or fallback_limits[1].value_kind != "block"
+    ):
+        return None
+    negative = list(
+        _assignments(
+            fallback_limits[1].raw_value[1:-1], fallback_limits[1].line_start
+        )
+    )
+    if (
+        len(negative) != 1
+        or negative[0].key != "has_dlc_feature"
+        or negative[0].value_kind != "scalar"
+        or _scalar_value(negative[0].raw_value) != EP3_FEATURE_FLAG
+        or [field.key for field in fallback_holder]
+        != ["change_government", "add_realm_law_skip_effects"]
+        or any(field.value_kind != "scalar" for field in fallback_holder)
+        or _scalar_value(fallback_holder[0].raw_value) != "feudal_government"
+        or _scalar_value(fallback_holder[1].raw_value)
+        != "single_heir_succession_law"
+    ):
+        return None
+    return "orthodox"
 
 
 def _is_tgp_dynasty_prestige_invocation(operation: HistoryOperation) -> bool:
@@ -2079,6 +2507,7 @@ def _materialize_title_variables(
     baseline_date: date,
     historical_adventurer_orders: set[int],
     installed_title_ids: set[str],
+    e_japan_variables_by_order: dict[int, str],
 ) -> list[tuple[object, ...]]:
     cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
     latest: dict[tuple[str, str], tuple[HistoryOperation, str, str]] = {}
@@ -2101,6 +2530,11 @@ def _materialize_title_variables(
         if ceremonial_title_id is not None:
             latest[(operation.title_id, "ceremonial_title")] = (
                 operation, "title", ceremonial_title_id
+            )
+        e_japan_target = e_japan_variables_by_order.get(operation.declaration_order)
+        if e_japan_target is not None:
+            latest[(operation.title_id, "administrative_ui_special_title")] = (
+                operation, "title", e_japan_target
             )
     return [
         (
