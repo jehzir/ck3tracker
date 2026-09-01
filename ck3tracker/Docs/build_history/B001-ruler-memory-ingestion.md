@@ -1,5 +1,7 @@
 # Current Build
 
+> **Archived build:** B001 is suspended and retained for history only. Do not resume its Imports or observation tasks from this file. Use `Docs/current_build.md` for the sole current execution path.
+
 - Build ID: `B001-ruler-memory-ingestion`
 - Build name: Ruler memory event-stream groundwork
 - Status: `suspended`
@@ -86,11 +88,11 @@ Establish the CK3 Game Journal as a durable memory and event model. Treat pasted
 - Evidence-set scaffolding uses six-digit playthrough-local IDs such as `set_000000`; four digits are insufficient for a full 867-1453 run.
 - OCR dependencies and the screenshot OCR page are committed; native Tesseract is installed outside the repository and configured by path.
 
-## Next Exact Action
+## Archived Next Action
 
 Build the first Imports review workflow: persist a pasted ruler-memory import batch and linked screenshot evidence with provenance, then create reviewed pending acquisition candidates without inventing exact game dates or modifying the character-memory feed.
 
-## Resume Note
+## Archived Resume Note
 
 Start the next chat with:
 

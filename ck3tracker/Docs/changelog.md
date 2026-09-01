@@ -1,6 +1,44 @@
 # Changelog
 
+## 2026-08-31
+- Replayed all five exact Royal Court conditional language-learning bodies in title-history parser `1.18.0`, adding four provenance-bearing `history_granted` rows for the Bulgarian, Italian, Lotharingian, and Sindhi holders and recording Tajik Nasr's Iranian branch as an already-native no-op.
+- Added exact learned/no-op, unresolved-language, Balhae-exclusion, and second-load idempotency coverage; opaque title states fall from 9 to 4 and all 62 repository tests pass.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:8b174297-d096-4740-a8c8-4467f8223c60`; classifications remain blocked at 2/2/1/20 with no promotion.
+- Extended character parser `1.5.0` to materialize 71,121 native-language rows from grounded culture mappings, covering every baseline character with a non-null culture and preserving separately owned learned rows on reload.
+- Added exact native-language provenance, idempotency, learned-row preservation, and pre-transaction unresolved-mapping tests; all 62 repository tests pass.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:82e6112d-ab4c-4d4c-8dde-df8280b391b8`; classifications remain blocked at 2/2/1/20 with no promotion.
+- Extended culture parser `1.1.0` to load 91 installed language definitions and 244 provenance-bearing culture-native mappings; every culture has exactly one resolved native language.
+- Added transactional rejection coverage for unresolved native-language IDs and generated current readiness report `ck3_1_19_0_6_867:readiness:41b4a45e-2eff-4c90-9e05-6796e9e95a40`; classifications remain blocked at 2/2/1/20 with no promotion.
+- All 61 repository tests pass.
+- Added durable `reference.character_baseline_languages` storage keyed by baseline, character, and language, with explicit knowledge kind, effective date, source group/declaration provenance, and validation state; bootstrapped the candidate database with zero rows and no parser, readiness, or promotion changes.
+- Added focused bootstrap coverage for native and history-granted language identity; all 60 repository tests pass.
+- Added exact candidate-only Royal Court replay in title-history parser `1.17.0`: 11 adjudicated execution-time holders now have provenance-bearing court language or type state, while `k_balhae` remains excluded because installed and observed values conflict.
+- Fully normalized four complete court-only declarations; projected proven court fields from mixed and language-learning bodies without certifying their unsupported remainder, reducing opaque title states from 12 to 9.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:f1679e28-6fdf-4b09-bc6d-cf62535e1b4d`; classifications remain 2 blocking, 2 accepted exceptions, 1 informational, and 20 passed, with no promotion.
+- All 59 repository tests pass.
+- Added durable `reference.character_baseline_court_states` storage keyed by baseline and character, with nullable court-language and court-type values plus independent effective-date and source-declaration provenance; bootstrapped the candidate database with zero rows and no readiness or promotion changes.
+- Added focused bootstrap coverage for the court-state schema boundary; all 58 repository tests pass.
+- Adopted strict baseline historical-state completeness in ADR-001: active starting court, character-language, state-faith, variable, and law state must be durably projected even when the current UI does not consume it.
+- Completed title-by-title review of all 12 remaining title rows and 13 declarations, preserving distinctions between court state, conditional holder-language changes, already projected fields, inactive branches, and runtime/source discrepancies.
+- Added required reviewed mapping `royal_court -> dlc004_ep1` independently of bookmark flags, validated the installed descriptor and CK3 Wiki revision `35819`, and loaded the evidence into the candidate snapshot with bookmark parser `1.2.0`.
+- Generated current readiness report `ck3_1_19_0_6_867:readiness:0ab136f8-a410-40b1-a79a-1ca209c307ca`; classifications remain 2 blocking, 2 accepted exceptions, 1 informational, and 20 passed, with 12 opaque title rows and no promotion.
+- All 57 repository tests pass.
+
 ## 2026-08-29
+- Audited the 12 remaining opaque title states and separated the current blanket readiness classification from title-by-title product scope: nine are Royal Court-only candidates for explicit exception, while three contain mixed non-court state requiring targeted review.
+- Completed a documentation consistency pass: added the remaining-title ledger, clarified archived task authority, verified current parser/report/count claims, and confirmed all relative Markdown links resolve.
+- Replayed the exact `k_chrysanthemum_throne` `ceremonial_title = title:e_japan` body as a resolved title-reference variable with provenance; mixed and unresolved bodies remain opaque, and the title retains two unrelated warnings.
+- Replayed the exact two-field `d_laamp_henry_of_skalitz` historical-adventurer body into the existing initialization and title-variable projections without synthesizing its omitted destruction helper, reducing opaque title states from 13 to 12.
+- Replayed the exact `c_nf_yamato` direct dynasty prestige loop as a field-grounded lower-bound constraint (`level >= 9`), retained the complete raw declaration, and reduced opaque title states from 14 to 13 without certifying its holder's unrelated character effect.
+- Replayed the exact `d_aragon` `set_title_name = d_zaragoza` effect through the existing dated name-override projection, resolving “Zaragoza” while preserving stable title identity and reducing opaque title states from 15 to 14.
+- Replayed six exact Minamoto/Taira helper bodies as provenance-bearing dynasty prestige floor constraints (`level >= 5`), never inferred exact levels, exposed them in the Reference Inspector, and reduced opaque title states from 21 to 15.
+- Replayed both exact title-scope `set_de_jure_liege_title = title:<id>` effect bodies through the existing dated de-jure projection; mixed and unresolved bodies remain opaque, and opaque title states fell from 23 to 21.
+- Replayed seven dated title-name replacements and one explicit reset into a separate provenance-bearing override projection; all localization keys and aliases resolve, the Inspector exposes effective name state, and opaque title states fell from 29 to 23.
+- Replayed all 43 baseline-effective `holder_ignore_head_of_faith_requirement` declarations as holder replacement/clear events with an explicit assignment-mode status; all 39 referenced character IDs resolve and opaque title states fell from 34 to 29.
+- Inventoried all 74 baseline-effective opaque single-conditional title effects; normalized 64 exact no-Roads-to-Power government fallback bodies as audited no-ops and preserved all 10 Royal Court bodies for a complete court-state/runtime-language model, reducing opaque title states from 97 to 34.
+- Fully replayed 20 historical adventurer initialization bodies as an idempotent law check, durable `adventurer_creation_reason=flag:historical` title state, and a Roads to Power no-op; opaque title states fell from 117 to 97.
+- Normalized 21 exact, date-matched `destroy_landless_title_no_dlc_effect` declarations as no-ops after binding `roads_to_power` to the validated installed Roads to Power package; mixed effects remain opaque and title warnings fell from 137 to 117.
+- Normalized all 23 baseline-effective `tributary_of` declarations as separate dated subject relationships after resolving six suzerains and the installed `tributary_mandala` contract definition; opaque title states fell from 160 to 137 without changing candidate or promotion status.
 - Superseded the permanent 867-only product decision. A playthrough may start at any CK3 location in a parsed, validated, and promoted reference baseline.
 - Defined run creation as searchable cascading filters over the stable title hierarchy, followed by an atomic playthrough baseline transaction.
 - Kept 867 as the only currently proven baseline; additional bookmarks become selectable only after their history and hierarchy inputs pass promotion validation.

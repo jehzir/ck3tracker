@@ -137,6 +137,36 @@ mixed_relationship_person = {
             baseline_id="scribe_867",
             database_path=self.database_path,
         )
+        connection = connect(self.database_path)
+        try:
+            for order, (culture_id, language_id) in enumerate(
+                (
+                    ("new_culture", "language_new"),
+                    ("test_culture", "language_test"),
+                    ("burmese", "language_burmese"),
+                    ("mon", "language_mon"),
+                ),
+                start=1,
+            ):
+                connection.execute(
+                    """
+                    INSERT INTO reference.languages
+                    VALUES ('scribe_build', ?, 'common/culture/pillars/test.txt',
+                            1, 1, ?, '{}', '1.1.0', 'valid', NULL)
+                    """,
+                    [language_id, order],
+                )
+                connection.execute(
+                    """
+                    INSERT INTO reference.culture_native_languages
+                    VALUES ('scribe_build', ?, ?,
+                            'common/culture/cultures/test.txt', 1, 1, ?,
+                            '1.1.0', 'valid', NULL)
+                    """,
+                    [culture_id, language_id, order],
+                )
+        finally:
+            connection.close()
 
     def tearDown(self) -> None:
         self.temporary_directory.cleanup()
@@ -164,6 +194,14 @@ mixed_relationship_person = {
                 """
                 SELECT title_id, holder_character_id, lifecycle_status, validation_status
                 FROM reference.title_holder_validations ORDER BY title_id
+                """
+            ).fetchall()
+            native_languages = connection.execute(
+                """
+                SELECT character_id, language_id, knowledge_kind, source_group,
+                       source_declaration_order
+                FROM reference.character_baseline_languages
+                ORDER BY character_id
                 """
             ).fetchall()
             duplicate_statuses = connection.execute(
@@ -261,6 +299,15 @@ mixed_relationship_person = {
                 ("c_dead", "dead_person", "dead_at_baseline", "warning"),
             ],
             holders,
+        )
+        self.assertEqual(
+            [
+                ("alive_person", "language_new", "native", "culture", 1),
+                ("culture_effect_person", "language_burmese", "native", "culture", 3),
+                ("dead_person", "language_test", "native", "culture", 2),
+                ("nested_effect_person", "language_mon", "native", "culture", 4),
+            ],
+            native_languages,
         )
         self.assertEqual([("review_required",)], duplicate_statuses)
         self.assertEqual(("conflicting_at_baseline", "display_name", 2), duplicate_blocks)
@@ -390,6 +437,18 @@ mixed_relationship_person = {
             "baseline_id": "scribe_867",
             "database_path": self.database_path,
         }
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.character_baseline_languages
+                VALUES ('scribe_867', 'alive_person', 'language_learned',
+                        'history_granted', '0850-01-01', 'title_history', 99,
+                        'valid', NULL)
+                """
+            )
+        finally:
+            connection.close()
         load_character_history_candidate(**arguments)
         load_character_history_candidate(**arguments)
         connection = connect(self.database_path)
@@ -398,6 +457,7 @@ mixed_relationship_person = {
                 """
                 SELECT
                   (SELECT count(*) FROM reference.character_baseline_states),
+                  (SELECT count(*) FROM reference.character_baseline_languages),
                   (SELECT count(*) FROM reference.title_holder_validations),
                   (SELECT count(*) FROM source.source_files),
                   (SELECT count(*) FROM source.parser_runs)
@@ -405,7 +465,44 @@ mixed_relationship_person = {
             ).fetchone()
         finally:
             connection.close()
-        self.assertEqual((11, 2, 4, 4), counts)
+        self.assertEqual((11, 5, 2, 4, 4), counts)
+
+    def test_unresolved_native_language_mapping_preserves_existing_state(self) -> None:
+        arguments = {
+            "game_root": self.game_root,
+            "reference_snapshot_id": "scribe_build",
+            "baseline_id": "scribe_867",
+            "database_path": self.database_path,
+        }
+        load_character_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                DELETE FROM reference.culture_native_languages
+                WHERE reference_snapshot_id = 'scribe_build'
+                  AND culture_id = 'new_culture'
+                """
+            )
+        finally:
+            connection.close()
+
+        with self.assertRaisesRegex(
+            ValueError, "Baseline cultures lack valid native-language mappings"
+        ):
+            load_character_history_candidate(**arguments)
+
+        connection = connect(self.database_path)
+        try:
+            counts = connection.execute(
+                """
+                SELECT (SELECT count(*) FROM reference.character_baseline_states),
+                       (SELECT count(*) FROM reference.character_baseline_languages)
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual((11, 4), counts)
 
 
 if __name__ == "__main__":

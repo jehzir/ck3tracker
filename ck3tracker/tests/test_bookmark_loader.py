@@ -46,6 +46,17 @@ bm_867_two = {
             "challenge_test = { start_date = 867.1.1 character = { history_id = person_one } }",
             encoding="utf-8-sig",
         )
+        royal_court_descriptor = self.game_root / "dlc" / "dlc004_ep1" / "dlc004.dlc"
+        royal_court_descriptor.parent.mkdir(parents=True)
+        royal_court_descriptor.write_text(
+            '''name = "The Royal Court"
+path = "dlc/dlc004_ep1"
+steam_id = "1303182"
+pops_id = "ck3_dlc004_ep1"
+msgr_id = "9PDMBMV4J906"
+''',
+            encoding="utf-8",
+        )
         connection = connect(self.database_path)
         try:
             connection.execute(
@@ -190,6 +201,7 @@ msgr_id = "9PHT1PQ17BJ1"
                 SELECT package_id, display_name, steam_id, pops_id,
                        wiki_revision_id, validation_status
                 FROM reference.dlc_packages
+                WHERE package_id = 'dlc014_ep3'
                 """
             ).fetchone()
         finally:
@@ -208,6 +220,46 @@ msgr_id = "9PHT1PQ17BJ1"
                 "valid",
             ),
             package,
+        )
+
+    def test_loads_required_royal_court_feature_without_bookmark_requirement(self) -> None:
+        load_bookmarks_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="snapshot",
+            baseline_id="baseline",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            mapping = connection.execute(
+                """
+                SELECT mapping.feature_flag, mapping.package_id,
+                       mapping.review_status, package.display_name,
+                       package.steam_id, package.pops_id,
+                       package.wiki_revision_id, package.validation_status
+                FROM reference.dlc_feature_mappings mapping
+                JOIN reference.dlc_packages package
+                  ON package.reference_snapshot_id = mapping.reference_snapshot_id
+                 AND package.package_id = mapping.package_id
+                WHERE mapping.reference_snapshot_id = 'snapshot'
+                  AND mapping.feature_flag = 'royal_court'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            (
+                "royal_court",
+                "dlc004_ep1",
+                "reviewed",
+                "The Royal Court",
+                "1303182",
+                "ck3_dlc004_ep1",
+                "35819",
+                "valid",
+            ),
+            mapping,
         )
 
 

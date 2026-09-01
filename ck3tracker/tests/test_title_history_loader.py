@@ -193,6 +193,363 @@ c_additive = { 800.1.1 = { government = tribal_government } }
         self.assertEqual(19, result.event_count)
         self.assertEqual(9, result.state_count)
 
+    def test_holder_ignore_head_of_faith_requirement_replaces_and_clears_holder(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+    k_islands = {
+        700.1.1 = { holder = ordinary_holder }
+        800.1.1 = { holder_ignore_head_of_faith_requirement = bypass_holder }
+    }
+    d_ruucuu = {
+        700.1.1 = { holder_ignore_head_of_faith_requirement = first_bypass_holder }
+        800.1.1 = { holder_ignore_head_of_faith_requirement = 0 }
+    }
+    """,
+            encoding="utf-8",
+        )
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            states = connection.execute(
+                """
+                    SELECT title_id, holder_character_id, holder_status,
+                           validation_status, validation_note
+                    FROM reference.title_baseline_states
+                    WHERE baseline_id = 'scribe_867'
+                        AND title_id IN ('k_islands', 'd_ruucuu')
+                    ORDER BY title_id
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                    SELECT title_id, scalar_value, resolution_status, raw_script
+                    FROM source.title_history_declarations
+                    WHERE operation_key = 'holder_ignore_head_of_faith_requirement'
+                    ORDER BY declaration_order
+                """
+            ).fetchall()
+            events = connection.execute(
+                """
+                    SELECT title_id, event_type, text_value, validation_status,
+                           validation_note
+                    FROM reference.title_history_events
+                    WHERE event_type = 'holder_ignore_head_of_faith_requirement'
+                    ORDER BY event_sequence
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                ("d_ruucuu", None, "explicit_unheld", "valid", None),
+                (
+                    "k_islands",
+                    "bypass_holder",
+                    "declared_ignore_head_of_faith_requirement",
+                    "valid",
+                    None,
+                ),
+            ],
+            states,
+        )
+        self.assertEqual(
+            [
+                (
+                    "k_islands",
+                    "bypass_holder",
+                    "normalized",
+                    "bypass_holder",
+                ),
+                (
+                    "d_ruucuu",
+                    "first_bypass_holder",
+                    "normalized",
+                    "first_bypass_holder",
+                ),
+                ("d_ruucuu", "0", "normalized", "0"),
+            ],
+            declarations,
+        )
+        self.assertEqual(
+            [
+                (
+                    "d_ruucuu",
+                    "holder_ignore_head_of_faith_requirement",
+                    "first_bypass_holder",
+                    "valid",
+                    "holder assigned with head-of-faith eligibility bypass",
+                ),
+                (
+                    "k_islands",
+                    "holder_ignore_head_of_faith_requirement",
+                    "bypass_holder",
+                    "valid",
+                    "holder assigned with head-of-faith eligibility bypass",
+                ),
+                (
+                    "d_ruucuu",
+                    "holder_ignore_head_of_faith_requirement",
+                    "0",
+                    "valid",
+                    "explicit title clear with head-of-faith eligibility bypass",
+                ),
+            ],
+            events,
+        )
+
+    def test_title_name_override_replaces_and_reset_restores_default_name(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+k_islands = { 700.1.1 = { name = CUSTOM_ISLANDS } }
+d_ruucuu = {
+    700.1.1 = { name = OLD_RUUCUU }
+    800.1.1 = { reset_name = yes }
+}
+c_future = { 700.1.1 = { name = MISSING_NAME_KEY } }
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.executemany(
+                """
+                INSERT INTO reference.localizations
+                VALUES ('scribe_build', 'english', ?, 0, ?, 'test_l_english.yml',
+                        ?, '1.0.0', 'valid')
+                """,
+                [
+                    ("CUSTOM_ISLANDS", "Custom Islands", 1),
+                    ("OLD_RUUCUU", "Old Ruucuu", 2),
+                ],
+            )
+        finally:
+            connection.close()
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            names = connection.execute(
+                """
+                SELECT title_id, localization_key, display_name, name_status,
+                       effective_date, source_declaration_order
+                FROM reference.title_baseline_name_overrides
+                WHERE baseline_id = 'scribe_867'
+                ORDER BY title_id
+                """
+            ).fetchall()
+            states = connection.execute(
+                """
+                SELECT title_id, validation_status, validation_note
+                FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867'
+                    AND title_id IN ('k_islands', 'd_ruucuu', 'c_future')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, operation_key, resolution_status
+                FROM source.title_history_declarations
+                WHERE operation_key IN ('name', 'reset_name')
+                ORDER BY declaration_order
+                """
+            ).fetchall()
+            events = connection.execute(
+                """
+                SELECT title_id, event_type, text_value, validation_status,
+                       validation_note
+                FROM reference.title_history_events
+                WHERE event_type IN ('title_name_override_set', 'title_name_override_reset')
+                ORDER BY event_sequence
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                ("d_ruucuu", None, None, "explicit_default", date(800, 1, 1), 3),
+                (
+                    "k_islands",
+                    "CUSTOM_ISLANDS",
+                    "Custom Islands",
+                    "declared",
+                    date(700, 1, 1),
+                    1,
+                ),
+            ],
+            names,
+        )
+        self.assertEqual(
+            [
+                ("c_future", "warning", "not evaluated: name"),
+                ("d_ruucuu", "valid", None),
+                ("k_islands", "valid", None),
+            ],
+            states,
+        )
+        self.assertEqual(
+            [
+                ("k_islands", "name", "normalized"),
+                ("d_ruucuu", "name", "normalized"),
+                ("d_ruucuu", "reset_name", "normalized"),
+                ("c_future", "name", "preserved"),
+            ],
+            declarations,
+        )
+        self.assertEqual(
+            [
+                (
+                    "k_islands",
+                    "title_name_override_set",
+                    "CUSTOM_ISLANDS",
+                    "valid",
+                    "display_name=Custom Islands",
+                ),
+                (
+                    "d_ruucuu",
+                    "title_name_override_set",
+                    "OLD_RUUCUU",
+                    "valid",
+                    "display_name=Old Ruucuu",
+                ),
+                (
+                    "d_ruucuu",
+                    "title_name_override_reset",
+                    None,
+                    "valid",
+                    "default title localization restored",
+                ),
+            ],
+            events,
+        )
+        inspection = get_title_inspection(
+            "scribe_867", "k_islands", self.database_path
+        )
+        self.assertEqual("CUSTOM_ISLANDS", inspection["name_override_localization_key"])
+        self.assertEqual("Custom Islands", inspection["name_override_display_name"])
+        self.assertEqual("declared", inspection["name_override_status"])
+
+    def test_exact_set_title_name_effect_reuses_name_override_projection(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+d_ruucuu = {
+  700.1.1 = { effect = { set_title_name = CUSTOM_RUUCUU } }
+}
+k_islands = {
+  700.1.1 = {
+    effect = { set_title_name = CUSTOM_ISLANDS set_variable = altered }
+  }
+}
+c_ucinaa = {
+  700.1.1 = { effect = { set_title_name = MISSING_NAME_KEY } }
+}
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.executemany(
+                """
+                INSERT INTO reference.localizations
+                VALUES ('scribe_build', 'english', ?, 0, ?, 'test_l_english.yml',
+                        ?, '1.0.0', 'valid')
+                """,
+                [
+                    ("CUSTOM_RUUCUU", "Custom Ruucuu", 1),
+                    ("CUSTOM_ISLANDS", "Custom Islands", 2),
+                ],
+            )
+        finally:
+            connection.close()
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            names = connection.execute(
+                """
+                SELECT title_id, localization_key, display_name, name_status,
+                       effective_date, source_declaration_order
+                FROM reference.title_baseline_name_overrides
+                WHERE baseline_id = 'scribe_867'
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status, raw_script
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                ORDER BY declaration_order
+                """
+            ).fetchall()
+            states = connection.execute(
+                """
+                SELECT title_id, validation_status, validation_note
+                FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867'
+                  AND title_id IN ('d_ruucuu', 'k_islands', 'c_ucinaa')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            event = connection.execute(
+                """
+                SELECT title_id, event_type, text_value, validation_note
+                FROM reference.title_history_events
+                WHERE event_type = 'title_name_override_set'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                (
+                    "d_ruucuu", "CUSTOM_RUUCUU", "Custom Ruucuu", "declared",
+                    date(700, 1, 1), 1,
+                )
+            ],
+            names,
+        )
+        self.assertEqual("normalized", declarations[0][1])
+        self.assertIn("set_title_name", declarations[0][2])
+        self.assertEqual("preserved", declarations[1][1])
+        self.assertEqual("preserved", declarations[2][1])
+        self.assertEqual(
+            [
+                ("c_ucinaa", "warning", "not evaluated: effect"),
+                ("d_ruucuu", "valid", None),
+                ("k_islands", "warning", "not evaluated: effect"),
+            ],
+            states,
+        )
+        self.assertEqual(
+            (
+                "d_ruucuu", "title_name_override_set", "CUSTOM_RUUCUU",
+                "display_name=Custom Ruucuu",
+            ),
+            event,
+        )
+
     def test_candidate_reload_is_idempotent(self) -> None:
         arguments = {
             "game_root": self.game_root,
@@ -419,6 +776,806 @@ destroy_landless_title_no_tgp_dlc_effect = {
             evidence_paths,
         )
 
+    def test_installed_roads_to_power_package_makes_exact_destruction_a_noop(self) -> None:
+                history = self.game_root / "history" / "titles" / "titles.txt"
+                history.write_text(
+                        """
+k_islands = {
+    867.1.1 = {
+        effect = { destroy_landless_title_no_dlc_effect = { DATE = 867.1.1 } }
+    }
+}
+c_future = {
+    867.1.1 = {
+        effect = {
+            set_variable = test
+            destroy_landless_title_no_dlc_effect = { DATE = 867.1.1 }
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                effects = self.game_root / "common" / "scripted_effects"
+                effects.mkdir(parents=True)
+                (effects / "07_dlc_ep3_scripted_effects.txt").write_text(
+                        """
+destroy_landless_title_no_dlc_effect = {
+    if = {
+        limit = {
+            NOT = { has_dlc_feature = roads_to_power }
+            game_start_date = $DATE$
+        }
+        holder ?= {
+            empty_treasury_when_abandoning_landed_life_effect = yes
+            destroy_title = prev
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                connection = connect(self.database_path)
+                try:
+                        connection.execute(
+                                """
+                                INSERT INTO reference.dlc_packages
+                                VALUES ('scribe_build', 'dlc014_ep3', 'Roads to Power', NULL,
+                                                NULL, NULL, 'dlc/dlc014_ep3/dlc014.dlc', 'hash',
+                                                'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                                """
+                        )
+                        connection.execute(
+                                """
+                                INSERT INTO reference.dlc_feature_mappings
+                                VALUES ('scribe_build', 'roads_to_power', 'dlc014_ep3',
+                                                'reviewed', 'test evidence')
+                                """
+                        )
+                finally:
+                        connection.close()
+
+                load_title_history_candidate(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        database_path=self.database_path,
+                )
+                connection = connect(self.database_path)
+                try:
+                        states = connection.execute(
+                                """
+                                SELECT title_id, validation_status, validation_note
+                                FROM reference.title_baseline_states
+                                WHERE baseline_id = 'scribe_867'
+                                    AND title_id IN ('k_islands', 'c_future')
+                                ORDER BY title_id
+                                """
+                        ).fetchall()
+                        declarations = connection.execute(
+                                """
+                                SELECT title_id, resolution_status
+                                FROM source.title_history_declarations
+                                WHERE operation_key = 'effect'
+                                    AND title_id IN ('k_islands', 'c_future')
+                                ORDER BY title_id
+                                """
+                        ).fetchall()
+                        event = connection.execute(
+                                """
+                                SELECT title_id, event_type, text_value, validation_note,
+                                             required_game_start_date
+                                FROM reference.title_history_events
+                                WHERE event_type = 'dlc_gated_noop'
+                                """
+                        ).fetchone()
+                finally:
+                        connection.close()
+
+                self.assertEqual(
+                        [
+                                ("c_future", "warning", "not evaluated: effect"),
+                                ("k_islands", "valid", None),
+                        ],
+                        states,
+                )
+                self.assertEqual(
+                        [("c_future", "preserved"), ("k_islands", "normalized")],
+                        declarations,
+                )
+                self.assertEqual(
+                        (
+                                "k_islands",
+                                "dlc_gated_noop",
+                                "roads_to_power",
+                                "installed dlc014_ep3 makes destruction condition false",
+                                "0867-01-01",
+                        ),
+                        event,
+                )
+
+    def test_installed_roads_to_power_makes_exact_government_fallback_a_noop(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+k_islands = {
+    867.1.1 = {
+        holder = holder_1
+        effect = {
+            if = {
+                limit = {
+                    exists = holder
+                    NOT = { has_dlc_feature = roads_to_power }
+                }
+                holder = {
+                    empty_treasury_when_abandoning_landed_life_effect = yes
+                    change_government = feudal_government
+                }
+            }
+        }
+    }
+}
+c_future = {
+    867.1.1 = {
+        holder = holder_2
+        effect = {
+            if = {
+                limit = {
+                    exists = holder
+                    NOT = { has_dlc_feature = roads_to_power }
+                }
+                holder = {
+                    empty_treasury_when_abandoning_landed_life_effect = yes
+                    change_government = feudal_government
+                    set_variable = altered
+                }
+            }
+        }
+    }
+}
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_packages
+                VALUES ('scribe_build', 'dlc014_ep3', 'Roads to Power', NULL,
+                        NULL, NULL, 'dlc/dlc014_ep3/dlc014.dlc', 'hash',
+                        'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_feature_mappings
+                VALUES ('scribe_build', 'roads_to_power', 'dlc014_ep3',
+                        'reviewed', 'test evidence')
+                """
+            )
+        finally:
+            connection.close()
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            states = connection.execute(
+                """
+                SELECT title_id, validation_status, validation_note
+                FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867'
+                    AND title_id IN ('k_islands', 'c_future')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                    AND title_id IN ('k_islands', 'c_future')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            event = connection.execute(
+                """
+                SELECT title_id, event_type, text_value, validation_note
+                FROM reference.title_history_events
+                WHERE event_type = 'dlc_gated_conditional_noop'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                ("c_future", "warning", "not evaluated: effect"),
+                ("k_islands", "valid", None),
+            ],
+            states,
+        )
+        self.assertEqual(
+            [("c_future", "preserved"), ("k_islands", "normalized")],
+            declarations,
+        )
+        self.assertEqual(
+            (
+                "k_islands",
+                "dlc_gated_conditional_noop",
+                "roads_to_power",
+                "installed dlc014_ep3 makes government fallback condition false",
+            ),
+            event,
+        )
+
+    def test_materializes_exact_royal_court_state_at_execution_holder(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+k_islands = {
+    700.1.1 = { holder = language_holder }
+    800.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = { set_court_language = language_chinese }
+    } } }
+    850.1.1 = { holder = type_holder }
+    860.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = { set_court_type = court_scholarly }
+    } } }
+    867.1.1 = { holder = final_holder }
+}
+c_future = {
+    800.1.1 = { holder = learning_holder }
+    801.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = {
+            set_court_language = language_greek
+            if = {
+                limit = { NOT = { knows_court_language_of = this } }
+                learn_court_language_of = this
+            }
+        }
+    } } }
+}
+c_additive = {
+    800.1.1 = { holder = native_holder }
+    801.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = {
+            set_court_language = language_iranian
+            if = {
+                limit = { NOT = { knows_court_language_of = this } }
+                learn_court_language_of = this
+            }
+        }
+    } } }
+}
+d_ruucuu = {
+    800.1.1 = { holder = unresolved_holder }
+    801.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = { set_court_language = language_missing }
+    } } }
+}
+k_balhae = {
+    800.1.1 = { holder = excluded_holder }
+    801.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = { set_court_language = language_chinese }
+    } } }
+}
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_packages
+                VALUES ('scribe_build', 'dlc004_ep1', 'The Royal Court', NULL,
+                        NULL, NULL, 'dlc/dlc004_ep1/dlc004.dlc', 'hash',
+                        'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_feature_mappings
+                VALUES ('scribe_build', 'royal_court', 'dlc004_ep1',
+                        'reviewed', 'test evidence')
+                """
+            )
+            for order, language_id in enumerate(
+                ("language_chinese", "language_greek", "language_iranian"),
+                start=1,
+            ):
+                connection.execute(
+                    """
+                    INSERT INTO reference.languages
+                    VALUES ('scribe_build', ?, 'common/culture/pillars/test.txt',
+                            1, 1, ?, '{}', '1.1.0', 'valid', NULL)
+                    """,
+                    [language_id, order],
+                )
+            connection.execute(
+                """
+                INSERT INTO reference.character_baseline_languages
+                VALUES ('scribe_867', 'native_holder', 'language_iranian',
+                        'native', NULL, 'culture', 1, 'valid', NULL)
+                """
+            )
+        finally:
+            connection.close()
+
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        load_title_history_candidate(**arguments)
+        load_title_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            court_states = connection.execute(
+                """
+                SELECT character_id, court_language_id,
+                       court_language_effective_date,
+                       court_language_source_declaration_order,
+                       court_type_id, court_type_effective_date,
+                       court_type_source_declaration_order
+                FROM reference.character_baseline_court_states
+                ORDER BY character_id
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                ORDER BY title_id
+                """
+            ).fetchall()
+            title_states = connection.execute(
+                """
+                SELECT title_id, validation_status
+                FROM reference.title_baseline_states
+                WHERE title_id IN ('k_islands', 'c_future', 'c_additive', 'd_ruucuu')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            languages = connection.execute(
+                """
+                SELECT character_id, language_id, knowledge_kind, source_group,
+                       source_declaration_order
+                FROM reference.character_baseline_languages
+                ORDER BY character_id, language_id
+                """
+            ).fetchall()
+            learning_events = connection.execute(
+                """
+                SELECT title_id, event_type, text_value, validation_note
+                FROM reference.title_history_events
+                WHERE event_type IN ('court_language_learned',
+                                     'court_language_learning_noop')
+                ORDER BY title_id
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                ("language_holder", "language_chinese", date(800, 1, 1), 2,
+                 None, None, None),
+                ("learning_holder", "language_greek", date(801, 1, 1), 7,
+                 None, None, None),
+                ("native_holder", "language_iranian", date(801, 1, 1), 9,
+                 None, None, None),
+                ("type_holder", None, None, None,
+                 "court_scholarly", date(860, 1, 1), 4),
+            ],
+            court_states,
+        )
+        self.assertEqual(
+            [
+                ("c_additive", "normalized"),
+                ("c_future", "normalized"),
+                ("d_ruucuu", "preserved"),
+                ("k_balhae", "preserved"),
+                ("k_islands", "normalized"),
+                ("k_islands", "normalized"),
+            ],
+            declarations,
+        )
+        self.assertEqual(
+            [
+                ("c_additive", "valid"),
+                ("c_future", "valid"),
+                ("d_ruucuu", "warning"),
+                ("k_islands", "valid"),
+            ],
+            title_states,
+        )
+        self.assertEqual(
+            [
+                ("learning_holder", "language_greek", "history_granted",
+                 "title_history", 7),
+                ("native_holder", "language_iranian", "native", "culture", 1),
+            ],
+            languages,
+        )
+        self.assertEqual(
+            [
+                ("c_additive", "court_language_learning_noop", "language_iranian",
+                 "holder=native_holder; already_known"),
+                ("c_future", "court_language_learned", "language_greek",
+                 "holder=learning_holder; history_granted"),
+            ],
+            learning_events,
+        )
+
+    def test_historical_adventurer_body_is_fully_replayed(self) -> None:
+                history = self.game_root / "history" / "titles" / "titles.txt"
+                history.write_text(
+                        """
+k_islands = {
+    867.1.1 = {
+        holder = holder_1
+        succession_laws = { landless_adventurer_succession_law }
+        effect = {
+            create_landless_adventurer_title_history_effect = yes
+            set_variable = { name = adventurer_creation_reason value = flag:historical }
+            destroy_landless_title_no_dlc_effect = { DATE = 867.1.1 }
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                laws = self.game_root / "common" / "laws"
+                laws.mkdir(parents=True)
+                (laws / "00_succession_laws.txt").write_text(
+                        "succession_order_laws = {\n"
+                        "  landless_adventurer_succession_law = { }\n"
+                        "}\n",
+                        encoding="utf-8",
+                )
+                effects = self.game_root / "common" / "scripted_effects"
+                effects.mkdir(parents=True)
+                (effects / "07_dlc_ep3_scripted_effects.txt").write_text(
+                        """
+create_landless_adventurer_title_history_effect = {
+    holder ?= {
+        if = {
+            limit = { NOT = { has_realm_law = landless_adventurer_succession_law } }
+            add_realm_law = landless_adventurer_succession_law
+        }
+    }
+}
+destroy_landless_title_no_dlc_effect = {
+    if = {
+        limit = {
+            NOT = { has_dlc_feature = roads_to_power }
+            game_start_date = $DATE$
+        }
+        holder ?= {
+            empty_treasury_when_abandoning_landed_life_effect = yes
+            destroy_title = prev
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                connection = connect(self.database_path)
+                try:
+                        connection.execute(
+                                """
+                                INSERT INTO reference.dlc_packages
+                                VALUES ('scribe_build', 'dlc014_ep3', 'Roads to Power', NULL,
+                                                NULL, NULL, 'dlc/dlc014_ep3/dlc014.dlc', 'hash',
+                                                'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                                """
+                        )
+                        connection.execute(
+                                """
+                                INSERT INTO reference.dlc_feature_mappings
+                                VALUES ('scribe_build', 'roads_to_power', 'dlc014_ep3',
+                                                'reviewed', 'test evidence')
+                                """
+                        )
+                finally:
+                        connection.close()
+
+                load_title_history_candidate(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        database_path=self.database_path,
+                )
+                connection = connect(self.database_path)
+                try:
+                        state = connection.execute(
+                                """
+                                SELECT validation_status, validation_note
+                                FROM reference.title_baseline_states
+                                WHERE baseline_id = 'scribe_867' AND title_id = 'k_islands'
+                                """
+                        ).fetchone()
+                        variable = connection.execute(
+                                """
+                                SELECT variable_name, value_kind, text_value, effective_date
+                                FROM reference.title_baseline_variables
+                                WHERE baseline_id = 'scribe_867' AND title_id = 'k_islands'
+                                """
+                        ).fetchone()
+                        events = connection.execute(
+                                """
+                                SELECT event_type, text_value, validation_note
+                                FROM reference.title_history_events
+                                WHERE title_id = 'k_islands'
+                                    AND event_type IN ('landless_adventurer_history_initialized',
+                                                                         'title_variable_set', 'dlc_gated_noop')
+                                ORDER BY event_sequence
+                                """
+                        ).fetchall()
+                        declaration = connection.execute(
+                                """
+                                SELECT resolution_status, raw_script
+                                FROM source.title_history_declarations
+                                WHERE title_id = 'k_islands' AND operation_key = 'effect'
+                                """
+                        ).fetchone()
+                finally:
+                        connection.close()
+
+                self.assertEqual(("valid", None), state)
+                self.assertEqual(
+                        ("adventurer_creation_reason", "flag", "historical", date(867, 1, 1)),
+                        variable,
+                )
+                self.assertEqual(
+                        [
+                                (
+                                        "landless_adventurer_history_initialized",
+                                        "landless_adventurer_succession_law",
+                                        "explicit title law makes helper idempotent",
+                                ),
+                                ("title_variable_set", "adventurer_creation_reason=historical", "value_kind=flag"),
+                                (
+                                        "dlc_gated_noop",
+                                        "roads_to_power",
+                                        "installed dlc014_ep3 makes destruction condition false",
+                                ),
+                        ],
+                        events,
+                )
+                self.assertEqual("normalized", declaration[0])
+                self.assertIn("create_landless_adventurer_title_history_effect", declaration[1])
+
+    def test_two_field_historical_adventurer_body_omits_destruction_event(self) -> None:
+                history = self.game_root / "history" / "titles" / "titles.txt"
+                history.write_text(
+                        """
+k_islands = {
+    866.1.1 = {
+        holder = holder_1
+        succession_laws = { landless_adventurer_succession_law }
+        effect = {
+            create_landless_adventurer_title_history_effect = yes
+            set_variable = { name = adventurer_creation_reason value = flag:historical }
+        }
+    }
+}
+d_ruucuu = {
+    866.1.1 = {
+        holder = holder_1
+        succession_laws = { landless_adventurer_succession_law }
+        effect = {
+            create_landless_adventurer_title_history_effect = yes
+            set_variable = { name = adventurer_creation_reason value = flag:historical }
+            set_variable = { name = altered value = yes }
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                laws = self.game_root / "common" / "laws"
+                laws.mkdir(parents=True)
+                (laws / "00_succession_laws.txt").write_text(
+                        "succession_order_laws = {\n"
+                        "  landless_adventurer_succession_law = { }\n"
+                        "}\n",
+                        encoding="utf-8",
+                )
+                effects = self.game_root / "common" / "scripted_effects"
+                effects.mkdir(parents=True)
+                (effects / "07_dlc_ep3_scripted_effects.txt").write_text(
+                        """
+create_landless_adventurer_title_history_effect = {
+    holder ?= {
+        if = {
+            limit = { NOT = { has_realm_law = landless_adventurer_succession_law } }
+            add_realm_law = landless_adventurer_succession_law
+        }
+    }
+}
+destroy_landless_title_no_dlc_effect = {
+    if = {
+        limit = {
+            NOT = { has_dlc_feature = roads_to_power }
+            game_start_date = $DATE$
+        }
+        holder ?= {
+            empty_treasury_when_abandoning_landed_life_effect = yes
+            destroy_title = prev
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+                connection = connect(self.database_path)
+                try:
+                        connection.execute(
+                                """
+                                INSERT INTO reference.dlc_packages
+                                VALUES ('scribe_build', 'dlc014_ep3', 'Roads to Power', NULL,
+                                                NULL, NULL, 'dlc/dlc014_ep3/dlc014.dlc', 'hash',
+                                                'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                                """
+                        )
+                        connection.execute(
+                                """
+                                INSERT INTO reference.dlc_feature_mappings
+                                VALUES ('scribe_build', 'roads_to_power', 'dlc014_ep3',
+                                                'reviewed', 'test evidence')
+                                """
+                        )
+                finally:
+                        connection.close()
+
+                load_title_history_candidate(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        database_path=self.database_path,
+                )
+                connection = connect(self.database_path)
+                try:
+                        events = connection.execute(
+                                """
+                                SELECT event_type
+                                FROM reference.title_history_events
+                                WHERE title_id = 'k_islands'
+                                  AND event_type IN ('landless_adventurer_history_initialized',
+                                                     'title_variable_set', 'dlc_gated_noop')
+                                ORDER BY event_sequence
+                                """
+                        ).fetchall()
+                        variable = connection.execute(
+                                """
+                                SELECT value_kind, text_value
+                                FROM reference.title_baseline_variables
+                                WHERE baseline_id = 'scribe_867' AND title_id = 'k_islands'
+                                    AND variable_name = 'adventurer_creation_reason'
+                                """
+                        ).fetchone()
+                        declarations = connection.execute(
+                                """
+                                SELECT title_id, resolution_status
+                                FROM source.title_history_declarations
+                                WHERE operation_key = 'effect'
+                                ORDER BY declaration_order
+                                """
+                        ).fetchall()
+                finally:
+                        connection.close()
+
+                self.assertEqual(
+                        [
+                                ("landless_adventurer_history_initialized",),
+                                ("title_variable_set",),
+                        ],
+                        events,
+                )
+                self.assertEqual(("flag", "historical"), variable)
+                self.assertEqual(
+                        [("k_islands", "normalized"), ("d_ruucuu", "preserved")],
+                        declarations,
+                )
+
+    def test_exact_ceremonial_title_variable_requires_resolved_title(self) -> None:
+                history = self.game_root / "history" / "titles" / "titles.txt"
+                history.write_text(
+                        """
+c_ucinaa = {
+    500.1.1 = {
+        effect = {
+            set_variable = { name = ceremonial_title value = title:e_world }
+        }
+    }
+}
+d_ruucuu = {
+    500.1.1 = {
+        effect = {
+            set_variable = { name = ceremonial_title value = title:e_world }
+            set_variable = { name = altered value = yes }
+        }
+    }
+}
+k_islands = {
+    500.1.1 = {
+        effect = {
+            set_variable = { name = ceremonial_title value = title:e_missing }
+        }
+    }
+}
+""",
+                        encoding="utf-8",
+                )
+
+                load_title_history_candidate(
+                        game_root=self.game_root,
+                        reference_snapshot_id="scribe_build",
+                        baseline_id="scribe_867",
+                        database_path=self.database_path,
+                )
+                connection = connect(self.database_path)
+                try:
+                        variables = connection.execute(
+                                """
+                                SELECT title_id, variable_name, value_kind, text_value,
+                                             source_declaration_order
+                                FROM reference.title_baseline_variables
+                                WHERE baseline_id = 'scribe_867'
+                                ORDER BY title_id
+                                """
+                        ).fetchall()
+                        events = connection.execute(
+                                """
+                                SELECT title_id, event_type, text_value, validation_note
+                                FROM reference.title_history_events
+                                WHERE event_type = 'title_variable_set'
+                                ORDER BY event_sequence
+                                """
+                        ).fetchall()
+                        declarations = connection.execute(
+                                """
+                                SELECT title_id, resolution_status
+                                FROM source.title_history_declarations
+                                WHERE operation_key = 'effect'
+                                ORDER BY declaration_order
+                                """
+                        ).fetchall()
+                finally:
+                        connection.close()
+
+                self.assertEqual(
+                        [("c_ucinaa", "ceremonial_title", "title", "e_world", 1)],
+                        variables,
+                )
+                self.assertEqual(
+                        [("c_ucinaa", "title_variable_set", "ceremonial_title=e_world",
+                            "value_kind=title")],
+                        events,
+                )
+                self.assertEqual(
+                        [
+                                ("c_ucinaa", "normalized"),
+                                ("d_ruucuu", "preserved"),
+                                ("k_islands", "preserved"),
+                        ],
+                        declarations,
+                )
+
     def test_succession_laws_replace_and_clear_with_installed_definitions(self) -> None:
         history = self.game_root / "history" / "titles"
         (history / "law_history.txt").write_text(
@@ -640,6 +1797,504 @@ d_ruucuu = {
         self.assertEqual("declared", inspection["de_jure_liege_status"])
         self.assertEqual(date(800, 1, 1), inspection["de_jure_effective_date"])
         self.assertEqual(2, inspection["de_jure_source_declaration_order"])
+
+    def test_exact_de_jure_liege_effect_replays_but_mixed_body_remains_opaque(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+k_islands = {
+  800.1.1 = {
+    effect = { set_de_jure_liege_title = title:e_world }
+  }
+}
+d_ruucuu = {
+  800.1.1 = {
+    effect = {
+      set_de_jure_liege_title = title:e_world
+      set_variable = altered
+    }
+  }
+}
+c_ucinaa = {
+    800.1.1 = {
+        effect = { set_de_jure_liege_title = e_world }
+    }
+}
+b_other = {
+    800.1.1 = {
+        effect = { set_de_jure_liege_title = title:e_missing }
+    }
+}
+""",
+            encoding="utf-8",
+        )
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            de_jure = connection.execute(
+                """
+                SELECT title_id, de_jure_liege_title_id, de_jure_liege_status,
+                       effective_date, source_declaration_order
+                FROM reference.title_baseline_de_jure_lieges
+                WHERE baseline_id = 'scribe_867'
+                ORDER BY title_id
+                """
+            ).fetchall()
+            states = connection.execute(
+                """
+                SELECT title_id, validation_status, validation_note
+                FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867'
+                                    AND title_id IN ('k_islands', 'd_ruucuu', 'c_ucinaa', 'b_other')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status, raw_script
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                ORDER BY declaration_order
+                """
+            ).fetchall()
+            event = connection.execute(
+                """
+                SELECT title_id, event_type, text_value, validation_note
+                FROM reference.title_history_events
+                WHERE event_type = 'de_jure_liege_replaced'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [("k_islands", "e_world", "declared", date(800, 1, 1), 1)],
+            de_jure,
+        )
+        self.assertEqual(
+            [
+                ("b_other", "warning", "not evaluated: effect"),
+                ("c_ucinaa", "warning", "not evaluated: effect"),
+                ("d_ruucuu", "warning", "not evaluated: effect"),
+                ("k_islands", "valid", None),
+            ],
+            states,
+        )
+        self.assertEqual("normalized", declarations[0][1])
+        self.assertIn("set_de_jure_liege_title", declarations[0][2])
+        self.assertEqual("preserved", declarations[1][1])
+        self.assertEqual("preserved", declarations[2][1])
+        self.assertEqual("preserved", declarations[3][1])
+        self.assertEqual(
+            (
+                "k_islands",
+                "de_jure_liege_replaced",
+                "e_world",
+                "effect-form title-scope de-jure replacement",
+            ),
+            event,
+        )
+
+    def test_dynasty_prestige_helper_materializes_a_floor_not_an_exact_level(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+c_ucinaa = {
+  700.1.1 = { holder = first_holder }
+  800.1.1 = {
+    effect = { tgp_set_minamoto_taira_dynasty_prestige_effect = yes }
+  }
+}
+d_ruucuu = {
+  800.1.1 = {
+    effect = { tgp_set_minamoto_taira_dynasty_prestige_effect = yes }
+  }
+}
+k_islands = {
+  700.1.1 = { holder = first_holder }
+  800.1.1 = {
+    effect = {
+      tgp_set_minamoto_taira_dynasty_prestige_effect = yes
+      set_variable = altered
+    }
+  }
+}
+""",
+            encoding="utf-8",
+        )
+        effects = self.game_root / "common" / "scripted_effects"
+        effects.mkdir(parents=True)
+        helper = effects / "10_dlc_tgp_japan_scripted_effects.txt"
+        helper.write_text(
+            """
+tgp_set_minamoto_taira_dynasty_prestige_effect = {
+  holder.dynasty ?= {
+    while = {
+      limit = { dynasty_prestige_level < 5 }
+      add_dynasty_prestige_level = 1
+    }
+  }
+}
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.dynasties VALUES
+                ('scribe_build', 'test_dynasty', 'common/dynasties/test.txt',
+                 1, 1, 1, '{}', '1.0.0', 'dynasty', 'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.character_baseline_states VALUES
+                ('scribe_867', 'first_holder', 'First Holder', 'male', 'default',
+                 NULL, NULL, NULL, 'test_dynasty', NULL, NULL, NULL, 'alive',
+                 'valid', NULL)
+                """
+            )
+        finally:
+            connection.close()
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            constraints = connection.execute(
+                """
+                SELECT dynasty_id, minimum_prestige_level, value_status,
+                       effective_date, source_title_id, source_holder_character_id,
+                       source_declaration_order, helper_source_path,
+                       validation_status
+                FROM reference.dynasty_baseline_prestige_constraints
+                WHERE baseline_id = 'scribe_867'
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                ORDER BY declaration_order
+                """
+            ).fetchall()
+            states = connection.execute(
+                """
+                SELECT title_id, validation_status, validation_note
+                FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867'
+                  AND title_id IN ('c_ucinaa', 'd_ruucuu', 'k_islands')
+                ORDER BY title_id
+                """
+            ).fetchall()
+            event = connection.execute(
+                """
+                SELECT title_id, event_type, text_value, integer_value,
+                       validation_note
+                FROM reference.title_history_events
+                WHERE event_type = 'dynasty_prestige_minimum_established'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                (
+                    "test_dynasty", 5, "lower_bound_only", date(800, 1, 1),
+                    "c_ucinaa", "first_holder", 2,
+                    "common/scripted_effects/10_dlc_tgp_japan_scripted_effects.txt",
+                    "valid",
+                )
+            ],
+            constraints,
+        )
+        self.assertEqual(
+            [
+                ("c_ucinaa", "normalized"),
+                ("d_ruucuu", "preserved"),
+                ("k_islands", "preserved"),
+            ],
+            declarations,
+        )
+        self.assertEqual(
+            [
+                ("c_ucinaa", "valid", None),
+                ("d_ruucuu", "warning", "not evaluated: effect"),
+                ("k_islands", "warning", "not evaluated: effect"),
+            ],
+            states,
+        )
+        self.assertEqual(
+            (
+                "c_ucinaa", "dynasty_prestige_minimum_established",
+                "test_dynasty", 5,
+                "holder=first_holder; lower_bound_only",
+            ),
+            event,
+        )
+        inspection = get_title_inspection(
+            "scribe_867", "c_ucinaa", self.database_path
+        )
+        self.assertEqual(
+            "test_dynasty",
+            inspection["dynasty_prestige_constraints"][0]["dynasty_id"],
+        )
+        self.assertEqual(
+            5,
+            inspection["dynasty_prestige_constraints"][0]["minimum_prestige_level"],
+        )
+        helper.write_text(
+            """
+tgp_set_minamoto_taira_dynasty_prestige_effect = {
+  holder.dynasty ?= { add_dynasty_prestige_level = 5 }
+}
+""",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(
+            ValueError, "dynasty-prestige helper does not match reviewed semantics"
+        ):
+            load_title_history_candidate(
+                game_root=self.game_root,
+                reference_snapshot_id="scribe_build",
+                baseline_id="scribe_867",
+                database_path=self.database_path,
+            )
+        connection = connect(self.database_path)
+        try:
+            retained_count = connection.execute(
+                """
+                SELECT count(*)
+                FROM reference.dynasty_baseline_prestige_constraints
+                WHERE baseline_id = 'scribe_867'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual((1,), retained_count)
+
+    def test_direct_dynasty_prestige_floor_uses_unambiguous_dynasty_field(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+c_ucinaa = {
+  700.1.1 = {
+    holder = warning_holder
+    effect = {
+      holder.dynasty ?= {
+        while = {
+          limit = { dynasty_prestige_level < 9 }
+          add_dynasty_prestige_level = 1
+        }
+      }
+    }
+  }
+}
+d_ruucuu = {
+  700.1.1 = {
+    holder = warning_holder
+    effect = {
+      holder.dynasty ?= {
+        while = {
+          limit = { dynasty_prestige_level < 9 }
+          add_dynasty_prestige_level = 1
+        }
+      }
+      set_variable = altered
+    }
+  }
+}
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.dynasties VALUES
+                ('scribe_build', 'warning_dynasty', 'common/dynasties/test.txt',
+                 1, 1, 1, '{}', '1.0.0', 'dynasty', 'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.character_baseline_states VALUES
+                ('scribe_867', 'warning_holder', 'Warning Holder', 'male',
+                 'default', NULL, NULL, NULL, 'warning_dynasty', NULL, NULL,
+                 NULL, 'alive', 'warning', 'not evaluated: unrelated effect')
+                """
+            )
+        finally:
+            connection.close()
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            constraints = connection.execute(
+                """
+                SELECT dynasty_id, minimum_prestige_level, value_status,
+                       source_title_id, source_holder_character_id,
+                       source_declaration_order, helper_source_path,
+                       helper_raw_sha256
+                FROM reference.dynasty_baseline_prestige_constraints
+                WHERE baseline_id = 'scribe_867'
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status
+                FROM source.title_history_declarations
+                WHERE operation_key = 'effect'
+                ORDER BY declaration_order
+                """
+            ).fetchall()
+            event = connection.execute(
+                """
+                SELECT integer_value
+                FROM reference.title_history_events
+                WHERE title_id = 'c_ucinaa'
+                  AND event_type = 'dynasty_prestige_minimum_established'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            [
+                (
+                    "warning_dynasty", 9, "lower_bound_only", "c_ucinaa",
+                    "warning_holder", 2, "history/titles/titles.txt", None,
+                )
+            ],
+            constraints,
+        )
+        self.assertEqual(
+            [("c_ucinaa", "normalized"), ("d_ruucuu", "preserved")],
+            declarations,
+        )
+        self.assertEqual((9,), event)
+
+    def test_tributary_relationship_replaces_without_changing_liege_or_de_jure(self) -> None:
+        history = self.game_root / "history" / "titles" / "titles.txt"
+        history.write_text(
+            """
+c_ucinaa = {
+  700.1.1 = {
+    tributary_of = { suzerain = d_ruucuu contract_group = tributary_mandala }
+  }
+  800.1.1 = {
+    tributary_of = { suzerain = k_islands contract_group = tributary_mandala }
+  }
+}
+c_future = {
+    700.1.1 = {
+        tributary_of = { suzerain = d_missing contract_group = tributary_mandala }
+    }
+}
+""",
+            encoding="utf-8",
+        )
+        groups = self.game_root / "common" / "subject_contracts" / "groups"
+        groups.mkdir(parents=True)
+        (groups / "subject_contract_groups.txt").write_text(
+            "tributary_mandala = { is_tributary = yes }\n",
+            encoding="utf-8",
+        )
+
+        load_title_history_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        connection = connect(self.database_path)
+        try:
+            state = connection.execute(
+                """
+                SELECT suzerain_title_id, contract_group_id, effective_date,
+                       source_declaration_order, validation_status
+                FROM reference.title_baseline_tributaries
+                WHERE baseline_id = 'scribe_867' AND title_id = 'c_ucinaa'
+                """
+            ).fetchone()
+            events = connection.execute(
+                """
+                SELECT effective_date, text_value, validation_note
+                FROM reference.title_history_events
+                WHERE title_id = 'c_ucinaa'
+                  AND event_type = 'tributary_relationship_replaced'
+                ORDER BY effective_date
+                """
+            ).fetchall()
+            declarations = connection.execute(
+                """
+                SELECT raw_script, resolution_status
+                FROM source.title_history_declarations
+                WHERE title_id = 'c_ucinaa' AND operation_key = 'tributary_of'
+                ORDER BY declaration_order
+                """
+            ).fetchall()
+            title_state = connection.execute(
+                """
+                SELECT liege_title_id FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867' AND title_id = 'c_ucinaa'
+                """
+            ).fetchone()
+            unresolved = connection.execute(
+                """
+                SELECT validation_note FROM reference.title_baseline_states
+                WHERE baseline_id = 'scribe_867' AND title_id = 'c_future'
+                """
+            ).fetchone()
+            unresolved_relationship = connection.execute(
+                """
+                SELECT count(*) FROM reference.title_baseline_tributaries
+                WHERE baseline_id = 'scribe_867' AND title_id = 'c_future'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            ("k_islands", "tributary_mandala", date(800, 1, 1), 2, "valid"),
+            state,
+        )
+        self.assertEqual(
+            [
+                ("0700-01-01", "d_ruucuu", "contract_group=tributary_mandala"),
+                ("0800-01-01", "k_islands", "contract_group=tributary_mandala"),
+            ],
+            events,
+        )
+        self.assertEqual(["normalized", "normalized"], [row[1] for row in declarations])
+        self.assertIn("suzerain = d_ruucuu", declarations[0][0])
+        self.assertEqual((None,), title_state)
+        self.assertIn("tributary_of", unresolved[0])
+        self.assertEqual((0,), unresolved_relationship)
+        inspection = get_title_inspection(
+            "scribe_867", "c_ucinaa", self.database_path
+        )
+        self.assertEqual("k_islands", inspection["suzerain_title_id"])
+        self.assertEqual("tributary_mandala", inspection["tributary_contract_group_id"])
+        self.assertEqual("d_ruucuu", inspection["parent_title_id"])
 
 
 if __name__ == "__main__":

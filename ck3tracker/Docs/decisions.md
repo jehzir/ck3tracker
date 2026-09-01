@@ -1,5 +1,7 @@
 # Crusader Kings III – Formation Decisions Summary
 
+> **Gameplay reference only:** This is not an architecture decision log or implementation manifest. Use `Docs/architecture.md` for durable system boundaries and `Docs/current_build.md` for the sole current execution path.
+
 | Title / Decision              | Type        | Requirements (Simplified)                                                                 | Region / Notes |
 |------------------------------|-------------|---------------------------------------------------------------------------------------------|----------------|
 | **Create Kingdom (Generic)** | Kingdom     | 51% de jure counties; 2 duchies; 500 gold; 1000 prestige                                   | Standard creation |

@@ -20,8 +20,15 @@ class CultureCatalogLoaderTests(unittest.TestCase):
         cultures = self.game_root / "common" / "culture" / "cultures"
         cultures.mkdir(parents=True)
         (cultures / "00_cultures.txt").write_text(
-            "norse = { ethos = ethos_bellicose }\n"
-            "irish = { ethos = ethos_courtly }\n",
+            "norse = { ethos = ethos_bellicose language = language_norse }\n"
+            "irish = { ethos = ethos_courtly language = language_goidelic }\n",
+            encoding="utf-8-sig",
+        )
+        pillars = self.game_root / "common" / "culture" / "pillars"
+        pillars.mkdir(parents=True)
+        (pillars / "00_language.txt").write_text(
+            "language_norse = { type = language color = norse }\n"
+            "language_goidelic = { type = language color = irish }\n",
             encoding="utf-8-sig",
         )
         self.database_path = root / "tracker.duckdb"
@@ -84,6 +91,19 @@ class CultureCatalogLoaderTests(unittest.TestCase):
             cultures = connection.execute(
                 "SELECT culture_id, source_path, wiki_page_key FROM reference.cultures ORDER BY culture_id"
             ).fetchall()
+            languages = connection.execute(
+                """
+                SELECT language_id, source_path
+                FROM reference.languages ORDER BY language_id
+                """
+            ).fetchall()
+            native_languages = connection.execute(
+                """
+                SELECT culture_id, language_id, source_path,
+                       source_declaration_order
+                FROM reference.culture_native_languages ORDER BY culture_id
+                """
+            ).fetchall()
             links = connection.execute(
                 "SELECT from_page_key, to_page_key, link_text FROM source.wiki_page_links"
             ).fetchall()
@@ -107,11 +127,65 @@ class CultureCatalogLoaderTests(unittest.TestCase):
             cultures,
         )
         self.assertEqual([("wiki_root", "culture", "Culture")], links)
-        self.assertEqual((1, 2, 2), counts)
+        self.assertEqual((2, 2, 2), counts)
+        self.assertEqual(
+            [
+                ("language_goidelic", "common/culture/pillars/00_language.txt"),
+                ("language_norse", "common/culture/pillars/00_language.txt"),
+            ],
+            languages,
+        )
+        self.assertEqual(
+            [
+                ("irish", "language_goidelic",
+                 "common/culture/cultures/00_cultures.txt", 2),
+                ("norse", "language_norse",
+                 "common/culture/cultures/00_cultures.txt", 1),
+            ],
+            native_languages,
+        )
         self.assertEqual("passed", findings["culture_wiki_provenance"].classification)
         self.assertEqual("passed", findings["culture_catalog"].classification)
         self.assertEqual("blocking", missing["culture_catalog"].classification)
         self.assertEqual(1, missing["culture_catalog"].subject_count)
+
+    def test_rejects_unresolved_native_language_before_replacing_catalog(self) -> None:
+        load_culture_catalog_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="snapshot",
+            wiki_root=self.root_evidence,
+            wiki_culture=self.culture_evidence,
+            database_path=self.database_path,
+        )
+        culture_path = (
+            self.game_root / "common" / "culture" / "cultures" / "00_cultures.txt"
+        )
+        culture_path.write_text(
+            "norse = { language = language_missing }\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(ValueError, "Unresolved native language"):
+            load_culture_catalog_candidate(
+                game_root=self.game_root,
+                reference_snapshot_id="snapshot",
+                wiki_root=self.root_evidence,
+                wiki_culture=self.culture_evidence,
+                database_path=self.database_path,
+            )
+
+        connection = connect(self.database_path)
+        try:
+            counts = connection.execute(
+                """
+                SELECT (SELECT count(*) FROM reference.cultures),
+                       (SELECT count(*) FROM reference.languages),
+                       (SELECT count(*) FROM reference.culture_native_languages)
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual((2, 2, 2), counts)
 
 
 if __name__ == "__main__":

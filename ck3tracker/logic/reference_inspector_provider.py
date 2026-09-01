@@ -187,6 +187,15 @@ def get_title_inspection(
                    dj.de_jure_liege_status,
                    dj.effective_date AS de_jure_effective_date,
                    dj.source_declaration_order AS de_jure_source_declaration_order,
+                   tributary.suzerain_title_id,
+                   tributary.contract_group_id AS tributary_contract_group_id,
+                   tributary.effective_date AS tributary_effective_date,
+                   tributary.source_declaration_order AS tributary_source_declaration_order,
+                   name_override.localization_key AS name_override_localization_key,
+                   name_override.display_name AS name_override_display_name,
+                   name_override.name_status AS name_override_status,
+                   name_override.effective_date AS name_override_effective_date,
+                   name_override.source_declaration_order AS name_override_source_declaration_order,
                    hv.declaration_status AS holder_declaration_status,
                    hv.uniqueness_status AS holder_uniqueness_status,
                    hv.lifecycle_status AS holder_lifecycle_status,
@@ -211,6 +220,12 @@ def get_title_inspection(
                          AND adjudication.review_status = 'reviewed'
                         LEFT JOIN reference.title_baseline_de_jure_lieges dj
                             ON dj.baseline_id = t.baseline_id AND dj.title_id = t.title_id
+                        LEFT JOIN reference.title_baseline_tributaries tributary
+                            ON tributary.baseline_id = t.baseline_id
+                         AND tributary.title_id = t.title_id
+                        LEFT JOIN reference.title_baseline_name_overrides name_override
+                            ON name_override.baseline_id = t.baseline_id
+                         AND name_override.title_id = t.title_id
             LEFT JOIN reference.character_baseline_states cs
               ON cs.baseline_id = t.baseline_id
                          AND cs.character_id = COALESCE(
@@ -232,6 +247,10 @@ def get_title_inspection(
             connection, result["reference_snapshot_id"], title_id
         )
         result["laws"] = _title_laws(connection, baseline_id, title_id)
+        result["variables"] = _title_variables(connection, baseline_id, title_id)
+        result["dynasty_prestige_constraints"] = _dynasty_prestige_constraints(
+            connection, baseline_id, title_id
+        )
         result["warnings"] = _warnings(result)
         return result
     finally:
@@ -267,6 +286,42 @@ def _title_chain(connection, baseline_id: str, title_id: str) -> list[dict[str, 
         }
         for row in rows
     ]
+
+
+def _title_variables(
+    connection, baseline_id: str, title_id: str
+) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        SELECT variable_name, value_kind, text_value, effective_date,
+               source_declaration_order, validation_status, validation_note
+        FROM reference.title_baseline_variables
+        WHERE baseline_id = ? AND title_id = ?
+        ORDER BY variable_name
+        """,
+        [baseline_id, title_id],
+    ).fetchall()
+    columns = [column[0] for column in connection.description]
+    return [dict(zip(columns, row, strict=True)) for row in rows]
+
+
+def _dynasty_prestige_constraints(
+    connection, baseline_id: str, title_id: str
+) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        SELECT dynasty_id, minimum_prestige_level, value_status, effective_date,
+               source_holder_character_id, source_declaration_order,
+               helper_source_path, helper_raw_sha256, validation_status,
+               validation_note
+        FROM reference.dynasty_baseline_prestige_constraints
+        WHERE baseline_id = ? AND source_title_id = ?
+        ORDER BY effective_date, source_declaration_order
+        """,
+        [baseline_id, title_id],
+    ).fetchall()
+    columns = [column[0] for column in connection.description]
+    return [dict(zip(columns, row, strict=True)) for row in rows]
 
 
 def _title_children(connection, baseline_id: str, title_id: str) -> list[dict[str, Any]]:

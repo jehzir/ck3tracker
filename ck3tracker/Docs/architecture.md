@@ -103,6 +103,12 @@ The project has two distinct data profile classes:
 
 These profiles must not be mixed. A goal such as forming Sicily must resolve against the active profile's CK3 title records. The seed profile may use simplified or imperfect names, but it must never be treated as evidence of the real CK3 hierarchy.
 
+### Baseline Completeness Contract
+
+Promoted CK3 baselines follow the strict complete-state policy recorded in `Docs/architecture_decision_001_baseline_completeness.md`. Every baseline-effective operation that changes supported game state must be deterministically evaluated and represented in durable typed state, whether or not the current journal UI consumes that field.
+
+Starting court language, court type, administrative state faith, holder language knowledge, title-scoped variables, and title laws are part of historical-state completeness. Their mutability after game start does not make their initial values optional. An accepted exception is limited to a proven inactive branch, true no-op, or operation that produces no persistent state; lack of a current product consumer is not sufficient.
+
 The application may start a journal at any CK3 location contained in a promoted reference baseline. Run creation first selects a supported baseline or bookmark date, then narrows the title hierarchy through searchable, cascading filters such as Empire, Kingdom, Duchy, County, and Barony. The final selection is persisted by stable CK3 IDs; display names are labels only. Changing an upstream filter clears incompatible descendants, and the application must preview the fully resolved hierarchy before committing the run.
 
 A selectable baseline date is not the same as an arbitrary in-game observation date. The UI may offer only dates whose title hierarchy and historical state have been parsed, validated, and promoted for the selected reference snapshot. Later dates belong to the journal timeline unless a separate reference baseline exists for them. The current retained data proves only the 867 baseline; additional bookmarks such as 1066 or 1178 become selectable only after their source inputs and validation pass. Any baseline change must load the complete title hierarchy together so counties, duchies, kingdoms, holdings, rulers, and goals remain internally consistent.

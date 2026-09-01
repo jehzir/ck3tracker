@@ -9,11 +9,11 @@ from pathlib import Path
 from uuid import uuid4
 
 from logic.root_database import connect
-from logic.title_history_loader import _assignments, _strip_comments
+from logic.title_history_loader import _assignments, _scalar_value, _strip_comments
 
 
 PARSER_NAME = "installed_cultures"
-PARSER_VERSION = "1.0.0"
+PARSER_VERSION = "1.1.0"
 
 
 @dataclass(frozen=True)
@@ -54,8 +54,64 @@ def load_culture_catalog_candidate(
         raise FileNotFoundError(f"Culture source folder does not exist: {source_root}")
 
     rows: list[tuple[object, ...]] = []
+    native_language_rows: list[tuple[object, ...]] = []
+    language_rows: list[tuple[object, ...]] = []
     manifests: list[tuple[object, ...]] = []
     seen: set[str] = set()
+    language_ids: set[str] = set()
+    language_source_order = 0
+    pillar_root = root / "common" / "culture" / "pillars"
+    if not pillar_root.is_dir():
+        raise FileNotFoundError(f"Culture pillar folder does not exist: {pillar_root}")
+    for path in sorted(pillar_root.glob("*.txt")):
+        raw_bytes = path.read_bytes()
+        relative_path = path.relative_to(root).as_posix()
+        file_has_languages = False
+        text = _strip_comments(raw_bytes.decode("utf-8-sig"))
+        for assignment in _assignments(text):
+            if assignment.value_kind != "block":
+                continue
+            fields = list(
+                _assignments(assignment.raw_value[1:-1], assignment.line_start)
+            )
+            type_fields = [field for field in fields if field.key == "type"]
+            if not (
+                len(type_fields) == 1
+                and type_fields[0].value_kind == "scalar"
+                and _scalar_value(type_fields[0].raw_value) == "language"
+            ):
+                continue
+            if assignment.key in language_ids:
+                raise ValueError(f"Duplicate language ID: {assignment.key}")
+            if not assignment.key.startswith("language_"):
+                raise ValueError(f"Invalid language ID: {assignment.key}")
+            file_has_languages = True
+            language_ids.add(assignment.key)
+            language_source_order += 1
+            language_rows.append((
+                reference_snapshot_id,
+                assignment.key,
+                relative_path,
+                assignment.line_start,
+                assignment.line_end,
+                language_source_order,
+                assignment.raw_value,
+                PARSER_VERSION,
+                "valid",
+                None,
+            ))
+        if file_has_languages:
+            manifests.append((
+                reference_snapshot_id,
+                relative_path,
+                PARSER_NAME,
+                len(raw_bytes),
+                datetime.fromtimestamp(path.stat().st_mtime, timezone.utc),
+                sha256(raw_bytes).hexdigest(),
+            ))
+    if not language_rows:
+        raise ValueError("No installed language definitions found")
+
     source_order = 0
     for path in sorted(source_root.glob("*.txt")):
         raw_bytes = path.read_bytes()
@@ -76,6 +132,19 @@ def load_culture_catalog_candidate(
             if assignment.key in seen:
                 raise ValueError(f"Duplicate culture ID: {assignment.key}")
             seen.add(assignment.key)
+            fields = list(
+                _assignments(assignment.raw_value[1:-1], assignment.line_start)
+            )
+            language_fields = [field for field in fields if field.key == "language"]
+            if len(language_fields) != 1 or language_fields[0].value_kind != "scalar":
+                raise ValueError(
+                    f"Culture must declare exactly one native language: {assignment.key}"
+                )
+            language_id = _scalar_value(language_fields[0].raw_value)
+            if language_id not in language_ids:
+                raise ValueError(
+                    f"Unresolved native language for {assignment.key}: {language_id}"
+                )
             rows.append((
                 reference_snapshot_id,
                 assignment.key,
@@ -86,6 +155,18 @@ def load_culture_catalog_candidate(
                 assignment.raw_value,
                 PARSER_VERSION,
                 wiki_culture.page_key,
+                "valid",
+                None,
+            ))
+            native_language_rows.append((
+                reference_snapshot_id,
+                assignment.key,
+                language_id,
+                relative_path,
+                language_fields[0].line_start,
+                language_fields[0].line_end,
+                source_order,
+                PARSER_VERSION,
                 "valid",
                 None,
             ))
@@ -106,6 +187,14 @@ def load_culture_catalog_candidate(
         connection.execute("BEGIN TRANSACTION")
         connection.execute(
             "DELETE FROM reference.cultures WHERE reference_snapshot_id = ?",
+            [reference_snapshot_id],
+        )
+        connection.execute(
+            "DELETE FROM reference.culture_native_languages WHERE reference_snapshot_id = ?",
+            [reference_snapshot_id],
+        )
+        connection.execute(
+            "DELETE FROM reference.languages WHERE reference_snapshot_id = ?",
             [reference_snapshot_id],
         )
         connection.execute(
@@ -138,6 +227,17 @@ def load_culture_catalog_candidate(
         connection.executemany(
             "INSERT INTO reference.cultures VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
+        )
+        connection.executemany(
+            "INSERT INTO reference.languages VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            language_rows,
+        )
+        connection.executemany(
+            """
+            INSERT INTO reference.culture_native_languages
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            native_language_rows,
         )
         connection.execute(
             """

@@ -13,9 +13,23 @@ from logic.title_history_loader import _assignments, _parse_date, _scalar_value,
 
 
 PARSER_NAME = "installed_bookmarks"
-PARSER_VERSION = "1.1.0"
+PARSER_VERSION = "1.2.0"
+
+REQUIRED_DLC_FEATURE_FLAGS = {"royal_court"}
 
 DLC_FEATURE_MAPPINGS = {
+    "royal_court": (
+        "dlc004_ep1",
+        "https://ck3.paradoxwikis.com/index.php?title=Royal_Court_(DLC)&oldid=35819",
+        "35819",
+        "Installed EP1 scripts and the Royal Court page identify this feature.",
+    ),
+    "roads_to_power": (
+        "dlc014_ep3",
+        "https://ck3.paradoxwikis.com/index.php?title=Roads_to_Power&oldid=33550",
+        "33550",
+        "Installed EP3 scripts and the Roads to Power page identify this feature.",
+    ),
     "all_under_heaven": (
         "dlc022_ep4",
         "https://ck3.paradoxwikis.com/index.php?title=All_Under_Heaven&oldid=35744",
@@ -156,7 +170,8 @@ def parse_bookmarks(game_root: str | Path) -> BookmarkParseResult:
     )
     dlc_packages = _load_dlc_package_evidence(
         root,
-        {bookmark.dlc_flag for bookmark in bookmarks if bookmark.dlc_flag},
+        REQUIRED_DLC_FEATURE_FLAGS
+        | {bookmark.dlc_flag for bookmark in bookmarks if bookmark.dlc_flag},
     )
     manifests.extend(
         _manifest(root, root / package.source_path) for package in dlc_packages

@@ -13,16 +13,16 @@ from logic.root_database import connect
 
 
 EXPECTED_PARSERS = {
-    "installed_bookmarks": "1.1.0",
-    "installed_character_history": "1.4.0",
-    "installed_cultures": "1.0.0",
+    "installed_bookmarks": "1.2.0",
+    "installed_character_history": "1.5.0",
+    "installed_cultures": "1.1.0",
     "installed_dynasties": "1.0.0",
     "installed_dynasty_houses": "1.0.0",
     "installed_faiths": "1.0.0",
     "installed_governments": "1.0.0",
     "installed_landed_titles": "1.0.0",
     "installed_localization_english": "1.0.0",
-    "installed_title_history": "1.4.0",
+    "installed_title_history": "1.18.0",
 }
 
 

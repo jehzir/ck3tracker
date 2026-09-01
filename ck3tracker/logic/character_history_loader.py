@@ -23,7 +23,7 @@ from logic.title_history_loader import (
 
 
 PARSER_NAME = "installed_character_history"
-PARSER_VERSION = "1.4.0"
+PARSER_VERSION = "1.5.0"
 CHARACTER_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 IDENTITY_OPERATIONS = {
     "name",
@@ -254,6 +254,9 @@ def load_character_history_candidate(
             conflict_fields,
             baseline[0],
         )
+        native_languages = _materialize_native_languages(
+            connection, reference_snapshot_id, states
+        )
         state_by_id = {state[0]: state for state in states}
         holders = connection.execute(
             """
@@ -285,6 +288,13 @@ def load_character_history_candidate(
         ) + sum(row[-2] == "warning" for row in events) + holder_warning_count
 
         connection.execute("BEGIN TRANSACTION")
+        connection.execute(
+            """
+            DELETE FROM reference.character_baseline_languages
+            WHERE baseline_id = ? AND knowledge_kind = 'native'
+            """,
+            [baseline_id],
+        )
         for table, column in (
             ("source.character_history_declarations", "reference_snapshot_id"),
             ("source.character_history_blocks", "reference_snapshot_id"),
@@ -398,6 +408,16 @@ def load_character_history_candidate(
             FROM unnest(?)
             """,
             ((baseline_id, *state) for state in states),
+        )
+        connection.executemany(
+            """
+            INSERT INTO reference.character_baseline_languages
+            (baseline_id, character_id, language_id, knowledge_kind,
+             effective_date, source_group, source_declaration_order,
+             validation_status, validation_note)
+            VALUES (?, ?, ?, 'native', NULL, 'culture', ?, 'valid', NULL)
+            """,
+            [(baseline_id, *row) for row in native_languages],
         )
         connection.executemany(
             """
@@ -617,6 +637,44 @@ def _materialize_character_states(
             "; ".join(notes) if notes else None,
         ))
     return states, events
+
+
+def _materialize_native_languages(
+    connection: duckdb.DuckDBPyConnection,
+    reference_snapshot_id: str,
+    states: list[tuple[object, ...]],
+) -> list[tuple[str, str, int]]:
+    mappings = {
+        str(row[0]): (str(row[1]), int(row[2]))
+        for row in connection.execute(
+            """
+            SELECT native.culture_id, native.language_id,
+                   native.source_declaration_order
+            FROM reference.culture_native_languages native
+            JOIN reference.languages language
+              USING (reference_snapshot_id, language_id)
+            WHERE native.reference_snapshot_id = ?
+              AND native.validation_status = 'valid'
+              AND language.validation_status = 'valid'
+            """,
+            [reference_snapshot_id],
+        ).fetchall()
+    }
+    unresolved_cultures = sorted({
+        str(state[4])
+        for state in states
+        if state[4] is not None and str(state[4]) not in mappings
+    })
+    if unresolved_cultures:
+        raise ValueError(
+            "Baseline cultures lack valid native-language mappings: "
+            + ", ".join(unresolved_cultures)
+        )
+    return [
+        (str(state[0]), mappings[str(state[4])][0], mappings[str(state[4])][1])
+        for state in states
+        if state[4] is not None
+    ]
 
 
 def _extract_character_effects(

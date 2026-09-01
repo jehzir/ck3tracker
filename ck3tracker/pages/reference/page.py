@@ -234,6 +234,15 @@ def _render_detail(baseline_id: str, title_id: str):
                                     _fact("Liege", detail["liege_title_id"] or _status_text(detail["liege_status"])),
                                     _fact("Static de jure parent", detail["parent_title_id"] or "None"),
                                     _fact("867 de jure parent", _de_jure_text(detail)),
+                                    _fact("Tributary", _tributary_text(detail)),
+                                    _fact("Historical name", _title_name_override_text(detail)),
+                                    _fact("Title variables", _title_variables_text(detail["variables"])),
+                                    _fact(
+                                        "Dynasty prestige",
+                                        _dynasty_prestige_text(
+                                            detail["dynasty_prestige_constraints"]
+                                        ),
+                                    ),
                                     _fact("Capital", detail["capital_title_id"] or _status_text(detail["capital_status"])),
                                     _fact("Capital source", _status_text(detail["capital_status"])),
                                     _fact("Holder status", _status_text(detail["holder_lifecycle_status"] or detail["holder_status"])),
@@ -369,6 +378,55 @@ def _de_jure_text(detail):
     return (
         f"{value} (from {detail['de_jure_effective_date']}, "
         f"declaration #{detail['de_jure_source_declaration_order']})"
+    )
+
+
+def _tributary_text(detail):
+    if detail["suzerain_title_id"] is None:
+        return "No declaration"
+    return (
+        f"{detail['suzerain_title_id']} ({detail['tributary_contract_group_id']}, "
+        f"from {detail['tributary_effective_date']}, "
+        f"declaration #{detail['tributary_source_declaration_order']})"
+    )
+
+
+def _title_name_override_text(detail):
+    status = detail["name_override_status"]
+    if status is None:
+        return "No dated override"
+    if status == "explicit_default":
+        value = "Default title localization"
+    else:
+        value = (
+            f"{detail['name_override_display_name']} "
+            f"[{detail['name_override_localization_key']}]"
+        )
+    return (
+        f"{value} (from {detail['name_override_effective_date']}, "
+        f"declaration #{detail['name_override_source_declaration_order']})"
+    )
+
+
+def _title_variables_text(variables):
+    if not variables:
+        return "None"
+    return "; ".join(
+        f"{item['variable_name']}={item['value_kind']}:{item['text_value']} "
+        f"(from {item['effective_date']}, declaration #{item['source_declaration_order']})"
+        for item in variables
+    )
+
+
+def _dynasty_prestige_text(constraints):
+    if not constraints:
+        return "No historical constraint"
+    return "; ".join(
+        f"{item['dynasty_id']} >= {item['minimum_prestige_level']} "
+        f"via {item['source_holder_character_id']} "
+        f"(from {item['effective_date']}, "
+        f"declaration #{item['source_declaration_order']})"
+        for item in constraints
     )
 
 

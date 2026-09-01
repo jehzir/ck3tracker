@@ -1,5 +1,7 @@
 # CK3 Tracker Daily Design Tracker
 
+> **Historical design tracker:** This records deferred Bronze holdings/UI work. It is not a current task list. Use `Docs/current_build.md` for the sole implementation sequence; holdings and editor work remain frozen while B002 promotion readiness is active.
+
 ## Current Checkpoint
 
 - Holdings opens as a realm summary.
@@ -19,7 +21,7 @@
 - `c_annaba` is archived from active editor/selector views, never deleted; its historical observations remain retained.
 - County view now exposes archived county history, attached baronies, and a trial Restore / Reclaim County action surface.
 
-## Next Design Tasks
+## Deferred Design Tasks
 
 ### 1. Extract Render Functions
 

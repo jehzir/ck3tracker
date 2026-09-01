@@ -355,6 +355,40 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
     )
     connection.execute(
         """
+        CREATE TABLE IF NOT EXISTS reference.languages (
+            reference_snapshot_id VARCHAR NOT NULL,
+            language_id VARCHAR NOT NULL,
+            source_path VARCHAR NOT NULL,
+            source_line_start INTEGER NOT NULL,
+            source_line_end INTEGER NOT NULL,
+            source_order BIGINT NOT NULL,
+            raw_script VARCHAR NOT NULL,
+            parser_version VARCHAR NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (reference_snapshot_id, language_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.culture_native_languages (
+            reference_snapshot_id VARCHAR NOT NULL,
+            culture_id VARCHAR NOT NULL,
+            language_id VARCHAR NOT NULL,
+            source_path VARCHAR NOT NULL,
+            source_line_start INTEGER NOT NULL,
+            source_line_end INTEGER NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            parser_version VARCHAR NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (reference_snapshot_id, culture_id)
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS reference.faiths (
             reference_snapshot_id VARCHAR NOT NULL,
             faith_id VARCHAR NOT NULL,
@@ -480,6 +514,96 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
     )
     connection.execute(
         """
+        CREATE TABLE IF NOT EXISTS reference.subject_contract_group_definitions (
+            reference_snapshot_id VARCHAR NOT NULL,
+            contract_group_id VARCHAR NOT NULL,
+            is_tributary BOOLEAN NOT NULL,
+            source_path VARCHAR NOT NULL,
+            source_line_start INTEGER NOT NULL,
+            source_line_end INTEGER NOT NULL,
+            raw_script VARCHAR NOT NULL,
+            raw_sha256 VARCHAR NOT NULL,
+            parser_version VARCHAR NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (reference_snapshot_id, contract_group_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.title_baseline_tributaries (
+            baseline_id VARCHAR NOT NULL,
+            title_id VARCHAR NOT NULL,
+            suzerain_title_id VARCHAR NOT NULL,
+            contract_group_id VARCHAR NOT NULL,
+            effective_date DATE NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, title_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.title_baseline_variables (
+            baseline_id VARCHAR NOT NULL,
+            title_id VARCHAR NOT NULL,
+            variable_name VARCHAR NOT NULL,
+            value_kind VARCHAR NOT NULL,
+            text_value VARCHAR NOT NULL,
+            effective_date DATE NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, title_id, variable_name)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.dynasty_baseline_prestige_constraints (
+            baseline_id VARCHAR NOT NULL,
+            dynasty_id VARCHAR NOT NULL,
+            minimum_prestige_level INTEGER NOT NULL,
+            value_status VARCHAR NOT NULL,
+            effective_date DATE NOT NULL,
+            source_title_id VARCHAR NOT NULL,
+            source_holder_character_id VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            helper_source_path VARCHAR NOT NULL,
+            helper_raw_sha256 VARCHAR,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, source_declaration_order)
+        )
+        """
+    )
+    connection.execute(
+        """
+        ALTER TABLE reference.dynasty_baseline_prestige_constraints
+        ALTER COLUMN helper_raw_sha256 DROP NOT NULL
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.title_baseline_name_overrides (
+            baseline_id VARCHAR NOT NULL,
+            title_id VARCHAR NOT NULL,
+            localization_key VARCHAR,
+            display_name VARCHAR,
+            name_status VARCHAR NOT NULL,
+            effective_date DATE NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, title_id)
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS reference.title_baseline_states (
             baseline_id VARCHAR NOT NULL,
             title_id VARCHAR NOT NULL,
@@ -537,6 +661,39 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
             validation_status VARCHAR NOT NULL,
             validation_note VARCHAR,
             PRIMARY KEY (baseline_id, character_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.character_baseline_court_states (
+            baseline_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            court_language_id VARCHAR,
+            court_language_effective_date DATE,
+            court_language_source_declaration_order BIGINT,
+            court_type_id VARCHAR,
+            court_type_effective_date DATE,
+            court_type_source_declaration_order BIGINT,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, character_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.character_baseline_languages (
+            baseline_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            language_id VARCHAR NOT NULL,
+            knowledge_kind VARCHAR NOT NULL,
+            effective_date DATE,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, character_id, language_id)
         )
         """
     )
