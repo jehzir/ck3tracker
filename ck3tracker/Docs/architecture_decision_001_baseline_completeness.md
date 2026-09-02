@@ -19,7 +19,7 @@ An accepted exception is limited to an operation proven inactive for the reviewe
 - Court language and court type require durable baseline projections.
 - Conditional `learn_court_language_of` results require durable character-language projections and exact branch evaluation.
 - Mixed bodies such as `e_byzantium`, `e_japan`, and `k_chrysanthemum_throne` remain blocking until every active state change in the body is represented.
-- `k_balhae` requires reconciliation of the installed Chinese assignment with the observed Tungusic runtime state before certification.
+- `k_balhae` is complete at parser `1.22.0`: its runtime-confirmed Chinese court language retains effective-date provenance while its independently grounded Tungusic cultural language remains separate.
 - Promotion readiness must report unsupported active state as blocking rather than silently narrowing completeness to current product consumption.
 
 ## Rejected Alternative

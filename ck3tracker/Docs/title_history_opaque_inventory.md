@@ -4,8 +4,8 @@
 - Baseline: `ck3_1_19_0_6_867` (`0867-01-01`)
 - Inventory date: 2026-08-29
 - Starting scope: 556 baseline title states with `not evaluated:` warnings
-- Current scope: one baseline title state, `k_balhae`, pending source/runtime court-language reconciliation.
-- Intermediate counts below are retained as parser-milestone audit history; the current count is 1 at parser `1.21.0` after exact Byzantine administrative-state replay.
+- Current scope: zero baseline title states.
+- Intermediate counts below are retained as parser-milestone audit history; the current count is 0 at parser `1.22.0` after exact Balhae court-language replay.
 - Raw declarations remain preserved in `source.title_history_declarations`.
 - Counts overlap when one title contains more than one opaque shape.
 

@@ -1220,6 +1220,172 @@ k_balhae = {
             learning_events,
         )
 
+    def test_exact_balhae_chinese_court_language_replays(self) -> None:
+        titles = self.game_root / "common" / "landed_titles" / "00_titles.txt"
+        titles.write_text(
+            """
+e_world = {
+    k_islands = { d_ruucuu = { c_ucinaa = { b_simajiri = { } } } }
+    k_balhae = { d_balhae = { c_balhae = { b_balhae = { } } } }
+}
+""",
+            encoding="utf-8",
+        )
+        load_landed_titles_candidate(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            game_version="1.19.0.6",
+            steam_build_id="23530548",
+            database_path=self.database_path,
+        )
+        exact_effect = """
+effect = {
+    if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = { set_court_language = language_chinese }
+    }
+}
+"""
+        history = self.game_root / "history" / "titles" / "k_balhae.txt"
+        history.write_text(
+            f"""
+k_balhae = {{
+    858.2.1 = {{ holder = balhae_dae_12 }}
+    867.1.1 = {{ {exact_effect} }}
+}}
+k_islands = {{
+    800.1.1 = {{ holder = wrong_title_holder }}
+    867.1.1 = {{ {exact_effect} }}
+}}
+""",
+            encoding="utf-8",
+        )
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_packages
+                VALUES ('scribe_build', 'dlc004_ep1', 'The Royal Court', NULL,
+                        NULL, NULL, 'dlc/dlc004_ep1/dlc004.dlc', 'hash',
+                        'https://example.test/wiki?oldid=1', '1', 'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.dlc_feature_mappings
+                VALUES ('scribe_build', 'royal_court', 'dlc004_ep1',
+                        'reviewed', 'test evidence')
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.languages
+                VALUES ('scribe_build', 'language_chinese',
+                        'common/culture/pillars/test.txt', 1, 1, 1, '{}',
+                        '1.1.0', 'valid', NULL)
+                """
+            )
+        finally:
+            connection.close()
+
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        load_title_history_candidate(**arguments)
+        load_title_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            court_state = connection.execute(
+                """
+                SELECT character_id, court_language_id,
+                       court_language_effective_date,
+                       court_language_source_declaration_order
+                FROM reference.character_baseline_court_states
+                WHERE character_id = 'balhae_dae_12'
+                """
+            ).fetchone()
+            event = connection.execute(
+                """
+                SELECT event_type, text_value, source_declaration_order,
+                       validation_note
+                FROM reference.title_history_events
+                WHERE title_id = 'k_balhae'
+                  AND event_type = 'court_language_set'
+                """
+            ).fetchone()
+            declarations = connection.execute(
+                """
+                SELECT title_id, resolution_status
+                FROM source.title_history_declarations
+                WHERE source_path = 'history/titles/k_balhae.txt'
+                  AND operation_key = 'effect'
+                ORDER BY title_id
+                """
+            ).fetchall()
+            personal_languages = connection.execute(
+                """
+                SELECT count(*) FROM reference.character_baseline_languages
+                WHERE character_id = 'balhae_dae_12'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(
+            ("balhae_dae_12", "language_chinese", date(867, 1, 1), event[2]),
+            court_state,
+        )
+        self.assertEqual(
+            ("court_language_set", "language_chinese", event[2],
+             "holder=balhae_dae_12; installed royal_court"),
+            event,
+        )
+        self.assertEqual(
+            [("k_balhae", "normalized"), ("k_islands", "preserved")],
+            declarations,
+        )
+        self.assertEqual((0,), personal_languages)
+
+        history.write_text(
+            """
+k_balhae = {
+    858.2.1 = { holder = balhae_dae_12 }
+    867.1.1 = { effect = { if = {
+        limit = { exists = holder has_dlc_feature = royal_court }
+        holder = { set_court_language = language_tungusic }
+    } } }
+}
+""",
+            encoding="utf-8",
+        )
+        load_title_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            self.assertEqual(
+                (0,),
+                connection.execute(
+                    """
+                    SELECT count(*) FROM reference.character_baseline_court_states
+                    WHERE character_id = 'balhae_dae_12'
+                    """
+                ).fetchone(),
+            )
+            self.assertEqual(
+                ("warning",),
+                connection.execute(
+                    """
+                    SELECT validation_status FROM reference.title_baseline_states
+                    WHERE baseline_id = 'scribe_867' AND title_id = 'k_balhae'
+                    """
+                ).fetchone(),
+            )
+        finally:
+            connection.close()
+
     def test_historical_adventurer_body_is_fully_replayed(self) -> None:
                 history = self.game_root / "history" / "titles" / "titles.txt"
                 history.write_text(

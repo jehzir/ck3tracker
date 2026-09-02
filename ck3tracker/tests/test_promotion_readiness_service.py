@@ -216,7 +216,7 @@ class PromotionReadinessServiceTests(unittest.TestCase):
         current = {finding.code: finding for finding in current_report.findings}
         self.assertEqual("passed", current["required_parsers"].classification)
         self.assertEqual(len(EXPECTED_PARSERS), current["required_parsers"].subject_count)
-        self.assertIn("installed_character_history@1.5.0", current["required_parsers"].detail)
+        self.assertIn("installed_character_history@1.8.0", current["required_parsers"].detail)
         self.assertEqual("passed", current["source_manifests"].classification)
         self.assertEqual(len(EXPECTED_PARSERS), current["source_manifests"].subject_count)
 

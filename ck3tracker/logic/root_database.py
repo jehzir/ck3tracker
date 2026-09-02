@@ -664,6 +664,72 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
     )
     connection.execute(
         """
+        CREATE TABLE IF NOT EXISTS reference.nicknames (
+            reference_snapshot_id VARCHAR NOT NULL,
+            nickname_id VARCHAR NOT NULL,
+            is_bad BOOLEAN NOT NULL,
+            is_prefix BOOLEAN NOT NULL,
+            localization_language VARCHAR NOT NULL,
+            localization_key VARCHAR NOT NULL,
+            display_name VARCHAR NOT NULL,
+            definition_source_path VARCHAR NOT NULL,
+            definition_source_line_start INTEGER NOT NULL,
+            definition_source_line_end INTEGER NOT NULL,
+            definition_source_order BIGINT NOT NULL,
+            raw_script VARCHAR NOT NULL,
+            localization_source_path VARCHAR NOT NULL,
+            localization_source_line INTEGER NOT NULL,
+            parser_version VARCHAR NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (reference_snapshot_id, nickname_id),
+            FOREIGN KEY (
+                reference_snapshot_id,
+                localization_language,
+                localization_key
+            ) REFERENCES reference.localizations (
+                reference_snapshot_id,
+                language,
+                localization_key
+            )
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.character_nickname_events (
+            reference_snapshot_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            source_operation_order INTEGER NOT NULL,
+            effective_date VARCHAR NOT NULL,
+            event_kind VARCHAR NOT NULL,
+            nickname_id VARCHAR,
+            source_path VARCHAR NOT NULL,
+            source_line_start INTEGER NOT NULL,
+            source_line_end INTEGER NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (
+                reference_snapshot_id,
+                character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ),
+            FOREIGN KEY (reference_snapshot_id, nickname_id)
+                REFERENCES reference.nicknames
+                    (reference_snapshot_id, nickname_id),
+            CHECK (
+                (event_kind = 'set' AND nickname_id IS NOT NULL)
+                OR (event_kind = 'clear' AND nickname_id IS NULL)
+            )
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS reference.character_baseline_states (
             baseline_id VARCHAR NOT NULL,
             character_id VARCHAR NOT NULL,
@@ -681,6 +747,47 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
             validation_status VARCHAR NOT NULL,
             validation_note VARCHAR,
             PRIMARY KEY (baseline_id, character_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.character_baseline_nickname_states (
+            baseline_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            reference_snapshot_id VARCHAR NOT NULL,
+            active_nickname_id VARCHAR,
+            last_event_kind VARCHAR NOT NULL,
+            effective_date VARCHAR NOT NULL,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            source_operation_order INTEGER NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, character_id),
+            FOREIGN KEY (baseline_id, character_id)
+                REFERENCES reference.character_baseline_states
+                    (baseline_id, character_id),
+            FOREIGN KEY (
+                reference_snapshot_id,
+                character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ) REFERENCES reference.character_nickname_events (
+                reference_snapshot_id,
+                character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ),
+            FOREIGN KEY (reference_snapshot_id, active_nickname_id)
+                REFERENCES reference.nicknames
+                    (reference_snapshot_id, nickname_id),
+            CHECK (
+                (last_event_kind = 'set' AND active_nickname_id IS NOT NULL)
+                OR (last_event_kind = 'clear' AND active_nickname_id IS NULL)
+            )
         )
         """
     )

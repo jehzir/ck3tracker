@@ -11,7 +11,7 @@
 | Family | Rows | Titles | Result |
 |---|---:|---:|---|
 | Exact no-Roads-to-Power government fallback | 64 | 63 | Normalized as deterministic no-op |
-| Royal Court language assignment | 4 | 4 | Three normalized; `k_balhae` preserved because installed and observed values conflict |
+| Royal Court language assignment | 4 | 4 | All four normalized |
 | Royal Court language assignment plus conditional language learning | 5 | 5 | Normalized: four learned rows and one already-native no-op |
 | Royal Court court-type assignment | 1 | 1 | Normalized into durable court-type state |
 
@@ -50,7 +50,7 @@ Reviewed mapping `royal_court -> dlc004_ep1` resolves to the valid installed des
 | `c_pacatiana` | `0330-01-01` | `history/titles/k_anatolia.txt` | 21142 | Roads to Power no-op | Normalized |
 | `c_selge` | `0330-01-01` | `history/titles/k_anatolia.txt` | 21195 | Roads to Power no-op | Normalized |
 | `d_cappadocia` | `0330-01-01` | `history/titles/k_anatolia.txt` | 21306 | Roads to Power no-op | Normalized |
-| `k_balhae` | `0867-01-01` | `history/titles/k_balhae.txt` | 27271 | Royal Court language | Preserved |
+| `k_balhae` | `0867-01-01` | `history/titles/k_balhae.txt` | 27271 | Royal Court language | Normalized |
 | `k_bengal` | `0855-01-01` | `history/titles/k_bengal.txt` | 29829 | Royal Court court type | Normalized |
 | `k_bulgaria` | `0852-01-01` | `history/titles/k_bulgaria.txt` | 33203 | Royal Court language and learning | Preserved |
 | `d_turnovo` | `0330-01-01` | `history/titles/k_bulgaria.txt` | 33344 | Roads to Power no-op | Normalized |
@@ -117,6 +117,6 @@ Reviewed mapping `royal_court -> dlc004_ep1` resolves to the valid installed des
 
 - 64 declarations across 63 titles normalize as no-ops.
 - Four complete court-only declarations normalize into durable court state.
-- Six Royal Court declarations remain preserved: five pending character-language projection and `k_balhae` pending evidence reconciliation.
+- All baseline-effective Royal Court declarations are normalized. Parser `1.22.0` adds Balhae's dated Chinese court state while preserving its independently Tungusic culture state.
 - Current opaque baseline title states are 9 after all later parser milestones.
 - Snapshot and baseline remain `candidate`; `historical_state_complete=false`; `app.supported_baselines` remains empty.

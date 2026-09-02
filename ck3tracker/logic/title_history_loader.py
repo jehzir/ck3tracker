@@ -14,7 +14,7 @@ from logic.root_database import connect
 
 
 PARSER_NAME = "installed_title_history"
-PARSER_VERSION = "1.21.0"
+PARSER_VERSION = "1.22.0"
 DATE_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 TITLE_PATTERN = re.compile(r"^[ekdcb]_[A-Za-z0-9_-]+$")
 NORMALIZED_OPERATIONS = {
@@ -64,7 +64,6 @@ EP3_HISTORY_EFFECT_DEFINITION = (
     "landless_adventurer_succession_law } } }"
 )
 ROYAL_COURT_FEATURE_FLAG = "royal_court"
-COURT_STATE_REPLAY_EXCLUDED_TITLE_IDS = {"k_balhae"}
 COURT_LANGUAGE_PATTERN = re.compile(r"^language_[A-Za-z0-9_-]+$")
 COURT_TYPE_PATTERN = re.compile(r"^court_[A-Za-z0-9_-]+$")
 LAW_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
@@ -1936,10 +1935,13 @@ def _is_roads_to_power_government_fallback(operation: HistoryOperation) -> bool:
 def _royal_court_assignment(
     operation: HistoryOperation,
 ) -> tuple[str, str, bool, bool] | None:
+    balhae_source = operation.source_path.replace("\\", "/").endswith(
+        "history/titles/k_balhae.txt"
+    )
     if (
         operation.operation_key != "effect"
         or operation.value_kind != "block"
-        or operation.title_id in COURT_STATE_REPLAY_EXCLUDED_TITLE_IDS
+        or (balhae_source and operation.title_id != "k_balhae")
     ):
         return None
     fields = list(_assignments(operation.raw_script[1:-1], operation.source_line_start))
@@ -1991,7 +1993,16 @@ def _royal_court_assignment(
             matches.append((
                 field_name.removeprefix("set_"), value_id, len(fields) == 1, True,
             ))
-    return matches[0] if len(matches) == 1 else None
+    if len(matches) != 1:
+        return None
+    assignment = matches[0]
+    if operation.title_id == "k_balhae" and (
+        not balhae_source
+        or operation.effective_date != CK3Date(867, 1, 1)
+        or assignment != ("court_language", "language_chinese", True, False)
+    ):
+        return None
+    return assignment
 
 
 def _is_exact_court_language_learning(field: Assignment) -> bool:

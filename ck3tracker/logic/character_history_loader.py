@@ -23,7 +23,7 @@ from logic.title_history_loader import (
 
 
 PARSER_NAME = "installed_character_history"
-PARSER_VERSION = "1.5.0"
+PARSER_VERSION = "1.8.0"
 CHARACTER_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 IDENTITY_OPERATIONS = {
     "name",
@@ -240,7 +240,13 @@ def load_character_history_candidate(
         if snapshot[0] == "promoted" or baseline[1] == "promoted":
             raise ValueError("Promoted character history cannot be replaced")
 
-        classified_blocks, duplicate_classifications, conflict_fields = (
+        (
+            classified_blocks,
+            duplicate_classifications,
+            conflict_fields,
+            reviewed_winner_blocks,
+            reviewed_character_ids,
+        ) = (
             _classify_character_blocks(parsed.blocks, parsed.operations, baseline[0])
         )
         baseline_conflicting_ids = frozenset(
@@ -253,9 +259,23 @@ def load_character_history_candidate(
             duplicate_classifications,
             conflict_fields,
             baseline[0],
+            reviewed_winner_blocks,
+            reviewed_character_ids,
         )
+        block_classifications = {
+            block.source_block_order: block.duplicate_classification
+            for block in classified_blocks
+        }
         native_languages = _materialize_native_languages(
             connection, reference_snapshot_id, states
+        )
+        history_languages = _materialize_history_languages(
+            connection,
+            reference_snapshot_id,
+            baseline_id,
+            events,
+            native_languages,
+            baseline[0],
         )
         state_by_id = {state[0]: state for state in states}
         holders = connection.execute(
@@ -291,7 +311,11 @@ def load_character_history_candidate(
         connection.execute(
             """
             DELETE FROM reference.character_baseline_languages
-            WHERE baseline_id = ? AND knowledge_kind = 'native'
+                        WHERE baseline_id = ?
+                            AND (
+                                knowledge_kind = 'native'
+                                OR source_group = 'character_history'
+                            )
             """,
             [baseline_id],
         )
@@ -374,8 +398,18 @@ def load_character_history_candidate(
                     item.source_line_end,
                     item.encoding_name,
                     PARSER_VERSION,
-                    "review_required"
-                    if duplicate_classifications.get(item.character_id) == "conflicting_at_baseline"
+                    "reviewed_winner"
+                    if block_classifications.get(item.character_declaration_order)
+                    == "reviewed_winner"
+                    else "reviewed_corrected"
+                    if block_classifications.get(item.character_declaration_order)
+                    == "reviewed_corrected"
+                    else "reviewed_superseded"
+                    if block_classifications.get(item.character_declaration_order)
+                    == "reviewed_superseded"
+                    else "review_required"
+                    if duplicate_classifications.get(item.character_id)
+                    == "conflicting_at_baseline"
                     else "normalized"
                     if item.operation_key in IDENTITY_OPERATIONS | LIFECYCLE_OPERATIONS
                     or _extract_character_effects(item)[1]
@@ -419,6 +453,18 @@ def load_character_history_candidate(
             """,
             [(baseline_id, *row) for row in native_languages],
         )
+        if history_languages:
+            connection.executemany(
+                """
+                INSERT INTO reference.character_baseline_languages
+                (baseline_id, character_id, language_id, knowledge_kind,
+                 effective_date, source_group, source_declaration_order,
+                 validation_status, validation_note)
+                VALUES (?, ?, ?, 'history_granted', ?, 'character_history', ?,
+                        'valid', NULL)
+                """,
+                [(baseline_id, *row) for row in history_languages],
+            )
         connection.executemany(
             """
             INSERT INTO reference.title_holder_validations
@@ -492,11 +538,25 @@ def _materialize_character_states(
     duplicate_classifications: dict[str, str],
     conflict_fields: dict[str, set[str]],
     baseline_date: date,
+    reviewed_winner_blocks: dict[str, int] | None = None,
+    reviewed_character_ids: dict[int, str] | None = None,
 ) -> tuple[list[tuple[object, ...]], list[tuple[object, ...]]]:
     cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
+    reviewed_winner_blocks = reviewed_winner_blocks or {}
+    reviewed_character_ids = reviewed_character_ids or {}
     by_character: dict[str, list[CharacterOperation]] = {}
     for operation in operations:
-        by_character.setdefault(operation.character_id, []).append(operation)
+        winner_block = reviewed_winner_blocks.get(operation.character_id)
+        if (
+            winner_block is not None
+            and operation.character_declaration_order != winner_block
+            and operation.character_declaration_order not in reviewed_character_ids
+        ):
+            continue
+        character_id = reviewed_character_ids.get(
+            operation.character_declaration_order, operation.character_id
+        )
+        by_character.setdefault(character_id, []).append(operation)
 
     states: list[tuple[object, ...]] = []
     events: list[tuple[object, ...]] = []
@@ -677,6 +737,65 @@ def _materialize_native_languages(
     ]
 
 
+def _materialize_history_languages(
+    connection: duckdb.DuckDBPyConnection,
+    reference_snapshot_id: str,
+    baseline_id: str,
+    events: list[tuple[object, ...]],
+    native_languages: list[tuple[str, str, int]],
+    baseline_date: date,
+) -> list[tuple[str, str, str, int]]:
+    mappings = {
+        str(row[0]): str(row[1])
+        for row in connection.execute(
+            """
+            SELECT native.culture_id, native.language_id
+            FROM reference.culture_native_languages native
+            JOIN reference.languages language
+              USING (reference_snapshot_id, language_id)
+            WHERE native.reference_snapshot_id = ?
+              AND native.validation_status = 'valid'
+              AND language.validation_status = 'valid'
+            """,
+            [reference_snapshot_id],
+        ).fetchall()
+    }
+    cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
+    language_events = [
+        event
+        for event in events
+        if event[3] == "learn_language_of_culture"
+        and CK3Date(*map(int, str(event[1]).split("-"))) <= cutoff
+    ]
+    unresolved = sorted({str(event[4]) for event in language_events if str(event[4]) not in mappings})
+    if unresolved:
+        raise ValueError(
+            "Language effects reference unresolved cultures: " + ", ".join(unresolved)
+        )
+    known_pairs = {
+        (str(row[0]), str(row[1]))
+        for row in connection.execute(
+            """
+            SELECT character_id, language_id
+            FROM reference.character_baseline_languages
+            WHERE baseline_id = ? AND source_group = 'title_history'
+            """,
+            [baseline_id],
+        ).fetchall()
+    }
+    known_pairs.update((character_id, language_id) for character_id, language_id, _ in native_languages)
+    learned: list[tuple[str, str, str, int]] = []
+    for event in language_events:
+        character_id = str(event[0])
+        language_id = mappings[str(event[4])]
+        pair = (character_id, language_id)
+        if pair in known_pairs:
+            continue
+        known_pairs.add(pair)
+        learned.append((character_id, language_id, str(event[1]), int(event[5])))
+    return learned
+
+
 def _extract_character_effects(
     operation: CharacterOperation,
 ) -> tuple[list[tuple[str, str | None, str, str | None]], bool]:
@@ -684,6 +803,24 @@ def _extract_character_effects(
         return [], False
 
     fields = list(_assignments(operation.raw_script[1:-1], operation.source_line_start))
+    if fields and all(
+        field.key == "learn_language_of_culture"
+        and field.value_kind == "scalar"
+        for field in fields
+    ):
+        effects: list[tuple[str, str | None, str, str | None]] = []
+        for field in fields:
+            target = _scalar_value(field.raw_value)
+            if not target.startswith("culture:"):
+                return [], False
+            culture_id = target[8:]
+            if not CHARACTER_PATTERN.fullmatch(culture_id):
+                return [], False
+            effects.append(
+                ("learn_language_of_culture", culture_id, "valid", None)
+            )
+        return effects, True
+
     effects: list[tuple[str, str | None, str, str | None]] = []
     handled = 0
     for field in fields:
@@ -707,7 +844,13 @@ def _classify_character_blocks(
     blocks: tuple[CharacterHistoryBlock, ...],
     operations: tuple[CharacterOperation, ...],
     baseline_date: date,
-) -> tuple[list[CharacterHistoryBlock], dict[str, str], dict[str, set[str]]]:
+) -> tuple[
+    list[CharacterHistoryBlock],
+    dict[str, str],
+    dict[str, set[str]],
+    dict[str, int],
+    dict[int, str],
+]:
     cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
     blocks_by_character: dict[str, list[CharacterHistoryBlock]] = {}
     operations_by_block: dict[int, list[CharacterOperation]] = {}
@@ -718,6 +861,8 @@ def _classify_character_blocks(
 
     classifications: dict[str, str] = {}
     conflicts_by_character: dict[str, set[str]] = {}
+    reviewed_winner_blocks: dict[str, int] = {}
+    reviewed_character_ids: dict[int, str] = {}
     classified: list[CharacterHistoryBlock] = []
     for character_id, character_blocks in blocks_by_character.items():
         if len(character_blocks) == 1:
@@ -742,6 +887,26 @@ def _classify_character_blocks(
                 classification = "conflicting_at_baseline"
             else:
                 classification = "additive_nonconflicting"
+        reviewed_winner = _reviewed_lope_winner(
+            character_id, character_blocks, operations_by_block
+        )
+        if reviewed_winner is not None:
+            classification = "reviewed"
+            conflicts = set()
+            reviewed_winner_blocks[character_id] = reviewed_winner
+        reviewed_bobo = _reviewed_bobo_correction(
+            character_id,
+            character_blocks,
+            operations_by_block,
+            set(blocks_by_character),
+        )
+        reviewed_corrected = None
+        if reviewed_bobo is not None:
+            reviewed_winner, reviewed_corrected = reviewed_bobo
+            classification = "reviewed"
+            conflicts = set()
+            reviewed_winner_blocks[character_id] = reviewed_winner
+            reviewed_character_ids[reviewed_corrected] = "bobo0060"
         classifications[character_id] = classification
         conflicts_by_character[character_id] = conflicts
         classified.extend(
@@ -754,12 +919,119 @@ def _classify_character_blocks(
                 block.raw_script,
                 block.raw_sha256,
                 block.semantic_sha256,
-                classification,
+                "reviewed_winner"
+                if block.source_block_order == reviewed_winner
+                else "reviewed_corrected"
+                if block.source_block_order == reviewed_corrected
+                else "reviewed_superseded"
+                if reviewed_winner is not None
+                else classification,
                 tuple(sorted(conflicts)),
             )
             for block in character_blocks
         )
-    return sorted(classified, key=lambda item: item.source_block_order), classifications, conflicts_by_character
+    return (
+        sorted(classified, key=lambda item: item.source_block_order),
+        classifications,
+        conflicts_by_character,
+        reviewed_winner_blocks,
+        reviewed_character_ids,
+    )
+
+
+def _reviewed_lope_winner(
+    character_id: str,
+    blocks: list[CharacterHistoryBlock],
+    operations_by_block: dict[int, list[CharacterOperation]],
+) -> int | None:
+    if character_id != "71419" or len(blocks) != 2:
+        return None
+    expected = {
+        "history/characters/basque.txt": "basque",
+        "history/characters/castilian.txt": "castilian",
+    }
+    block_by_path = {block.source_path: block for block in blocks}
+    if set(block_by_path) != set(expected):
+        return None
+    for source_path, culture_id in expected.items():
+        operations = operations_by_block.get(
+            block_by_path[source_path].source_block_order, []
+        )
+        signature = [
+            (
+                operation.operation_key,
+                str(operation.effective_date) if operation.effective_date else None,
+                operation.scalar_value,
+            )
+            for operation in operations
+        ]
+        if signature != [
+            ("name", None, "Lope"),
+            ("dynasty", None, "681"),
+            ("religion", None, "catholic"),
+            ("culture", None, culture_id),
+            ("father", None, "71410"),
+            ("mother", None, "71411"),
+            ("birth", "1208-01-01", "1208.1.1"),
+            ("death", "1235-01-01", "1235.1.1"),
+        ]:
+            return None
+    return block_by_path["history/characters/castilian.txt"].source_block_order
+
+
+def _reviewed_bobo_correction(
+    character_id: str,
+    blocks: list[CharacterHistoryBlock],
+    operations_by_block: dict[int, list[CharacterOperation]],
+    all_character_ids: set[str],
+) -> tuple[int, int] | None:
+    if (
+        character_id != "bobo0050"
+        or len(blocks) != 2
+        or "bobo0060" in all_character_ids
+    ):
+        return None
+    ordered_blocks = sorted(blocks, key=lambda item: item.source_block_order)
+    if any(
+        block.source_path != "history/characters/bobo.txt"
+        for block in ordered_blocks
+    ):
+        return None
+    expected_signatures = [
+        [
+            ("name", None, "Yama"),
+            ("dynasty", None, "bobodyn005"),
+            ("religion", None, "west_african_pagan"),
+            ("culture", None, "bobo"),
+            ("father", None, "bobo0049"),
+            ("birth", "1186-01-01", "yes"),
+            ("death", "1244-01-01", "yes"),
+        ],
+        [
+            ("name", None, "Labidiedo"),
+            ("dynasty", None, "bobodyn006"),
+            ("religion", None, "ashari"),
+            ("culture", None, "bobo"),
+            ("father", None, "bobo0059"),
+            ("birth", "1193-01-01", "yes"),
+            ("death", "1254-01-01", "yes"),
+        ],
+    ]
+    for block, expected_signature in zip(ordered_blocks, expected_signatures):
+        signature = [
+            (
+                operation.operation_key,
+                str(operation.effective_date) if operation.effective_date else None,
+                operation.scalar_value,
+            )
+            for operation in operations_by_block.get(block.source_block_order, [])
+        ]
+        if signature != expected_signature:
+            return None
+    return (
+        ordered_blocks[0].source_block_order,
+        ordered_blocks[1].source_block_order,
+    )
 
 
 def _character_block_state(

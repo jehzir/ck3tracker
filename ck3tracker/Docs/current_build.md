@@ -2,8 +2,8 @@
 
 - Build ID: `B002-scribe-promotion-readiness`
 - Build name: Scribe reference-catalog promotion readiness
-- Status: `active — administrative state-faith schema bootstrapped`
-- Last updated: 2026-09-01
+- Status: `active — nickname storage schema bootstrapped`
+- Last updated: 2026-09-02
 
 ## Objective
 
@@ -20,8 +20,8 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 ## Repository State
 
 - Branch: `master`
-- Checkpoint commit: `cf82e12` (`build Scribe reference validation pipeline`).
-- Worktree: post-checkpoint title-history normalization is uncommitted; root DuckDB and backup databases remain ignored. Do not revert unrelated changes.
+- Checkpoint lineage: `704d80e` (`Replay Byzantine administrative state history`) is the parent checkpoint for the current title, character, and nickname sequence.
+- Worktree policy: root DuckDB and backup databases remain ignored. The separate `new_version` prototype and `twelve_titles.md` are outside B002 and must not be included in this checkpoint.
 - Runtime: Dash development server at `http://127.0.0.1:8051/reference` when active.
 - Python: `C:\Python314\python.exe`
 - DuckDB: repository-root `ck3tracker_v2.duckdb`
@@ -37,7 +37,7 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - Duplicate title blocks classified by baseline impact; all 21 same-date singleton conflicts are resolved by reviewed vanilla source order while every raw block remains preserved.
 - Duplicate character blocks classified: 18 semantically identical IDs and two baseline conflicts remain.
 - Character parser `1.3.0` normalizes top-level `set_culture`, two proven non-projecting flag values, and pure relationship effects while preserving mixed effects.
-- Character review reduced to 109 subjects: two duplicate conflicts and 107 opaque states.
+- Character review reduced to 95 subjects: zero duplicate conflicts and 95 opaque states.
 - Grounded government catalog loaded from 18 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Government` revision `35874`; all 14 baseline-used government IDs resolve.
 - Grounded culture catalog loaded from 244 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Culture` revision `35845`; all 228 baseline-used culture IDs resolve. Parser `1.1.0` also loads all 91 installed language definitions and resolves one native language for every culture.
 - Grounded faith catalog loaded from 140 installed definitions nested under 49 parent religions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Faith` revision `35751`; all 111 baseline-used faith IDs resolve.
@@ -48,7 +48,7 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - All nine installed bookmark DLC gates resolve through reviewed feature mappings to canonical installed package descriptors: `landless_adventurer -> dlc014_ep3`, `khans_of_the_steppe -> dlc020_ce2`, and `all_under_heaven -> dlc022_ep4`.
 - Required snapshot evidence now also resolves `royal_court -> dlc004_ep1` independently of bookmark requirements, binding the valid installed The Royal Court descriptor, platform IDs, SHA-256 manifest, and CK3 Wiki revision `35819`.
 - Raw feature flags remain preserved beside package identity, descriptor hashes, platform IDs, and permanent wiki-revision evidence; unknown feature flags remain unresolved and block readiness.
-- Bookmark parser is `1.2.0`, title-history parser is `1.21.0`, culture parser is `1.1.0`, character history is `1.5.0`, and the other six required parsers remain `1.0.0`.
+- Bookmark parser is `1.2.0`, title-history parser is `1.22.0`, culture parser is `1.1.0`, character history is `1.8.0`, and the other six required parsers remain `1.0.0`.
 - Every readiness report now stores an immutable ten-row evidence ledger containing the exact latest parser-run ID, parser version/status, manifest count, and deterministic SHA-256 digest evaluated for each required source group.
 - Readiness retrieval compares stored bindings with current evidence and labels legacy or superseded reports stale without rewriting the persisted report, findings, or evidence ledger.
 - All 1,714 current source manifests are covered by the latest report evidence ledger; culture evidence includes the installed language pillar and title history binds installed TGP and law-definition evidence.
@@ -96,7 +96,7 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - Snapshot-scoped `reference.languages` and `reference.culture_native_languages` catalogs preserve all 91 installed language definitions and all 244 culture-native references with source coordinates; zero native references are unresolved.
 - Character parser `1.5.0` materializes 71,121 native-language rows for all 71,121 baseline characters with non-null culture IDs. Every row resolves through the grounded culture mapping, and native-only replacement preserves separately owned history-granted knowledge.
 - Title-history parser `1.17.0` materializes 11 adjudicated court-state rows at 867, including proven court fields embedded in mixed bodies, while binding every field to its execution-time holder, effective date, and declaration order.
-- Four complete court-only declarations normalize; mixed and holder-language-learning bodies retain warnings after their proven court fields are projected. `k_balhae` remains wholly excluded because installed Chinese and observed Tungusic evidence conflict.
+- Four complete court-only declarations normalize; mixed and holder-language-learning bodies retain warnings after their proven court fields are projected. `k_balhae` remains wholly excluded at this parser milestone pending the later culture-versus-court evidence reconciliation.
 - Opaque title states fall from 12 to 9. All 62 repository tests pass, and the candidate remains unpromoted with `historical_state_complete=false`.
 - Title-history parser `1.18.0` replays all five exact conditional `learn_court_language_of = this` branches against durable baseline language knowledge. Boris learns Greek, Louis II and Lothair II learn High German, Umar I Habbari learns Arabic, and Tajik Nasr's Iranian branch records an already-native no-op.
 - Four `history_granted` rows retain their effective dates and title-declaration provenance; reload ignores and replaces stale title-history-owned learned rows idempotently. Opaque title states fall from 9 to 4 while `k_balhae` remains excluded.
@@ -108,14 +108,30 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - The candidate database is bootstrapped with zero state-faith rows. Parser `1.20.0`, readiness report `3e00ddd4-b439-4a00-b1dd-c84be7d31102`, both opaque title warnings, candidate statuses, false historical completeness, and zero supported baselines remain unchanged; all 65 tests pass.
 - Title-history parser `1.21.0` fully replays exact `e_byzantium` declaration `1028`: resolved holder `70490` retains Intrigue Court, the title gains durable Orthodox administrative state faith, and the no-Roads-to-Power feudal/law fallback is recorded as inactive under the reviewed installed package.
 - State faith remains separate from holder `70490`'s source-derived personal faith. Exact wrong-title and non-administrative cases remain opaque, two reloads are idempotent, and opaque title states fall from 2 to only `k_balhae`; all 66 repository tests pass.
+- Title-history parser `1.22.0` replays exact `k_balhae` declaration `27271` as holder `balhae_dae_12`'s Chinese court language effective `0867-01-01`, preserving the effective date required by the observed five-year adoption lock while leaving Tungusic cultural language and personal language knowledge unchanged.
+- Same-source wrong-title, wrong-date, altered-language, unresolved-language, holder-missing, and package-missing cases remain opaque. Two reloads are idempotent; declaration `27271` normalizes, title warnings fall from 1 to 0, and all 67 repository tests pass.
+- Character-history parser `1.6.0` implements the reviewed Lope adjudication without a general precedence rule. It preserves both exact blocks and all 16 declarations, labels the Castilian copy `reviewed_winner` and the Basque copy `reviewed_superseded`, and materializes Castilian with all consensus identity/lifecycle fields intact.
+- Exact altered blocks return to unresolved conflict handling and unrelated duplicates remain untouched. Character review falls from 109 to 108 subjects, holder validations remain warning-free, and all 68 repository tests pass.
+- Duplicate character `bobo0050` is internally deterministic: Yama of `bobodyn005` owns `bobo0050` and completes the `c_loropeni` succession, while Labidiedo of `bobodyn006` is the missing `bobo0060` already named by the `c_nyene` succession.
+- Character-history parser `1.7.0` preserves both installed `bobo0050` blocks and all 14 declarations, labels Yama `reviewed_winner`, labels Labidiedo `reviewed_corrected`, and materializes valid canonical states for both `bobo0050` and `bobo0060`.
+- Exact operation/path/order certification and the absence of an independent `bobo0060` are required. Altered or competing evidence fails closed; all 4,434 holder validations remain valid, character review falls from 108 to 107 opaque-only subjects, and all 69 repository tests pass.
+- The 107 opaque character states reconcile to 157 baseline-effective effect declarations: 36 already-normalized declarations and 121 preserved declarations across 64 opaque structural shapes. Every warning subject and all multi-declaration overlaps are accounted for in `Docs/character_history_opaque_inventory.md`.
+- No blanket exception is supportable. Complete language-only bodies are the smallest replayable family because durable provenance-bearing character-language storage and culture-native-language mappings already exist; mixed language bodies remain blocking.
+- Character-history parser `1.8.0` normalizes all 12 complete language-only bodies from shapes O03 and O10, resolving their culture targets through grounded native-language mappings and materializing 15 `history_granted` rows for 12 characters.
+- Character-history grants replace only their own source rows, preserve native and title-history knowledge, and obey the baseline cutoff. Mixed language bodies remain wholly preserved; opaque character states fall from 107 to 95, all 4,434 holder validations remain valid, and all 71 repository tests pass.
+- Nickname semantics are resolved as scalar latest-event state: later sets replace the active nickname and `remove_nickname = yes` clears it, while every set/clear remains append-only provenance. All 15 warning-linked keys resolve uniquely to installed definitions and English localization.
+- The 16 warning-linked direct-child assignments are disjoint from 104 baseline-effective direct assignments already preserved without warnings. A complete replay must cover all 120 baseline characters, use one chronology across both syntax forms, and never descend into conditional or random bodies.
+- The nickname review is evidence-only in `Docs/character_history_nickname_review.md`; parser `1.8.0`, the 95 warnings, current readiness report, candidate statuses, false historical completeness, and zero supported baselines remain unchanged.
+- Durable nickname storage now separates snapshot-scoped definitions, append-only character set/clear events, and sparse scalar baseline state. Composite keys retain source operation identity, set/clear checks enforce nullable nickname semantics, and same-schema foreign keys bind localization, nickname, baseline character, and exact event provenance.
+- The candidate schema bootstrap created zero nickname catalog, event, and state rows. Backup `ck3tracker_v2.before-nickname-schema.20260901-201938.duckdb` precedes the additive bootstrap; all 72 repository tests pass without changing parser `1.8.0`, the 95 warnings, readiness, or promotion state.
 - `k_chrysanthemum_throne` is a functional ceremonial kingdom beneath `e_japan` during fractured imperial authority, not disposable structural noise. Nonselectability applies only to geographic start selection; observed 867 evidence confirms its protected Tenno role and Male Preference Primogeniture succession.
 - A full documentation consistency pass found no broken relative Markdown links or stale current parser, readiness-report, and opaque-count claims; archived B001 and deferred design tasks are explicitly non-authoritative.
 
 ## Current Evidence
 
-- Latest readiness report: `ck3_1_19_0_6_867:readiness:06f75cc3-cdfd-4873-af43-40de33745a74`.
+- Latest readiness report: `ck3_1_19_0_6_867:readiness:4f2d5916-7cf6-40fc-b7f5-49df4d0c0201`.
 - Report evidence status: `current`, with ten parser bindings and both installed EP3 helper definitions bound to title-history evidence.
-- Report status: blocked, with 2 blocking, 2 accepted-exception, 1 informational, and 20 passed findings.
+- Report status: blocked, with 1 blocking, 2 accepted-exception, 1 informational, and 21 passed findings.
 - Snapshot status: `candidate`.
 - Baseline status: `candidate`.
 - `historical_state_complete`: `false`.
@@ -125,9 +141,8 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 
 ## Known Blockers
 
-- The current readiness implementation classifies one title state with baseline-effective opaque history as one blocking finding: `k_balhae`.
-- Two character IDs have baseline-conflicting duplicate declarations.
-- 107 character states contain baseline-effective opaque effects.
+- Title history has zero baseline warning states; its readiness finding passes.
+- 95 character states contain baseline-effective opaque effects.
 - No production atomic promotion service exists.
 
 ## Deferred And Superseded Work
@@ -139,20 +154,24 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 
 ## Next Exact Action
 
-Reconcile only `k_balhae` declaration `27271` at `0867-01-01`. Follow the installed title-history links and reviewed runtime evidence to explain why source requests Chinese while the observed 867 court reports Tungusic as its new language with a five-year change restriction. Determine whether the discrepancy is a baseline-effective state transition, bookmark/runtime initialization, or presentation artifact, and record the evidence chain and exact 1,825-day lock semantics.
+Implement only candidate nickname-catalog ingestion. Parse every top-level installed definition under `common/nicknames/*.txt`, applying documented `is_bad = no` and `is_prefix = no` defaults, and resolve each nickname ID through the existing snapshot-scoped English localization catalog. Preserve raw definitions, definition coordinates/order, localization coordinates, source hashes/manifests, parser version, and validation status in `reference.nicknames`.
 
-Do not normalize declaration `27271`, create a court-language row, waive the warning, or change parser behavior until one interpretation is supported by reproducible source/runtime evidence. Preserve the raw declaration and keep `k_balhae` as the sole opaque title throughout this reconciliation action.
+Use a dedicated `installed_nicknames@1.0.0` parser run and make it an explicit required readiness evidence group. Reject duplicate IDs, missing or duplicate resolved English localization, malformed boolean fields, unknown snapshots, and promoted snapshots before replacement. Replace only the target candidate snapshot's nickname rows and manifests in one transaction; rollback must preserve the prior catalog.
+
+Add focused exact/default/explicit-flag, unresolved-localization, duplicate-ID, promoted-snapshot, rollback, provenance, and repeated-load tests. Back up the root database, load the complete installed catalog, audit all 683 definitions and the 63 baseline-used keys, then refresh readiness without changing character parser `1.8.0`, character declarations/states, warning count, candidate status, or promotion state.
 
 Target files:
 
+- `logic/nickname_catalog_loader.py`
+- `logic/promotion_readiness_service.py`
+- `tests/test_nickname_catalog_loader.py`
+- `tests/test_promotion_readiness_service.py`
 - `Docs/current_build.md`
-- `Docs/remaining_title_history_review.md`
-- `Docs/title_conditional_effect_inventory.md`
-- source/runtime evidence artifacts only if the reconciliation requires them
+- `Docs/changelog.md`
 
-Keep `k_balhae` excluded from projections. Do not change parser code, court or personal language state, dashboard/journal behavior, readiness policy, or promotion in this slice.
+Do not combine character nickname event replay, baseline nickname materialization, warning reduction, Reference Inspector UI, or promotion into this slice.
 
-`k_balhae` requires reconciliation before any court-only exception: installed 867 history requests Chinese, while observed game UI reports Tungusic as new court-language state and a five-year change restriction. The standard Royal Court adoption cooldown is 1,825 days, so this may affect playable baseline state rather than presentation alone.
+`k_balhae` is reconciled semantically. Installed culture defines Balhae with Tungusic language from its year-700 creation; installed title history separately assigns Chinese to King Geon-hwang's court on `0867-01-01`; and the observed Royal Court screen confirms Chinese at the exact baseline. The culture-panel tooltip blocks `Adopt Tungusic Court Language` until `0872-01-01`, proving the initial Chinese-to-potential-Tungusic direction and the standard 1,825-day adoption cooldown. The game-start tributary setup independently makes Balhae a tributary of Tang. The court row's effective date therefore remains supported baseline state; developer-reported post-start complexity does not change these two distinct baseline language dimensions.
 
 `k_bengal` is resolved semantically: its 855 history initializes Narayanapala's Pala Kingdom with `court_scholarly`, and the observed 867 Royal Court screen confirms a Scholarly Court. Whether to project it remains a baseline-scope decision, not a parser-meaning ambiguity.
 
@@ -170,18 +189,17 @@ Keep `k_balhae` excluded from projections. Do not change parser code, court or p
 
 `k_viet` is resolved semantically: its 866 history gives Gao Pian's Jinghai Circuit a Chinese court language. Gao Pian is Han and natively speaks Chinese; celestial government and the `h_china` liege are already projected separately.
 
-Do not combine opaque-effect classification, promotion, dashboard work, or journal work into this slice.
+Do not combine character replay, opaque-effect reclassification, promotion, dashboard work, or journal work into this slice.
 
 ## Acceptance Checks
 
-- All 12 titles and 13 remaining declarations have a documented category, source location, and proposed disposition.
-- The chosen policy states whether court language, court type, and holder language knowledge belong to `historical_state_complete`.
-- Selectability and product consumption are considered separately from raw evidence completeness.
-- Any accepted exception remains provenance-bearing and report-visible; mixed non-court effects remain blocking until separately resolved.
-- Readiness clears only titles whose complete baseline-effective operations are supported.
-- Report generation does not change snapshot status, baseline status, or `historical_state_complete`.
+- All installed nickname definitions load exactly once with defaulted or explicit flags, English labels, raw definitions, source coordinates, and bound manifests.
+- Every nickname key used by baseline direct and reviewed effect-wrapped assignments resolves in the catalog.
+- Invalid input and promoted-snapshot attempts roll back without partial replacement.
+- Repeated candidate load is idempotent and the fresh readiness report binds `installed_nicknames@1.0.0` with all manifests current.
+- Character parser remains `1.8.0`, character nickname event/state tables remain empty, and opaque character warnings remain 95.
 - `app.supported_baselines` remains empty.
-- Focused readiness tests and the full repository suite pass.
+- Snapshot and baseline remain candidate with `historical_state_complete=false`.
 
 ## Resume Note
 

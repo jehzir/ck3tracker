@@ -3,9 +3,9 @@
 - Snapshot: `ck3_1_19_0_6_build_23530548`
 - Baseline: `ck3_1_19_0_6_867` (`0867-01-01`)
 - Review date: 2026-08-31
-- Current parser: `installed_title_history` `1.21.0`
-- Current readiness report: `ck3_1_19_0_6_867:readiness:06f75cc3-cdfd-4873-af43-40de33745a74`
-- Current unresolved count: one title state, `k_balhae`; the twelve-title table below is the reviewed source ledger.
+- Current parser: `installed_title_history` `1.22.0`
+- Current readiness report: `ck3_1_19_0_6_867:readiness:9209c3cc-6b5b-4458-bc5f-f4d8b0dea8a8`
+- Current unresolved count: zero title states; the twelve-title table below is the completed reviewed source ledger.
 
 ## Why The Count Is 12
 
@@ -21,7 +21,7 @@ Reviewed mapping `royal_court -> dlc004_ep1` resolves to the valid installed The
 |---|---|---:|---|---|---|
 | `e_byzantium` | Byzantine Empire | yes | `#1028`, `history/titles/00_other_titles.txt:3706-3733` | Orthodox administrative-state initialization, optional Royal Court Intrigue Court initialization, and an inactive no-Roads-to-Power fallback | Normalized in parser `1.21.0` as durable Orthodox state faith, holder-bound Intrigue Court, and an installed-package fallback no-op without changing personal faith. |
 | `e_japan` | Japan | yes | `#15088`, `history/titles/e_japan.txt:18-35` | Royal Court language plus TGP administrative UI title variable | Normalized in parser `1.20.0` as holder-bound Chinese court state and a resolved `administrative_ui_special_title` reference. |
-| `k_balhae` | Bóhai | yes | `#27271`, `history/titles/k_balhae.txt:8-16` | Installed history requests Chinese; observed game UI reports Tungusic as new court-language state and exposes the five-year adoption lock | Do not waive as generic mutable presentation. Reconcile the source/runtime language difference and decide whether the initial 1,825-day lock belongs to supported baseline state. |
+| `k_balhae` | Bóhai | yes | `#27271`, `history/titles/k_balhae.txt:8-16` | Chinese Royal Court language under Tungusic-speaking Balhae culture, initialized alongside the 867 Tang tributary relationship | Normalized in parser `1.22.0` as dated Chinese court state with no cultural or personal-language mutation. |
 | `k_bengal` | Bengal | yes | `#29829`, `history/titles/k_bengal.txt:23-33` | Scholarly Court initialization for Narayanapala's Pala Kingdom | Known, screenshot-confirmed baseline court state. It may be excluded only through an explicit policy that court type is outside the supported contract, not because the declaration is unresolved. |
 | `k_bulgaria` | Bulgaria | yes | `#33203`, `history/titles/k_bulgaria.txt:71-85` | Greek court language for Boris's Bulgarian kingdom; Boris learns Greek if needed | Resolved baseline court and character-language state. Any exception must explicitly exclude both dimensions; this is not an ambiguous effect. |
 | `k_chrysanthemum_throne` | Chrysanthemum Throne | no geographic start | `#16413`, `history/titles/e_japan.txt:2059-2067`; `#16444`, lines 2100-2103 | Mutable Royal Court language; ceremonial-throne primogeniture plus TGP no-op | Functional kingdom-tier title under `e_japan`, held by the Tenno when imperial authority is fractured. Its lack of a canonical de jure chain excludes it from location selection but does not make it dispensable. Declaration 16444 should be replayed as proven title state, not waived as structural noise. |
@@ -40,7 +40,7 @@ All 12 titles and 13 declarations now have title-by-title dispositions. Domain o
 
 The evidence-review sequence is complete. The next action is the strict complete-state versus journal-required baseline policy decision; there is no next title to inspect in this twelve-title set.
 
-These reviews preserve the original twelve-title evidence ledger. Exact replay has since reduced the production opaque-title count to only `k_balhae`; candidate statuses remain unchanged.
+These reviews preserve the original twelve-title evidence ledger. Exact replay has reduced the production opaque-title count to zero; candidate statuses remain unchanged.
 
 ## Baseline Completeness Decision
 
@@ -65,9 +65,11 @@ The current warning survives because the parser preserves the mixed body as a wh
 
 Declaration 27271 runs on `0867-01-01` when the title has a holder and Royal Court is available. Its installed source explicitly calls `holder = { set_court_language = language_chinese }`, with the comment “Chinese influence on bureaucracy and literature.”
 
-The observed game UI instead reports Tungusic Language as new court-language state and warns that it cannot be changed for five years. The installed define `NRoyalCourt.COURT_LANGUAGE_ADOPTION_COOLDOWN` is 1,825 days, confirming that adopting a new court language carries a five-year restriction.
+The two observed screens resolve the apparent conflict. The culture screen reports `Tungusic Language`, matching `common/culture/cultures/00_korean.txt`, where Balhae culture is created in 700 with `language = language_tungusic`. The separate Royal Court screen is dated `1 January, 867 AD` and reports `Court Language: Chinese`, exactly matching declaration 27271. Culture language and court language are distinct state dimensions.
 
-Until the source/runtime difference is explained, Balhae must not be reduced to an inconsequential “court language” exception. The supported-baseline decision must account for both the effective language and any adoption-date/cooldown state affecting the first five years of play.
+Installed game-start effect `tgp_867_tributary_setup_effect` independently establishes King Geon-hwang of `k_balhae` as a tributary of the holder of `h_china`. This political initialization provides context for the Chinese court assignment but does not mutate Balhae culture's Tungusic language. The known developer-reported post-start language/cooldown complexity therefore does not contradict the exact initial state.
+
+The culture-panel tooltip makes the direction and dates explicit: on `0867-01-01`, `Adopt Tungusic Court Language` is unavailable until `0872-01-01`. The court therefore starts in Chinese and cannot switch to its culture's Tungusic language for five years. This exactly matches `NRoyalCourt.COURT_LANGUAGE_ADOPTION_COOLDOWN = 1825`; declaration 27271's `0867-01-01` effective date must be retained with the durable court-language row so this gameplay-relevant initial condition is not reduced to a timeless label. The declaration does not teach the holder Chinese; no personal language knowledge may be inferred.
 
 ## Bengal Court-Type Clarification
 
