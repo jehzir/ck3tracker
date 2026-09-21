@@ -23,7 +23,7 @@ from logic.title_history_loader import (
 
 
 PARSER_NAME = "installed_character_history"
-PARSER_VERSION = "1.8.0"
+PARSER_VERSION = "1.10.0"
 CHARACTER_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 IDENTITY_OPERATIONS = {
     "name",
@@ -55,6 +55,23 @@ NON_PROJECTING_RELATIONSHIP_EFFECTS = {
     "set_relation_potential_rival",
     "set_relation_rival",
     "set_relation_soulmate",
+}
+NICKNAME_OPERATIONS = {"give_nickname", "remove_nickname"}
+MPO_FEATURE_FLAG = "khans_of_the_steppe"
+MPO_PACKAGE_ID = "dlc020_ce2"
+REVIEWED_CONTRACT_DECLARATIONS = {
+    ("145116", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 2, "1700"),
+    ("145123", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 3, "1700"),
+    ("145137", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 2, "1700"),
+    ("145144", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 2, "1700"),
+    ("145185", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 3, "1700"),
+    ("145194", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 5, "1700"),
+    ("145196", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 5, "1700"),
+    ("145931", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 5, "1700"),
+    ("302342", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 2, "1700"),
+    ("302355", "0867-01-01", "history/characters/greek.txt"): ("administrative_themes", 3, "1700"),
+    ("3022740", "0845-01-02", "history/characters/khazar.txt"): None,
+    ("168137", "0865-01-01", "history/characters/occitan.txt"): ("special_contract", 2, "90104"),
 }
 
 
@@ -277,6 +294,24 @@ def load_character_history_candidate(
             native_languages,
             baseline[0],
         )
+        nickname_events, nickname_states = _materialize_nickname_history(
+            connection,
+            reference_snapshot_id,
+            parsed.operations,
+            baseline[0],
+            reviewed_winner_blocks,
+            reviewed_character_ids,
+        )
+        contract_events, contract_states = _materialize_subject_contract_history(
+            connection,
+            reference_snapshot_id,
+            baseline_id,
+            parsed.operations,
+            states,
+            baseline[0],
+            reviewed_winner_blocks,
+            reviewed_character_ids,
+        )
         state_by_id = {state[0]: state for state in states}
         holders = connection.execute(
             """
@@ -306,8 +341,62 @@ def load_character_history_candidate(
         warning_count = len(baseline_conflicting_ids) + sum(
             row[-2] == "warning" for row in states
         ) + sum(row[-2] == "warning" for row in events) + holder_warning_count
+        preserved_nickname_events = connection.execute(
+            """
+            SELECT * FROM reference.character_nickname_events
+            WHERE reference_snapshot_id <> ?
+               OR source_group <> 'character_history'
+            """,
+            [reference_snapshot_id],
+        ).fetchall()
+        preserved_nickname_states = connection.execute(
+            """
+            SELECT * FROM reference.character_baseline_nickname_states
+            WHERE baseline_id <> ?
+               OR source_group <> 'character_history'
+            """,
+            [baseline_id],
+        ).fetchall()
+        preserved_contract_events = connection.execute(
+            """
+            SELECT * FROM reference.character_subject_contract_events
+            WHERE reference_snapshot_id <> ?
+               OR source_group <> 'character_history'
+            """,
+            [reference_snapshot_id],
+        ).fetchall()
+        preserved_contract_states = connection.execute(
+            """
+            SELECT * FROM reference.character_baseline_subject_contract_states
+            WHERE baseline_id <> ?
+               OR source_group <> 'character_history'
+            """,
+            [baseline_id],
+        ).fetchall()
+        contract_event_schema = connection.execute(
+            """
+            SELECT sql FROM duckdb_tables()
+            WHERE schema_name = 'reference'
+              AND table_name = 'character_subject_contract_events'
+            """
+        ).fetchone()[0]
+        contract_state_schema = connection.execute(
+            """
+            SELECT sql FROM duckdb_tables()
+            WHERE schema_name = 'reference'
+              AND table_name = 'character_baseline_subject_contract_states'
+            """
+        ).fetchone()[0]
 
         connection.execute("BEGIN TRANSACTION")
+        connection.execute(
+            "DROP TABLE reference.character_baseline_subject_contract_states"
+        )
+        connection.execute("DROP TABLE reference.character_subject_contract_events")
+        connection.execute(
+            "DROP TABLE reference.character_baseline_nickname_states"
+        )
+        connection.execute("DROP TABLE reference.character_nickname_events")
         connection.execute(
             """
             DELETE FROM reference.character_baseline_languages
@@ -412,6 +501,7 @@ def load_character_history_candidate(
                     == "conflicting_at_baseline"
                     else "normalized"
                     if item.operation_key in IDENTITY_OPERATIONS | LIFECYCLE_OPERATIONS
+                    or item.operation_key in NICKNAME_OPERATIONS
                     or _extract_character_effects(item)[1]
                     else "preserved",
                     item.character_declaration_order,
@@ -443,6 +533,65 @@ def load_character_history_candidate(
             """,
             ((baseline_id, *state) for state in states),
         )
+        _create_character_nickname_tables(connection)
+        connection.execute(contract_event_schema)
+        connection.execute(contract_state_schema)
+        if preserved_nickname_events:
+            connection.executemany(
+                "INSERT INTO reference.character_nickname_events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                preserved_nickname_events,
+            )
+        if nickname_events:
+            connection.executemany(
+                """
+                INSERT INTO reference.character_nickname_events
+                VALUES (?, ?, 'character_history', ?, ?, ?, ?, ?, ?, ?, ?,
+                        'valid', NULL)
+                """,
+                [(reference_snapshot_id, *event) for event in nickname_events],
+            )
+        if preserved_nickname_states:
+            connection.executemany(
+                "INSERT INTO reference.character_baseline_nickname_states VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                preserved_nickname_states,
+            )
+        if nickname_states:
+            connection.executemany(
+                """
+                INSERT INTO reference.character_baseline_nickname_states
+                VALUES (?, ?, ?, ?, ?, ?, 'character_history', ?, ?,
+                        'valid', NULL)
+                """,
+                [(baseline_id, *state) for state in nickname_states],
+            )
+        if preserved_contract_events:
+            connection.executemany(
+                "INSERT INTO reference.character_subject_contract_events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                preserved_contract_events,
+            )
+        if contract_events:
+            connection.executemany(
+                """
+                INSERT INTO reference.character_subject_contract_events
+                VALUES (?, ?, ?, 'character_history', ?, ?, ?, ?, ?, ?,
+                        'executed', ?, ?, ?, ?, 'valid', NULL)
+                """,
+                [(reference_snapshot_id, *event) for event in contract_events],
+            )
+        if preserved_contract_states:
+            connection.executemany(
+                "INSERT INTO reference.character_baseline_subject_contract_states VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                preserved_contract_states,
+            )
+        if contract_states:
+            connection.executemany(
+                """
+                INSERT INTO reference.character_baseline_subject_contract_states
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'character_history', ?, ?,
+                        'valid', NULL)
+                """,
+                [(baseline_id, *state) for state in contract_states],
+            )
         connection.executemany(
             """
             INSERT INTO reference.character_baseline_languages
@@ -803,6 +952,9 @@ def _extract_character_effects(
         return [], False
 
     fields = list(_assignments(operation.raw_script[1:-1], operation.source_line_start))
+    contract_status, _ = _reviewed_contract_effect(operation)
+    if _reviewed_contract_key(operation) in REVIEWED_CONTRACT_DECLARATIONS and contract_status is not None:
+        return [], True
     if fields and all(
         field.key == "learn_language_of_culture"
         and field.value_kind == "scalar"
@@ -823,6 +975,7 @@ def _extract_character_effects(
 
     effects: list[tuple[str, str | None, str, str | None]] = []
     handled = 0
+    nickname_fields = _nickname_effect_fields(operation)
     for field in fields:
         if field.key == "set_culture" and field.value_kind == "scalar":
             target = _scalar_value(field.raw_value)
@@ -837,7 +990,441 @@ def _extract_character_effects(
                 handled += 1
         elif field.key in NON_PROJECTING_RELATIONSHIP_EFFECTS:
             handled += 1
+        elif field in nickname_fields:
+            handled += 1
     return effects, handled > 0 and handled == len(fields)
+
+
+def _materialize_subject_contract_history(
+    connection: duckdb.DuckDBPyConnection,
+    reference_snapshot_id: str,
+    baseline_id: str,
+    operations: tuple[CharacterOperation, ...],
+    states: list[tuple[object, ...]],
+    baseline_date: date,
+    reviewed_winner_blocks: dict[str, int],
+    reviewed_character_ids: dict[int, str],
+) -> tuple[list[tuple[object, ...]], list[tuple[object, ...]]]:
+    reviewed_ids = {item[0] for item in REVIEWED_CONTRACT_DECLARATIONS}
+    present_ids = {operation.character_id for operation in operations} & reviewed_ids
+    if not present_ids:
+        return [], []
+
+    extracted: dict[tuple[str, str, str], tuple[CharacterOperation, tuple[object, ...] | None]] = {}
+    for operation in operations:
+        winner_block = reviewed_winner_blocks.get(operation.character_id)
+        if (
+            winner_block is not None
+            and operation.character_declaration_order != winner_block
+            and operation.character_declaration_order not in reviewed_character_ids
+        ):
+            continue
+        character_id = reviewed_character_ids.get(
+            operation.character_declaration_order, operation.character_id
+        )
+        if character_id not in reviewed_ids or operation.effective_date is None:
+            continue
+        status, write = _reviewed_contract_effect(operation)
+        if status is None:
+            continue
+        key = (character_id, str(operation.effective_date), operation.source_path)
+        if key in extracted:
+            raise ValueError(f"Duplicate reviewed subject-contract declaration: {key}")
+        extracted[key] = (operation, write)
+
+    if set(extracted) != set(REVIEWED_CONTRACT_DECLARATIONS):
+        raise ValueError("Reviewed character subject-contract declaration set changed")
+    for key, expected in REVIEWED_CONTRACT_DECLARATIONS.items():
+        write = extracted[key][1]
+        actual = None if write is None else (write[1], write[2])
+        expected_body = None if expected is None else expected[:2]
+        if actual != expected_body:
+            raise ValueError(f"Reviewed character subject-contract body changed: {key}")
+
+    package = connection.execute(
+        """
+        SELECT package.package_id
+        FROM reference.dlc_feature_mappings mapping
+        JOIN reference.dlc_packages package
+          ON package.reference_snapshot_id = mapping.reference_snapshot_id
+         AND package.package_id = mapping.package_id
+        WHERE mapping.reference_snapshot_id = ?
+          AND mapping.feature_flag = ?
+          AND mapping.review_status = 'reviewed'
+          AND package.validation_status = 'valid'
+        """,
+        [reference_snapshot_id, MPO_FEATURE_FLAG],
+    ).fetchone()
+    if package is None or str(package[0]) != MPO_PACKAGE_ID:
+        raise ValueError("Reviewed MPO package evidence is missing or changed")
+
+    active = [(key, operation, write) for key, (operation, write) in extracted.items() if write]
+    subject_ids = sorted(key[0] for key, _, _ in active)
+    state_ids = {str(state[0]) for state in states}
+    missing_subjects = sorted(set(subject_ids) - state_ids)
+    if missing_subjects:
+        raise ValueError("Subject-contract subjects lack baseline state: " + ", ".join(missing_subjects))
+
+    pairs = sorted({(str(write[1]), int(write[2])) for _, _, write in active})
+    rows = connection.execute(
+        """
+        SELECT contract_type_id, level_index, obligation_id
+        FROM reference.subject_contract_obligations
+        WHERE reference_snapshot_id = ?
+          AND validation_status = 'valid'
+          AND (contract_type_id, level_index) IN (
+              SELECT unnest[1], unnest[2]::INTEGER FROM unnest(?)
+          )
+        """,
+        [reference_snapshot_id, pairs],
+    ).fetchall()
+    catalog = {(str(row[0]), int(row[1])): str(row[2]) for row in rows}
+    if set(catalog) != set(pairs):
+        raise ValueError("Character subject-contract writes lack valid catalog mappings")
+
+    liege_rows = connection.execute(
+        """
+        SELECT DISTINCT subject.holder_character_id, liege.holder_character_id
+        FROM reference.title_baseline_states subject
+        JOIN reference.title_baseline_states liege
+          ON liege.baseline_id = subject.baseline_id
+         AND liege.title_id = subject.liege_title_id
+        WHERE subject.baseline_id = ?
+          AND subject.holder_character_id IN (SELECT unnest(?))
+          AND liege.holder_character_id IS NOT NULL
+          AND liege.holder_character_id <> subject.holder_character_id
+        """,
+        [baseline_id, subject_ids],
+    ).fetchall()
+    lieges: dict[str, set[str]] = {}
+    for subject_id, liege_id in liege_rows:
+        lieges.setdefault(str(subject_id), set()).add(str(liege_id))
+
+    events: list[tuple[object, ...]] = []
+    for key, operation, write in active:
+        assert write is not None
+        expected = REVIEWED_CONTRACT_DECLARATIONS[key]
+        assert expected is not None
+        source_operation_order, contract_type_id, level_index, _, branch_evidence, line_start, line_end = write
+        expected_liege = expected[2]
+        if lieges.get(key[0], set()) != {str(expected_liege)}:
+            raise ValueError(f"Subject-contract liege evidence changed: {key[0]}")
+        events.append((
+            key[0], expected_liege, operation.declaration_order,
+            source_operation_order, key[1], contract_type_id,
+            catalog[(str(contract_type_id), int(level_index))], level_index,
+            branch_evidence, operation.source_path, line_start, line_end,
+        ))
+    events.sort(key=lambda event: (str(event[0]), CK3Date(*map(int, str(event[4]).split("-"))), int(event[2])))
+
+    cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
+    latest: dict[tuple[str, str], tuple[object, ...]] = {}
+    for event in events:
+        if CK3Date(*map(int, str(event[4]).split("-"))) <= cutoff:
+            latest[(str(event[0]), str(event[5]))] = event
+    baseline_states = [
+        (event[0], event[5], reference_snapshot_id, event[6], event[7],
+         event[1], event[4], event[2], event[3])
+        for _, event in sorted(latest.items())
+    ]
+    return events, baseline_states
+
+
+def _reviewed_contract_effect(
+    operation: CharacterOperation,
+) -> tuple[str | None, tuple[object, ...] | None]:
+    if operation.operation_key != "effect" or operation.value_kind != "block":
+        return None, None
+    fields = list(_assignments(operation.raw_script[1:-1], operation.source_line_start))
+    if len(fields) == 1 and fields[0].key == "if" and fields[0].value_kind == "block":
+        conditional = list(_assignments(fields[0].raw_value[1:-1], fields[0].line_start))
+        if len(conditional) == 2 and _exact_limit(conditional[0], "government_allows", "administrative"):
+            write = _contract_write(conditional[1], "government_allows=administrative")
+            return ("active", write) if write else (None, None)
+        if len(conditional) == 3 and _exact_limit(conditional[0], "has_mpo_dlc_trigger", "no"):
+            first = _contract_write(conditional[1], "")
+            second = _contract_write(conditional[2], "")
+            if first and second and (first[1], first[2], second[1], second[2]) == ("religious_rights", 1, "title_revocation_rights", 1):
+                return "inactive", None
+        return None, None
+    if len(fields) == 2:
+        write = _contract_write(fields[0], "unconditional")
+        relation = fields[1]
+        if write and relation.key == "set_relation_friend" and relation.value_kind == "block":
+            relation_fields = list(_assignments(relation.raw_value[1:-1], relation.line_start))
+            relation_values = [(field.key, _scalar_value(field.raw_value)) for field in relation_fields if field.value_kind == "scalar"]
+            if relation_values == [("reason", "friend_generic_history"), ("target", "character:127007")]:
+                return "active", write
+    return None, None
+
+
+def _reviewed_contract_key(
+    operation: CharacterOperation,
+) -> tuple[str, str, str] | None:
+    if operation.effective_date is None:
+        return None
+    return operation.character_id, str(operation.effective_date), operation.source_path
+
+
+def _exact_limit(field, key: str, value: str) -> bool:
+    if field.key != "limit" or field.value_kind != "block":
+        return False
+    limits = list(_assignments(field.raw_value[1:-1], field.line_start))
+    return len(limits) == 1 and limits[0].key == key and limits[0].value_kind == "scalar" and _scalar_value(limits[0].raw_value) == value
+
+
+def _contract_write(field, branch_evidence: str) -> tuple[object, ...] | None:
+    if field.key != "vassal_contract_set_obligation_level" or field.value_kind != "block":
+        return None
+    values = list(_assignments(field.raw_value[1:-1], field.line_start))
+    if len(values) != 2 or [(item.key, item.value_kind) for item in values] != [("type", "scalar"), ("level", "scalar")]:
+        return None
+    contract_type_id = _scalar_value(values[0].raw_value)
+    level_text = _scalar_value(values[1].raw_value)
+    if not CHARACTER_PATTERN.fullmatch(contract_type_id) or not level_text.isdigit():
+        return None
+    return (1, contract_type_id, int(level_text), None, branch_evidence, field.line_start, field.line_end)
+
+
+def _materialize_nickname_history(
+    connection: duckdb.DuckDBPyConnection,
+    reference_snapshot_id: str,
+    operations: tuple[CharacterOperation, ...],
+    baseline_date: date,
+    reviewed_winner_blocks: dict[str, int],
+    reviewed_character_ids: dict[int, str],
+) -> tuple[list[tuple[object, ...]], list[tuple[object, ...]]]:
+    cutoff = CK3Date(baseline_date.year, baseline_date.month, baseline_date.day)
+    extracted: list[tuple[object, ...]] = []
+    for operation in operations:
+        winner_block = reviewed_winner_blocks.get(operation.character_id)
+        if (
+            winner_block is not None
+            and operation.character_declaration_order != winner_block
+            and operation.character_declaration_order not in reviewed_character_ids
+        ):
+            continue
+        character_id = reviewed_character_ids.get(
+            operation.character_declaration_order, operation.character_id
+        )
+        for event in _extract_nickname_events(operation):
+            extracted.append((character_id, *event))
+
+    used_ids = sorted({str(event[5]) for event in extracted if event[5] is not None})
+    valid_ids: set[str] = set()
+    if used_ids:
+        valid_ids = {
+            str(row[0])
+            for row in connection.execute(
+                """
+                SELECT nickname_id FROM reference.nicknames
+                WHERE reference_snapshot_id = ?
+                  AND nickname_id IN (SELECT unnest(?))
+                  AND validation_status = 'valid'
+                  AND localization_language = 'english'
+                  AND localization_key = nickname_id
+                  AND display_name IS NOT NULL
+                """,
+                [reference_snapshot_id, used_ids],
+            ).fetchall()
+        }
+    unresolved = sorted(set(used_ids) - valid_ids)
+    if unresolved:
+        raise ValueError(
+            "Character nicknames lack valid catalog rows: " + ", ".join(unresolved)
+        )
+
+    extracted.sort(
+        key=lambda event: (
+            str(event[0]),
+            CK3Date(*map(int, str(event[3]).split("-"))),
+            int(event[1]),
+            int(event[2]),
+        )
+    )
+    latest: dict[str, tuple[object, ...]] = {}
+    for event in extracted:
+        effective_date = CK3Date(*map(int, str(event[3]).split("-")))
+        if effective_date <= cutoff:
+            latest[str(event[0])] = event
+
+    states = [
+        (
+            character_id,
+            reference_snapshot_id,
+            event[5],
+            event[4],
+            event[3],
+            event[1],
+            event[2],
+        )
+        for character_id, event in sorted(latest.items())
+    ]
+    return extracted, states
+
+
+def _extract_nickname_events(
+    operation: CharacterOperation,
+) -> list[tuple[object, ...]]:
+    if operation.operation_key in NICKNAME_OPERATIONS:
+        if operation.effective_date is None:
+            raise ValueError(
+                f"Nickname operation requires a date: {operation.character_id}"
+            )
+        event_kind, nickname_id = _nickname_value(
+            operation.operation_key, operation.value_kind, operation.scalar_value
+        )
+        return [(
+            operation.declaration_order,
+            operation.operation_order,
+            str(operation.effective_date),
+            event_kind,
+            nickname_id,
+            operation.source_path,
+            operation.source_line_start,
+            operation.source_line_end,
+        )]
+    fields = _nickname_effect_fields(operation)
+    if not fields:
+        return []
+    if operation.effective_date is None:
+        raise ValueError(
+            f"Nickname effect requires a date: {operation.character_id}"
+        )
+    events: list[tuple[object, ...]] = []
+    for source_operation_order, field in enumerate(
+        _assignments(operation.raw_script[1:-1], operation.source_line_start),
+        start=1,
+    ):
+        if field not in fields:
+            continue
+        scalar_value = (
+            _scalar_value(field.raw_value) if field.value_kind == "scalar" else None
+        )
+        event_kind, nickname_id = _nickname_value(
+            field.key, field.value_kind, scalar_value
+        )
+        events.append((
+            operation.declaration_order,
+            source_operation_order,
+            str(operation.effective_date),
+            event_kind,
+            nickname_id,
+            operation.source_path,
+            field.line_start,
+            field.line_end,
+        ))
+    return events
+
+
+def _nickname_effect_fields(operation: CharacterOperation) -> list[object]:
+    if operation.operation_key != "effect" or operation.value_kind != "block":
+        return []
+    fields = list(_assignments(operation.raw_script[1:-1], operation.source_line_start))
+    nickname_fields = [field for field in fields if field.key in NICKNAME_OPERATIONS]
+    if not nickname_fields:
+        return []
+    for field in nickname_fields:
+        scalar_value = (
+            _scalar_value(field.raw_value) if field.value_kind == "scalar" else None
+        )
+        _nickname_value(field.key, field.value_kind, scalar_value)
+    return nickname_fields
+
+
+def _nickname_value(
+    operation_key: str,
+    value_kind: str,
+    scalar_value: str | None,
+) -> tuple[str, str | None]:
+    if value_kind != "scalar" or scalar_value is None:
+        raise ValueError(f"Malformed character nickname operation: {operation_key}")
+    if operation_key == "remove_nickname":
+        if scalar_value != "yes":
+            raise ValueError("remove_nickname must equal yes")
+        return "clear", None
+    if not CHARACTER_PATTERN.fullmatch(scalar_value):
+        raise ValueError(f"Invalid nickname stable ID: {scalar_value}")
+    return "set", scalar_value
+
+
+def _create_character_nickname_tables(
+    connection: duckdb.DuckDBPyConnection,
+) -> None:
+    connection.execute(
+        """
+        CREATE TABLE reference.character_nickname_events (
+            reference_snapshot_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            source_operation_order INTEGER NOT NULL,
+            effective_date VARCHAR NOT NULL,
+            event_kind VARCHAR NOT NULL,
+            nickname_id VARCHAR,
+            source_path VARCHAR NOT NULL,
+            source_line_start INTEGER NOT NULL,
+            source_line_end INTEGER NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (
+                reference_snapshot_id,
+                character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ),
+            FOREIGN KEY (reference_snapshot_id, nickname_id)
+                REFERENCES reference.nicknames
+                    (reference_snapshot_id, nickname_id),
+            CHECK (
+                (event_kind = 'set' AND nickname_id IS NOT NULL)
+                OR (event_kind = 'clear' AND nickname_id IS NULL)
+            )
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE reference.character_baseline_nickname_states (
+            baseline_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            reference_snapshot_id VARCHAR NOT NULL,
+            active_nickname_id VARCHAR,
+            last_event_kind VARCHAR NOT NULL,
+            effective_date VARCHAR NOT NULL,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            source_operation_order INTEGER NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (baseline_id, character_id),
+            FOREIGN KEY (baseline_id, character_id)
+                REFERENCES reference.character_baseline_states
+                    (baseline_id, character_id),
+            FOREIGN KEY (
+                reference_snapshot_id,
+                character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ) REFERENCES reference.character_nickname_events (
+                reference_snapshot_id,
+                character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ),
+            FOREIGN KEY (reference_snapshot_id, active_nickname_id)
+                REFERENCES reference.nicknames
+                    (reference_snapshot_id, nickname_id),
+            CHECK (
+                (last_event_kind = 'set' AND active_nickname_id IS NOT NULL)
+                OR (last_event_kind = 'clear' AND active_nickname_id IS NULL)
+            )
+        )
+        """
+    )
 
 
 def _classify_character_blocks(

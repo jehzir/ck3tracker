@@ -2,8 +2,8 @@
 
 - Build ID: `B002-scribe-promotion-readiness`
 - Build name: Scribe reference-catalog promotion readiness
-- Status: `active — nickname storage schema bootstrapped`
-- Last updated: 2026-09-02
+- Status: `unlocked — waiting for a Steam build different from 23530548`
+- Last updated: 2026-09-21
 
 ## Objective
 
@@ -12,6 +12,10 @@ Produce one evidence-backed, immutable CK3 `1.19.0.6 (Scribe)` reference snapsho
 ## Authority And Scope
 
 This file is the sole execution manifest and the only authoritative source for the current priority, next exact action, and resume instructions. Precedence is defined in `Docs/build_session_protocol.md`.
+
+## Project Lock
+
+The user supplied the exact keyword `unlock` on 2026-09-21, releasing the project lock created on 2026-09-10. Unlocking does not itself start the patch workflow, authorize promotion, or supersede the installed-build gate.
 
 Current scope is reference ingestion, validation, and promotion safety. Imports, dashboard redesign, broader journal workflows, buildings, decisions, army, council, and other product work remain deferred until this build is complete or the user explicitly changes scope.
 
@@ -43,15 +47,15 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - Grounded faith catalog loaded from 140 installed definitions nested under 49 parent religions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Faith` revision `35751`; all 111 baseline-used faith IDs resolve.
 - Grounded dynasty catalog loaded from 10,338 installed definitions with the internal wiki path `Crusader_Kings_III_Wiki` revision `32094` to `Dynasty` revision `35828`; all 10,180 baseline-used dynasty IDs resolve.
 - Grounded house catalog loaded from 558 installed definitions with the internal wiki path `Dynasty` revision `35828` to its versioned `Houses` section; all 459 baseline-used dynasty-house IDs resolve and all 235 parent dynasty IDs resolve.
-- Readiness now requires the deterministic latest run for each of ten parser groups to be completed at its explicit expected version; older successful runs cannot mask newer failures or obsolete versions.
-- All 1,714 source-file manifests are bound to the exact latest parser runs that produced them; readiness blocks missing, detached, and stale run bindings.
+- Readiness now requires the deterministic latest run for each of eleven parser groups to be completed at its explicit expected version; older successful runs cannot mask newer failures or obsolete versions.
+- All 1,724 source-file manifests are bound to the exact latest parser runs that produced them; readiness blocks missing, detached, and stale run bindings.
 - All nine installed bookmark DLC gates resolve through reviewed feature mappings to canonical installed package descriptors: `landless_adventurer -> dlc014_ep3`, `khans_of_the_steppe -> dlc020_ce2`, and `all_under_heaven -> dlc022_ep4`.
 - Required snapshot evidence now also resolves `royal_court -> dlc004_ep1` independently of bookmark requirements, binding the valid installed The Royal Court descriptor, platform IDs, SHA-256 manifest, and CK3 Wiki revision `35819`.
 - Raw feature flags remain preserved beside package identity, descriptor hashes, platform IDs, and permanent wiki-revision evidence; unknown feature flags remain unresolved and block readiness.
-- Bookmark parser is `1.2.0`, title-history parser is `1.22.0`, culture parser is `1.1.0`, character history is `1.8.0`, and the other six required parsers remain `1.0.0`.
-- Every readiness report now stores an immutable ten-row evidence ledger containing the exact latest parser-run ID, parser version/status, manifest count, and deterministic SHA-256 digest evaluated for each required source group.
+- Bookmark parser is `1.2.0`, title-history parser is `1.22.0`, culture parser is `1.1.0`, character history is `1.10.0`, and the other seven required parsers remain `1.0.0`.
+- Every readiness report now stores an immutable eleven-row evidence ledger containing the exact latest parser-run ID, parser version/status, manifest count, and deterministic SHA-256 digest evaluated for each required source group.
 - Readiness retrieval compares stored bindings with current evidence and labels legacy or superseded reports stale without rewriting the persisted report, findings, or evidence ledger.
-- All 1,714 current source manifests are covered by the latest report evidence ledger; culture evidence includes the installed language pillar and title history binds installed TGP and law-definition evidence.
+- All 1,724 current source manifests are covered by the latest report evidence ledger; culture evidence includes the installed language pillar and title history binds installed TGP and law-definition evidence.
 - Title-history blocks now record explicit `winner`, `superseded`, or `unresolved` status and expose their source block order, path, conflicting fields, and resolution in the Reference Inspector.
 - The permanent `Modding` revision `35725` grounds the engine rule that later ASCII filenames override earlier top-level declarations; this evidence defines vanilla parsing behavior only and adds no mod support.
 - All 556 opaque title states are grouped into 19 operation/script shapes with complete source-path counts in `Docs/title_history_opaque_inventory.md`.
@@ -124,14 +128,44 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - The nickname review is evidence-only in `Docs/character_history_nickname_review.md`; parser `1.8.0`, the 95 warnings, current readiness report, candidate statuses, false historical completeness, and zero supported baselines remain unchanged.
 - Durable nickname storage now separates snapshot-scoped definitions, append-only character set/clear events, and sparse scalar baseline state. Composite keys retain source operation identity, set/clear checks enforce nullable nickname semantics, and same-schema foreign keys bind localization, nickname, baseline character, and exact event provenance.
 - The candidate schema bootstrap created zero nickname catalog, event, and state rows. Backup `ck3tracker_v2.before-nickname-schema.20260901-201938.duckdb` precedes the additive bootstrap; all 72 repository tests pass without changing parser `1.8.0`, the 95 warnings, readiness, or promotion state.
+- Pre-ingestion validation finds 683 unique installed nickname definitions but only 682 exact English localization rows. `nick_the_bastard_rumoured` is defined once, has no localization in any installed language, and has no installed usage outside its definition; no evidence supports aliasing it to adjacent `nick_the_bastard`.
+- The contradiction is recorded in `Docs/nickname_catalog_localization_gap.md`. Catalog ingestion failed closed before implementation or mutation, so no nickname loader, parser run, manifest, catalog row, readiness report, or character state changed.
+- The sole gap is adjudicated as an exact Scribe `reviewed_orphan`: preserve its definition and flags with nullable localization/display provenance, never alias or invent text, and invalidate the exception if its definition, localization, or installed usage changes. All 63 baseline-used keys remain fully localized, so ADR-001 historical-state completeness is not narrowed.
+- Nickname catalog parser `installed_nicknames@1.0.0` loaded all 683 definitions transactionally: 682 valid localized rows and exact `nick_the_bastard_rumoured` as one null-label `reviewed_orphan`. All ten manifests bind parser run `888a8523-3a08-4e91-9bae-fa04d31f850b`.
+- Backup `ck3tracker_v2.before-nickname-catalog-1.0.0.20260902-093859.duckdb` precedes the nullable-schema migration and candidate load. All 78 tests pass; all 63 baseline-used IDs resolve to valid English catalog rows; nickname event/state tables remain empty; character parser `1.8.0`, 95 opaque states, 4,434 valid holder rows, and all promotion guards remain unchanged.
+- Character-history parser `1.9.0` emits all 539 installed direct or direct-effect-child nickname events: 538 sets and one clear. It never descends into nested bodies, validates every set against the localized catalog before mutation, and replaces only character-history-owned projection rows.
+- The 867 materialization contains exactly 120 nickname-bearing characters across 63 active nickname IDs. O01 and O48 clear completely; O27's nickname/appearance body normalizes while character `70150` remains warning because of a separate prestige effect; O28 and O29 retain their gold and random-witch warnings.
+- Backup `ck3tracker_v2.before-character-history-1.9.0.20260902-112706.duckdb` precedes the candidate reload. Opaque character subjects fall from 95 to 82, all 4,434 holder validations remain valid, and all promotion guards remain unchanged.
+- The evidence-only O02/O33/O64 contract review accounts for all 12 baseline-effective declarations. Ten O02 administrative-theme writes and O64's March write are active subject-to-liege state; O33's two enclosed writes do not execute because its no-MPO branch is false under reviewed installed `khans_of_the_steppe -> dlc020_ce2` evidence.
+- The durable contract is subject-character-owned scalar state per obligation type, with stable obligation IDs resolved from snapshot definition order, append-only events, sparse latest-event baseline state, optional chronology-valid liege identity, and exact declaration/operation provenance. Missing active contracts fail closed rather than inventing state.
+- No schema, parser, database, readiness, warning, or promotion state changed during the contract review. Character parser remains `1.9.0`, opaque character states remain 82, and readiness report `0d7df0e4-7f64-4eca-b08c-938895502f2b` remains current.
+- Durable contract storage now separates snapshot-scoped type/obligation catalog rows, append-only character subject-contract events, and sparse latest-by-type baseline state. Composite constraints bind each stable obligation to one nonnegative numeric index and bind state to the exact effective date, obligation, index, and source operation of its winning event.
+- Contract type and obligation labels retain separate localization keys, display values, and source coordinates. Optional liege identity never replaces subject ownership; only executed branches can enter the event table.
+- Backup `ck3tracker_v2.before-contract-schema.20260902-121223.duckdb` was SHA-256 and byte-length verified before bootstrap. All three contract tables contain zero rows, all 84 repository tests pass, and parser `1.9.0`, 82 warnings, readiness, candidate statuses, false completeness, and zero supported baselines remain unchanged.
+- Subject-contract catalog preflight inventories all 15 installed files, 64 unique contract types, and 194 direct obligation rows. Deterministic source order is valid, type and within-type obligation IDs are unique, all types have one direct `obligation_levels` block, and the two top-level AI scalar constants are not contract types.
+- Exact English localization resolves for 58 type IDs and 182 obligation rows. Six type IDs and twelve obligation IDs have no exact installed English declaration; nearby Iqta/Ghazi tax-collector labels belong to a different stable-ID system and are not aliases.
+- The contradiction is recorded in `Docs/subject_contract_catalog_localization_gap.md`. Preflight failed closed before loader implementation or database mutation: no `installed_subject_contracts` parser run, manifest, catalog row, event, state, readiness report, warning count, or promotion state changed.
+- User-provided CK3 Wiki and immediate 867 runtime evidence confirms “Iqta Grant” and “Ghazi Status” are active Tax Decrees with tax-jurisdiction icons, not subject-contract labels. The six unlabeled Iqta/Ghazi subject-contract keys have no group or consumer and are classified as inactive superseded remnants with null label provenance.
+- User-provided immediate 867 evidence maps the visible “Nomadic Tributary Contract” and “Request Contract Change” interaction to the separate `tributary_steppe` relationship, not `herder_vassal`. Installed interaction gates prove the one-level `herder_government_obligations` type cannot enter either ordinary editable vassal-contract path. It is classified as active fixed engine-structural data with null type-label provenance; the broader “Herder obligations cannot be adjusted” key documents the rule without aliasing the type ID.
+- `japan_administrative_salary` is classified as an inactive superseded remnant: it is absent from `japan_administrative_vassal` and every other consumer, while immediate 867 runtime evidence confirms Japanese Kuni governors sit directly beneath the empire with no intermediate duchy-or-higher vassal class capable of satisfying its visibility gate. Its five localized levels remain source truth, but the type retains null label provenance.
+- Both meritocratic tribute types and all eight levels are classified as inactive superseded remnants. An exact whole-game inventory finds only their definitions and same-family parent links: no localization, group membership, UI, history, or script consumer exists. Their raw 0/5/10/25 percent mechanics and the prestige family's contradictory double default remain source truth.
+- All 18 original subject-contract localization gaps are adjudicated without invented labels. Complete catalog ingestion is no longer blocked by localization evidence.
+- Subject-contract parser `installed_subject_contracts@1.0.0` transactionally loads the complete 15-file, 64-type, 194-obligation catalog: 182 rows have exact valid obligation localization and 18 rows carry reviewed non-localized classifications. All manifests bind latest completed run `8c2cc990-38b7-4ce8-9355-05c8e28468af`.
+- Character-history parser `1.10.0` replays the exact reviewed O02/O33/O64 contract declarations. Ten administrative-theme writes and one March write resolve through the installed catalog into 11 provenance-bearing events and 11 latest-by-type baseline states; the installed-MPO O33 branch emits no event or state.
+- Exact identity/date/path and ordered-body checks fail closed on drift. Active subjects and reviewed lieges resolve against baseline character/title state before replacement, and only character-history-owned contract rows are replaced transactionally.
+- Verified backup `ck3tracker_v2.before-character-history-1.10.0.20260902-152057.duckdb` at 822,358,016 bytes and SHA-256 `D2F6F127E5BDB696047CDCE16C092C6C97C3F937EF49B51E9C6F626F06341402` before mutation. Two production reloads are idempotent; all 4,434 holder validations remain valid and opaque character states fall from 82 to exactly 70.
+- Fresh readiness report `ck3_1_19_0_6_867:readiness:8f106bc5-8a9d-4f7b-939b-341fdcdacda0` is current and blocked only by the exact 70-state character-history finding. Its eleven evidence rows bind every required latest parser run and all 1,724 parser source manifests.
+- Full installed-tree scan `game-tree:07f87b79-5b41-4ad6-a7f6-6c62ad32994f` freezes 48,350 files and 3,697 directories under canonical manifest SHA-256 `790a4cb6910ca603d0a5791c4380a14983a6a96e4ca426fb0f23440cc703257e`.
+- Machine-readable Steam, launcher, and Clausewitz evidence binds app `1158310`, build `23530548`, game `1.19.0.6`, and branch `titus/release/1.19.0`. Readiness-linked ledger SHA-256 `271d4154b1b050d2f9e302c0e5e53ce56793f5ab817d65983ccb29c818b286f9` freezes exactly 70 warning subjects and 83 baseline-effective preserved declarations with zero live set difference.
+- Backup `ck3tracker_v2.before-subject-contract-catalog-1.0.0.20260902-150026.duckdb` was byte-length and SHA-256 verified before mutation. Two production loads are idempotent, all 89 tests pass, contract event/state tables remain empty, and character parser `1.9.0`, 82 warnings, readiness, candidate status, and promotion state remain unchanged.
 - `k_chrysanthemum_throne` is a functional ceremonial kingdom beneath `e_japan` during fractured imperial authority, not disposable structural noise. Nonselectability applies only to geographic start selection; observed 867 evidence confirms its protected Tenno role and Male Preference Primogeniture succession.
 - A full documentation consistency pass found no broken relative Markdown links or stale current parser, readiness-report, and opaque-count claims; archived B001 and deferred design tasks are explicitly non-authoritative.
 
 ## Current Evidence
 
-- Latest readiness report: `ck3_1_19_0_6_867:readiness:4f2d5916-7cf6-40fc-b7f5-49df4d0c0201`.
-- Report evidence status: `current`, with ten parser bindings and both installed EP3 helper definitions bound to title-history evidence.
-- Report status: blocked, with 1 blocking, 2 accepted-exception, 1 informational, and 21 passed findings.
+- Latest readiness report: `ck3_1_19_0_6_867:readiness:8f106bc5-8a9d-4f7b-939b-341fdcdacda0`.
+- Report evidence status: `current`, with eleven parser bindings and 1,724 parser-bound source manifests.
+- Report status: blocked, with 1 blocking, 2 accepted-exception, 2 informational, and 22 passed findings.
 - Snapshot status: `candidate`.
 - Baseline status: `candidate`.
 - `historical_state_complete`: `false`.
@@ -142,7 +176,7 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 ## Known Blockers
 
 - Title history has zero baseline warning states; its readiness finding passes.
-- 95 character states contain baseline-effective opaque effects.
+- 70 character states contain baseline-effective opaque effects and remain deferred until the September 30 installed-build refresh.
 - No production atomic promotion service exists.
 
 ## Deferred And Superseded Work
@@ -150,26 +184,38 @@ The workbook is a workflow and visual specification, not runtime storage. Instal
 - B001 ruler-memory ingestion is preserved at `Docs/build_history/B001-ruler-memory-ingestion.md`; its Imports next action is suspended, not current.
 - Holdings, Bronze observation, dashboard, and tier roadmaps in architecture and planning documents are historical or long-range guidance unless activated here.
 - The old permanent 867-only product decision is superseded. 867 is the first candidate date profile, not a permanent product limit.
+- After subject-contract catalog ingestion and O02/O33/O64 replay, defer the remaining 70 opaque character states until the September 30, 2026 installed-build refresh. They remain real ADR-001 promotion blockers and are not accepted exceptions, but no current evidence requires implementing them before the patch.
+- Preserve the complete current opaque-shape ledger, declaration coordinates, parser outputs, source manifests, and Scribe snapshot. The release workflow must create a new snapshot and use content-hash and semantic diffs to carry forward unchanged classifications and reopen only changed or newly introduced evidence.
 - Do not promote or resume product feature work from an older document.
+
+## Pre-Patch Completion Boundary
+
+Required before pausing Scribe character-history work:
+
+1. Complete candidate-only `installed_subject_contracts@1.0.0` catalog ingestion with reviewed exception fingerprints and rollback coverage.
+2. Replay only reviewed O02/O33/O64 contract semantics: ten active administrative-theme writes, one active March write, and one inactive MPO branch. This is expected to clear exactly 12 of the current 82 warning states.
+3. Generate a fresh readiness report and verify the expected residual blocker is exactly 70 opaque character states, with zero title warnings, all holder validations valid, candidate statuses unchanged, and no promotion.
+4. Freeze the prerelease comparison evidence required by `Docs/game_update_protocol.md`: installed build identity, full-tree manifest, parser-bound source manifests, parser versions, immutable readiness evidence, and the exact 70-state shape/declaration ledger.
+
+No other opaque character family is a prerequisite for preserving work across the patch. If a required check exposes a catalog/replay defect, source-manifest gap, unstable declaration identity, or mismatch between the 70 live states and the frozen ledger, resolve that infrastructure defect before pausing. Otherwise do not implement claims, resources, traits, secrets, armies, memories, capitals, employment, imprisonment, artifacts, modifiers, flags, or mixed bodies before the release diff.
 
 ## Next Exact Action
 
-Implement only candidate nickname-catalog ingestion. Parse every top-level installed definition under `common/nicknames/*.txt`, applying documented `is_bad = no` and `is_prefix = no` defaults, and resolve each nickname ID through the existing snapshot-scoped English localization catalog. Preserve raw definitions, definition coordinates/order, localization coordinates, source hashes/manifests, parser version, and validation status in `reference.nicknames`.
+Wait for Steam to install a CK3 build whose machine-readable build identity differs from `23530548`, unless the user explicitly changes scope. Do not perform a patch build action before that gate is satisfied.
 
-Use a dedicated `installed_nicknames@1.0.0` parser run and make it an explicit required readiness evidence group. Reject duplicate IDs, missing or duplicate resolved English localization, malformed boolean fields, unknown snapshots, and promoted snapshots before replacement. Replace only the target candidate snapshot's nickname rows and manifests in one transaction; rollback must preserve the prior catalog.
+After an installed update is detected, follow `Docs/game_update_protocol.md`: capture the new build/version/branch evidence, create a new reference snapshot, generate a second full-tree manifest without deleting scan `game-tree:07f87b79-5b41-4ad6-a7f6-6c62ad32994f`, and compare normalized paths, content hashes, parser groups, and residual structural shapes. Carry forward only unchanged evidence and reopen changed, removed, or newly introduced declarations.
 
-Add focused exact/default/explicit-flag, unresolved-localization, duplicate-ID, promoted-snapshot, rollback, provenance, and repeated-load tests. Back up the root database, load the complete installed catalog, audit all 683 definitions and the 63 baseline-used keys, then refresh readiness without changing character parser `1.8.0`, character declarations/states, warning count, candidate status, or promotion state.
+Do not implement the frozen 70-state long tail against Scribe, refresh the frozen readiness report, modify Reference Inspector UI, promote, add implicit promotion behavior, or overwrite the Scribe snapshot.
+
+The release-day review, model-escalation policy, 3,000-credit budget, gates, and stop conditions are defined in `Docs/patch_review_plan.md`.
 
 Target files:
 
-- `logic/nickname_catalog_loader.py`
-- `logic/promotion_readiness_service.py`
-- `tests/test_nickname_catalog_loader.py`
-- `tests/test_promotion_readiness_service.py`
+- `Docs/subject_contract_catalog_localization_gap.md`
 - `Docs/current_build.md`
 - `Docs/changelog.md`
 
-Do not combine character nickname event replay, baseline nickname materialization, warning reduction, Reference Inspector UI, or promotion into this slice.
+Do not combine contract implementation, unrelated opaque-effect families, Reference Inspector UI, promotion machinery, dashboard work, or journal work into this slice.
 
 `k_balhae` is reconciled semantically. Installed culture defines Balhae with Tungusic language from its year-700 creation; installed title history separately assigns Chinese to King Geon-hwang's court on `0867-01-01`; and the observed Royal Court screen confirms Chinese at the exact baseline. The culture-panel tooltip blocks `Adopt Tungusic Court Language` until `0872-01-01`, proving the initial Chinese-to-potential-Tungusic direction and the standard 1,825-day adoption cooldown. The game-start tributary setup independently makes Balhae a tributary of Tang. The court row's effective date therefore remains supported baseline state; developer-reported post-start complexity does not change these two distinct baseline language dimensions.
 
@@ -193,13 +239,11 @@ Do not combine character replay, opaque-effect reclassification, promotion, dash
 
 ## Acceptance Checks
 
-- All installed nickname definitions load exactly once with defaulted or explicit flags, English labels, raw definitions, source coordinates, and bound manifests.
-- Every nickname key used by baseline direct and reviewed effect-wrapped assignments resolves in the catalog.
-- Invalid input and promoted-snapshot attempts roll back without partial replacement.
-- Repeated candidate load is idempotent and the fresh readiness report binds `installed_nicknames@1.0.0` with all manifests current.
-- Character parser remains `1.8.0`, character nickname event/state tables remain empty, and opaque character warnings remain 95.
-- `app.supported_baselines` remains empty.
-- Snapshot and baseline remain candidate with `historical_state_complete=false`.
+- Readiness report `8f106bc5-8a9d-4f7b-939b-341fdcdacda0` is current, blocked by exactly 70 character states, and binds all eleven required parser runs and 1,724 source manifests.
+- Full-tree scan `07f87b79-5b41-4ad6-a7f6-6c62ad32994f` contains exactly 48,350 files and 3,697 directories with build and branch evidence hashed separately.
+- The frozen warning ledger contains exactly 70 subjects and 83 declarations; live-versus-frozen subject set difference is zero in both directions.
+- Title warnings remain zero, all 4,434 holder validations remain valid, snapshot and baseline remain candidate, historical completeness remains false, and supported baselines remain empty.
+- The full repository test suite passes. No promotion or residual opaque-family implementation occurs before the installed-update diff.
 
 ## Resume Note
 

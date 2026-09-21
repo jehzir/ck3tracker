@@ -2,9 +2,9 @@
 
 - Snapshot: `ck3_1_19_0_6_build_23530548`
 - Baseline: `ck3_1_19_0_6_867` (`0867-01-01`)
-- Parser observed: `installed_character_history@1.8.0`
-- Inventory date: 2026-09-01
-- Scope: all baseline states whose validation note contains `not evaluated: effect`
+- Parser observed: `installed_character_history@1.9.0`
+- Inventory date: 2026-09-02
+- Scope: original parser `1.8.0` opaque ledger with current parser `1.9.0` implementation progress
 
 ## Implementation Progress
 
@@ -12,11 +12,13 @@ Character-history parser `1.8.0` implements O03 and O10. All 12 complete languag
 
 The candidate warning count falls from 107 to 95 opaque character states. Backup `ck3tracker_v2.before-character-history-1.8.0.20260901-194743.duckdb` precedes the clean reload, and readiness report `ck3_1_19_0_6_867:readiness:4f2d5916-7cf6-40fc-b7f5-49df4d0c0201` binds the completed parser run.
 
-The nickname evidence review resolves O01 and the nickname portions of O27-O29/O48 as scalar latest-event state. The 16 warning-linked assignments are deterministic direct children, all 15 keys resolve, and none of those characters repeats or clears a nickname. Full reconciliation also finds 104 disjoint direct baseline assignments already preserved without warnings, for 120 nickname-bearing baseline characters total. Schema and replay are not yet implemented, so counts remain unchanged; see `Docs/character_history_nickname_review.md`.
+Nickname replay resolves O01/O48 and O27's complete declaration and projects the nickname children of O28/O29. All 539 events and 120 baseline states are materialized; unrelated siblings leave 82 opaque character states. See `Docs/character_history_nickname_review.md`.
 
-## Reconciliation
+The evidence-only contract review resolves the durable owner, stable obligation IDs, branch outcomes, chronology, and fail-closed parser boundary for O02/O33/O64. O02 has ten active subject-to-Emperor `1700` writes, O33 is an audited inactive no-MPO branch under reviewed installed `dlc020_ce2`, and O64 has one active March write to Aquitaine holder `90104` beside its already-supported friendship. No contract schema or replay exists yet; see `Docs/character_history_contract_review.md`.
 
-The blocker contains exactly 107 character states. Those subjects own 157 baseline-effective `effect` declarations: 36 declarations are already `normalized` as reviewed flags or relationships, while 121 declarations remain `preserved` and cause the warnings. No warning subject lacks a preserved declaration.
+## Original 1.8.0 Reconciliation
+
+At the inventory baseline, the blocker contained exactly 107 character states. Those subjects owned 157 baseline-effective `effect` declarations: 36 declarations were already `normalized` as reviewed flags or relationships, while 121 declarations remained `preserved` and caused the warnings. No warning subject lacked a preserved declaration. The shape ledger remains the denominator for implementation tracking; current parser `1.9.0` has reduced the live blocker to 82 states without renumbering it.
 
 | Measure | Count |
 |---|---:|
@@ -54,8 +56,8 @@ These declarations do not themselves require new work. They are included because
 
 | ID | Rows | Kind | Exact ordered shape | Source distribution and representative | Affected state; proposed disposition |
 |---|---:|---|---|---|---|
-| O01 | 12 | S | `give_nickname` | `armenian:4; basque:1; french:1; hausa:1; korean:1; lombard:1; norse:2; swabian:1`; `armenian_000011`, `armenian.txt:8338-8340` | Nickname; reviewed scalar replacement, replay after nickname schema |
-| O02 | 10 | S | `if{government_allows,vassal_contract_set_obligation_level{type,level}}` | `greek:10`; `145116`, `greek.txt:16760-16770` | Contract; Replay after contract/scope model |
+| O01 | 12 | S | `give_nickname` | `armenian:4; basque:1; french:1; hausa:1; korean:1; lombard:1; norse:2; swabian:1`; `armenian_000011`, `armenian.txt:8338-8340` | Nickname; implemented in parser `1.9.0` |
+| O02 | 10 | S | `if{government_allows,vassal_contract_set_obligation_level{type,level}}` | `greek:10`; `145116`, `greek.txt:16760-16770` | Contract-reviewed; ten active administrative-theme writes await catalog/schema/replay |
 | O03 | 9 | S | `learn_language_of_culture` | `karluk:4; persian:1; tajik:4`; `extra_karluks_4`, `karluk.txt:3384-3386` | Language knowledge; Implemented in parser `1.8.0` |
 | O04 | 7 | S | `add_trait+add_trait_xp{trait,value{integer_range{min,max}}}` | `asturleonese:1; basque:1; bedouin:1; hungarian:1; norse:3`; `70017`, `asturleonese.txt:131-142` | Trait and random XP; Block pending random-state policy |
 | O05 | 6 | S | `make_character_crypto_religionist_effect{CRYPTO_RELIGION}` | `afghan:2; andalusian:1; daylamite:2; levantine:1`; `188713`, `afghan.txt:380-382` | Secret faith and secret; Replay installed helper |
@@ -80,13 +82,13 @@ These declarations do not themselves require new work. They are included because
 | O24 | 1 | M | `claim+gold+friend+realm capital+primary title` | `galician:1`; `73857`, `galician.txt:5317-5323` | Five dimensions; Block mixed body |
 | O25 | 1 | S | `add_unpressed_claim` | `turkish:1`; `163132`, `turkish.txt:7437-7439` | Claim; Replay after claim projection |
 | O26 | 1 | S | `create_character_memory{type}+every_memory{set_variable{name,value}}` | `han:1`; `bookmark_huang_chao`, `han.txt:141937-141944` | Memory and location metadata; Replay together |
-| O27 | 1 | M | `give_nickname+add_character_flag` | `catalan:1`; `70150`, `catalan.txt:15028-15031` | Nickname reviewed; full support after nickname projection because appearance flag is already reviewed |
-| O28 | 1 | M | `give_nickname+add_gold` | `norse:1`; `40605`, `norse.txt:748-751` | Nickname reviewed; gold remains blocking after partial projection |
-| O29 | 1 | M | `give_nickname+random{chance,give_witch_secret_or_trait_effect}` | `norse:1`; `40606`, `norse.txt:813-819` | Nickname reviewed; random trait/secret remains blocking after partial projection |
+| O27 | 1 | M | `give_nickname+add_character_flag` | `catalan:1`; `70150`, `catalan.txt:15028-15031` | Implemented in parser `1.9.0`; the character retains a separate O60 warning |
+| O28 | 1 | M | `give_nickname+add_gold` | `norse:1`; `40605`, `norse.txt:748-751` | Nickname projected in parser `1.9.0`; gold remains blocking |
+| O29 | 1 | M | `give_nickname+random{chance,give_witch_secret_or_trait_effect}` | `norse:1`; `40606`, `norse.txt:813-819` | Nickname projected in parser `1.9.0`; random trait/secret remains blocking |
 | O30 | 1 | M | `if{not roads_to_power,set_employer}+add_character_flag` | `norse:1`; `242`, `norse.txt:23-31` | Employer branch inactive under reviewed installed package; family flag non-projecting |
 | O31 | 1 | M | `if{roads_to_power,change_government}+flags+global-list/scopes+create_artifact_weapon_effect` | `easteregg_non_developers:1`; `easteregg_henry_of_skalitz`, `easteregg_non_developers.txt:247-275` | Government, flags, scopes, artifact; Block |
 | O32 | 1 | S | `if{has_fp1_dlc_trigger,spawn_army}+else{spawn_army}` | `norse:1`; `40605`, `norse.txt:754-786` | Starting army; Block until FP1 package evidence |
-| O33 | 1 | S | `if{has_mpo_dlc_trigger,contract-write,contract-write}` | `khazar:1`; `3022740`, `khazar.txt:1046-1058` | Installed MPO branch is deterministic; Replay selected contract write |
+| O33 | 1 | S | `if{has_mpo_dlc_trigger,contract-write,contract-write}` | `khazar:1`; `3022740`, `khazar.txt:1046-1058` | Contract-reviewed; exact branch is inactive because reviewed MPO is installed; no writes execute |
 | O34 | 1 | S | `imprison{target,type}` | `levantine:1`; `73683`, `levantine.txt:9467-9472` | Imprisonment; Replay after relationship/status projection |
 | O35 | 1 | M | `language+pressed claims` x2 `+crypto helper` | `daylamite:1`; `45107`, `daylamite.txt:16-21` | Language, claims, secrets; Block mixed body |
 | O36 | 1 | M | `language+unpressed claim` | `tajik:1`; `163161`, `tajik.txt:780-783` | Language and claim; Block mixed body |
@@ -101,7 +103,7 @@ These declarations do not themselves require new work. They are included because
 | O45 | 1 | M | `set_relation_friend+set_realm_capital` | `tajik:1`; `163099`, `tajik.txt:33-36` | Relationship and capital; Block mixed body |
 | O46 | 1 | M | `friend+gold+prestige+prestige XP+FP1 armies` | `norse:1`; `6878`, `norse.txt:548-615` | Resources, relationship, armies; Block |
 | O47 | 1 | M | `friend+claim+rival+FP3 trait` | `bedouin:1`; `45108`, `bedouin.txt:40-52` | Relationship, claim, trait; Block |
-| O48 | 1 | M | `friend+give_nickname` | `norse:1`; `306010`, `norse.txt:4135-4138` | Nickname reviewed; full support after nickname projection because friendship is already reviewed |
+| O48 | 1 | M | `friend+give_nickname` | `norse:1`; `306010`, `norse.txt:4135-4138` | Implemented in parser `1.9.0` with the already-supported friendship |
 | O49 | 1 | M | `friend+set_realm_capital` | `basque:1`; `73813`, `basque.txt:4744-4747` | Relationship and capital; Block |
 | O50 | 1 | M | `friend+add_character_flag` | `japanese:1`; `japanese_fujiwara_530`, `japanese.txt:15988-15991` | Relationship and ceremonial-regent flag; Block |
 | O51 | 1 | M | `lover+rival+claims` x2 `+trait/random XP` | `andalusian:1`; `73957`, `andalusian.txt:1892-1908` | Relationship, claims, trait; Block |
@@ -117,7 +119,7 @@ These declarations do not themselves require new work. They are included because
 | O61 | 1 | S | `spawn_army{name,levies,location,origin}` | `basque:1`; `73813`, `basque.txt:4750-4758` | Starting army; Replay after army projection |
 | O62 | 1 | S | `spawn_army{name,levies,men_at_arms,location,origin,inheritable}` x4 | `levantine:1`; `azariqa_0006`, `levantine.txt:12611-12656` | Starting armies; Replay after army projection |
 | O63 | 1 | S | `spawn_army{name,levies,men_at_arms,location,origin,war_keep_on_attacker_victory}` x3 | `bedouin:1`; `163096`, `bedouin.txt:5650-5696` | Starting armies and war retention; Replay after army projection |
-| O64 | 1 | M | `vassal_contract_set_obligation_level+set_relation_friend` | `occitan:1`; `168137`, `occitan.txt:12973-12981` | Contract and relationship; Block mixed body |
+| O64 | 1 | M | `vassal_contract_set_obligation_level+set_relation_friend` | `occitan:1`; `168137`, `occitan.txt:12973-12981` | Contract-reviewed; active March write awaits catalog/schema/replay, friendship already supported |
 
 The ledger accounts for all 121 preserved declarations exactly once. The 16 repeated-shape rows contribute 73 declarations and the 48 singleton-shape rows contribute 48, totaling 121.
 
@@ -138,6 +140,16 @@ The ledger accounts for all 121 preserved declarations exactly once. The 16 repe
 
 The 107 states remain blocking as a group. No evidence supports a blanket exception: the preserved bodies contain persistent languages, claims, resources, traits, secrets, contracts, capitals, memories, modifiers, armies, flags, employment, imprisonment, government, artifacts, and title state.
 
-Parser `1.8.0` now covers O03 and O10. Mixed language bodies O35-O41, O43-O44, O53-O54, and O58 remain blocking until every operation in each body is supported.
+Parser `1.10.0` covers O01, O02, O03, O10, O27's declaration, O33, O48, and O64. It projects the nickname portions of O28/O29 while retaining their unsupported siblings. Mixed language bodies O35-O41, O43-O44, O53-O54, and O58 remain blocking until every operation in each body is supported.
 
-Nickname semantics and storage boundaries are resolved in `Docs/character_history_nickname_review.md`. O01 is the next unresolved complete family. Its 12 bodies must be implemented together with the 104 direct baseline assignments that currently do not warn; otherwise warning reduction would overstate baseline completeness. O27/O48 can become fully supported after nickname projection, while O28/O29 must retain warnings for gold and random witch outcomes.
+Nickname semantics and storage boundaries are implemented as documented in `Docs/character_history_nickname_review.md`. All 539 historical events and 120 baseline states are projected; O28/O29 retain only their unrelated blockers, and `70150` retains its separate O60 prestige warning.
+
+Contract semantics and storage boundaries are implemented as documented in `Docs/character_history_contract_review.md`. O02's ten writes and O64's one write produce 11 catalog-resolved events and baseline states; O33 is an exact inactive branch and emits no contract state.
+
+## September 30 Deferral Boundary
+
+O02, O33, and O64 account for 12 current warning states. After catalog ingestion and exact contract replay, the expected live blocker is 70 character states. Those residual states remain unresolved under ADR-001; deferral is a scheduling decision, not a completeness exception or promotion authorization.
+
+The 70-state long tail is deferred until the September 30, 2026 installed-build refresh because the announced patch contains numerous unspecified fixes and may change character history, helper definitions, DLC branches, or source coordinates. Readiness report `8f106bc5-8a9d-4f7b-939b-341fdcdacda0` and ledger SHA-256 `271d4154b1b050d2f9e302c0e5e53ce56793f5ab817d65983ccb29c818b286f9` bind the exact 70 states to 83 preserved declarations, structural shape hashes, normalized paths, source hashes, parser identities, and full-tree scan `07f87b79-5b41-4ad6-a7f6-6c62ad32994f`. The post-patch workflow must create a new snapshot, compare source content and parsed shapes, carry forward unchanged classifications, and reopen only changed, removed, or newly introduced evidence.
+
+Pre-patch implementation is required only if contract replay fails to produce the expected 70-state residual set or exposes an unstable parser/provenance boundary that would prevent deterministic cross-snapshot comparison. No currently inventoried non-contract shape meets that threshold.

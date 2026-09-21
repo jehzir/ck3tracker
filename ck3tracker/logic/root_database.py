@@ -662,6 +662,42 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
         )
         """
     )
+    nickname_schema = connection.execute(
+        """
+        SELECT is_nullable
+        FROM information_schema.columns
+        WHERE table_schema = 'reference'
+          AND table_name = 'nicknames'
+          AND column_name = 'localization_language'
+        """
+    ).fetchone()
+    if nickname_schema == ("NO",):
+        dependent_count = 0
+        for table_name in (
+            "character_baseline_nickname_states",
+            "character_nickname_events",
+            "nicknames",
+        ):
+            table_exists = connection.execute(
+                """
+                SELECT count(*) FROM information_schema.tables
+                WHERE table_schema = 'reference' AND table_name = ?
+                """,
+                [table_name],
+            ).fetchone()[0]
+            if table_exists:
+                dependent_count += connection.execute(
+                    f"SELECT count(*) FROM reference.{table_name}"
+                ).fetchone()[0]
+        if dependent_count:
+            raise RuntimeError(
+                "Legacy nickname tables must be empty before nullable orphan migration"
+            )
+        connection.execute(
+            "DROP TABLE IF EXISTS reference.character_baseline_nickname_states"
+        )
+        connection.execute("DROP TABLE IF EXISTS reference.character_nickname_events")
+        connection.execute("DROP TABLE reference.nicknames")
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS reference.nicknames (
@@ -669,16 +705,16 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
             nickname_id VARCHAR NOT NULL,
             is_bad BOOLEAN NOT NULL,
             is_prefix BOOLEAN NOT NULL,
-            localization_language VARCHAR NOT NULL,
-            localization_key VARCHAR NOT NULL,
-            display_name VARCHAR NOT NULL,
+            localization_language VARCHAR,
+            localization_key VARCHAR,
+            display_name VARCHAR,
             definition_source_path VARCHAR NOT NULL,
             definition_source_line_start INTEGER NOT NULL,
             definition_source_line_end INTEGER NOT NULL,
             definition_source_order BIGINT NOT NULL,
             raw_script VARCHAR NOT NULL,
-            localization_source_path VARCHAR NOT NULL,
-            localization_source_line INTEGER NOT NULL,
+            localization_source_path VARCHAR,
+            localization_source_line INTEGER,
             parser_version VARCHAR NOT NULL,
             validation_status VARCHAR NOT NULL,
             validation_note VARCHAR,
@@ -787,6 +823,162 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
             CHECK (
                 (last_event_kind = 'set' AND active_nickname_id IS NOT NULL)
                 OR (last_event_kind = 'clear' AND active_nickname_id IS NULL)
+            )
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.subject_contract_obligations (
+            reference_snapshot_id VARCHAR NOT NULL,
+            contract_type_id VARCHAR NOT NULL,
+            obligation_id VARCHAR NOT NULL,
+            level_index INTEGER NOT NULL,
+            is_default BOOLEAN NOT NULL,
+            contract_type_localization_key VARCHAR,
+            contract_type_display_name VARCHAR,
+            contract_type_localization_source_path VARCHAR,
+            contract_type_localization_source_line INTEGER,
+            obligation_localization_key VARCHAR,
+            obligation_display_name VARCHAR,
+            obligation_localization_source_path VARCHAR,
+            obligation_localization_source_line INTEGER,
+            definition_source_path VARCHAR NOT NULL,
+            definition_source_line_start INTEGER NOT NULL,
+            definition_source_line_end INTEGER NOT NULL,
+            definition_source_order BIGINT NOT NULL,
+            raw_script VARCHAR NOT NULL,
+            parser_version VARCHAR NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (
+                reference_snapshot_id,
+                contract_type_id,
+                obligation_id
+            ),
+            UNIQUE (
+                reference_snapshot_id,
+                contract_type_id,
+                level_index
+            ),
+            UNIQUE (
+                reference_snapshot_id,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ),
+            CHECK (level_index >= 0)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.character_subject_contract_events (
+            reference_snapshot_id VARCHAR NOT NULL,
+            subject_character_id VARCHAR NOT NULL,
+            liege_character_id VARCHAR,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            source_operation_order INTEGER NOT NULL,
+            effective_date VARCHAR NOT NULL,
+            contract_type_id VARCHAR NOT NULL,
+            obligation_id VARCHAR NOT NULL,
+            level_index INTEGER NOT NULL,
+            branch_status VARCHAR NOT NULL,
+            branch_evidence VARCHAR,
+            source_path VARCHAR NOT NULL,
+            source_line_start INTEGER NOT NULL,
+            source_line_end INTEGER NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (
+                reference_snapshot_id,
+                subject_character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order
+            ),
+            UNIQUE (
+                reference_snapshot_id,
+                subject_character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order,
+                effective_date,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ),
+            FOREIGN KEY (
+                reference_snapshot_id,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ) REFERENCES reference.subject_contract_obligations (
+                reference_snapshot_id,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ),
+            CHECK (branch_status = 'executed')
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.character_baseline_subject_contract_states (
+            baseline_id VARCHAR NOT NULL,
+            subject_character_id VARCHAR NOT NULL,
+            contract_type_id VARCHAR NOT NULL,
+            reference_snapshot_id VARCHAR NOT NULL,
+            obligation_id VARCHAR NOT NULL,
+            level_index INTEGER NOT NULL,
+            liege_character_id VARCHAR,
+            effective_date VARCHAR NOT NULL,
+            source_group VARCHAR NOT NULL,
+            source_declaration_order BIGINT NOT NULL,
+            source_operation_order INTEGER NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR,
+            PRIMARY KEY (
+                baseline_id,
+                subject_character_id,
+                contract_type_id
+            ),
+            FOREIGN KEY (baseline_id, subject_character_id)
+                REFERENCES reference.character_baseline_states
+                    (baseline_id, character_id),
+            FOREIGN KEY (
+                reference_snapshot_id,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ) REFERENCES reference.subject_contract_obligations (
+                reference_snapshot_id,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ),
+            FOREIGN KEY (
+                reference_snapshot_id,
+                subject_character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order,
+                effective_date,
+                contract_type_id,
+                obligation_id,
+                level_index
+            ) REFERENCES reference.character_subject_contract_events (
+                reference_snapshot_id,
+                subject_character_id,
+                source_group,
+                source_declaration_order,
+                source_operation_order,
+                effective_date,
+                contract_type_id,
+                obligation_id,
+                level_index
             )
         )
         """
@@ -1010,6 +1202,112 @@ def _bootstrap(connection: duckdb.DuckDBPyConnection) -> None:
             manifest_count BIGINT NOT NULL,
             manifest_digest VARCHAR NOT NULL,
             PRIMARY KEY (report_id, parser_name)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS source.game_tree_scans (
+            scan_id VARCHAR PRIMARY KEY,
+            reference_snapshot_id VARCHAR NOT NULL,
+            scanned_at_utc TIMESTAMP NOT NULL,
+            scanner_name VARCHAR NOT NULL,
+            scanner_version VARCHAR NOT NULL,
+            path_normalization_version VARCHAR NOT NULL,
+            steam_app_id VARCHAR NOT NULL,
+            steam_build_id VARCHAR NOT NULL,
+            steam_branch VARCHAR NOT NULL,
+            clausewitz_revision VARCHAR,
+            build_evidence_locator VARCHAR NOT NULL,
+            build_evidence_sha256 VARCHAR NOT NULL,
+            file_count BIGINT NOT NULL,
+            directory_count BIGINT NOT NULL,
+            manifest_sha256 VARCHAR NOT NULL,
+            FOREIGN KEY (reference_snapshot_id)
+                REFERENCES source.reference_snapshots (reference_snapshot_id),
+            CHECK (file_count >= 0 AND directory_count >= 0)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS source.game_tree_entries (
+            scan_id VARCHAR NOT NULL,
+            relative_path VARCHAR NOT NULL,
+            entry_kind VARCHAR NOT NULL,
+            byte_size BIGINT,
+            mtime_unix_ns BIGINT,
+            sha256 VARCHAR,
+            PRIMARY KEY (scan_id, relative_path),
+            FOREIGN KEY (scan_id) REFERENCES source.game_tree_scans (scan_id),
+            CHECK (
+                (entry_kind = 'directory' AND byte_size IS NULL
+                 AND mtime_unix_ns IS NULL AND sha256 IS NULL)
+                OR
+                (entry_kind = 'file' AND byte_size IS NOT NULL
+                 AND mtime_unix_ns IS NOT NULL AND sha256 IS NOT NULL)
+            )
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.promotion_readiness_freezes (
+            report_id VARCHAR PRIMARY KEY,
+            scan_id VARCHAR NOT NULL UNIQUE,
+            frozen_at_utc TIMESTAMP NOT NULL,
+            ledger_version VARCHAR NOT NULL,
+            shape_algorithm_version VARCHAR NOT NULL,
+            warning_subject_count BIGINT NOT NULL,
+            warning_declaration_count BIGINT NOT NULL,
+            warning_ledger_sha256 VARCHAR NOT NULL,
+            FOREIGN KEY (report_id)
+                REFERENCES reference.promotion_readiness_reports (report_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.promotion_readiness_character_warnings (
+            report_id VARCHAR NOT NULL,
+            baseline_id VARCHAR NOT NULL,
+            reference_snapshot_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            validation_status VARCHAR NOT NULL,
+            validation_note VARCHAR NOT NULL,
+            state_sha256 VARCHAR NOT NULL,
+            declaration_count BIGINT NOT NULL,
+            declaration_digest VARCHAR NOT NULL,
+            PRIMARY KEY (report_id, character_id),
+            FOREIGN KEY (report_id)
+                REFERENCES reference.promotion_readiness_freezes (report_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reference.promotion_readiness_character_warning_declarations (
+            report_id VARCHAR NOT NULL,
+            character_id VARCHAR NOT NULL,
+            reference_snapshot_id VARCHAR NOT NULL,
+            declaration_order BIGINT NOT NULL,
+            source_block_order BIGINT,
+            operation_order INTEGER NOT NULL,
+            effective_date VARCHAR NOT NULL,
+            operation_key VARCHAR NOT NULL,
+            resolution_status VARCHAR NOT NULL,
+            source_path VARCHAR NOT NULL,
+            source_file_sha256 VARCHAR NOT NULL,
+            parser_run_id VARCHAR NOT NULL,
+            parser_version VARCHAR NOT NULL,
+            raw_script_sha256 VARCHAR NOT NULL,
+            structural_shape VARCHAR NOT NULL,
+            structural_shape_sha256 VARCHAR NOT NULL,
+            review_shape_id VARCHAR,
+            PRIMARY KEY (report_id, declaration_order),
+            FOREIGN KEY (report_id, character_id)
+                REFERENCES reference.promotion_readiness_character_warnings
+                    (report_id, character_id)
         )
         """
     )

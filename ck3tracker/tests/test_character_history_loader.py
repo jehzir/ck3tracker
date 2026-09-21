@@ -972,6 +972,257 @@ language_future = {
             declarations,
         )
 
+    def test_nickname_events_materialize_scalar_chronology_without_recursion(self) -> None:
+        characters = self.game_root / "history" / "characters" / "nicknames.txt"
+        characters.write_text(
+            """
+nickname_direct = {
+  840.1.1 = { give_nickname = nick_first }
+  850.1.1 = { give_nickname = nick_second }
+  860.1.1 = { remove_nickname = yes }
+  900.1.1 = { give_nickname = nick_future }
+}
+nickname_effect = {
+  850.1.1 = { effect = { give_nickname = nick_first } }
+}
+nickname_appearance = {
+  850.1.1 = { effect = { give_nickname = nick_second add_character_flag = has_scripted_appearance } }
+}
+nickname_gold = {
+  850.1.1 = { effect = { give_nickname = nick_second add_gold = 10 } }
+}
+nickname_nested = {
+  850.1.1 = { effect = { if = { give_nickname = nick_first } } }
+}
+nickname_altered = {
+  850.1.1 = { effect = { give_nickname = nick_first add_gold = 10 add_prestige = 10 } }
+}
+""",
+            encoding="utf-8-sig",
+        )
+        self._insert_nickname_catalog("nick_first", "nick_second", "nick_future")
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+
+        load_character_history_candidate(**arguments)
+        load_character_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            events = connection.execute(
+                """
+                SELECT character_id, effective_date, event_kind, nickname_id,
+                       source_declaration_order, source_operation_order,
+                       source_path, validation_status
+                FROM reference.character_nickname_events
+                ORDER BY character_id, effective_date
+                """
+            ).fetchall()
+            states = connection.execute(
+                """
+                SELECT character_id, active_nickname_id, last_event_kind,
+                       effective_date, source_group, validation_status
+                FROM reference.character_baseline_nickname_states
+                ORDER BY character_id
+                """
+            ).fetchall()
+            resolutions = connection.execute(
+                """
+                SELECT character_id, resolution_status
+                FROM source.character_history_declarations
+                WHERE source_path = 'history/characters/nicknames.txt'
+                  AND operation_key = 'effect'
+                ORDER BY character_id
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        self.assertEqual(8, len(events))
+        self.assertEqual(
+            [
+                ("nickname_altered", "nick_first", "set", "0850-01-01", "character_history", "valid"),
+                ("nickname_appearance", "nick_second", "set", "0850-01-01", "character_history", "valid"),
+                ("nickname_direct", None, "clear", "0860-01-01", "character_history", "valid"),
+                ("nickname_effect", "nick_first", "set", "0850-01-01", "character_history", "valid"),
+                ("nickname_gold", "nick_second", "set", "0850-01-01", "character_history", "valid"),
+            ],
+            states,
+        )
+        self.assertEqual(
+            [
+                ("nickname_altered", "preserved"),
+                ("nickname_appearance", "normalized"),
+                ("nickname_effect", "normalized"),
+                ("nickname_gold", "preserved"),
+                ("nickname_nested", "preserved"),
+            ],
+            resolutions,
+        )
+
+    def test_unresolved_nickname_preserves_existing_projection(self) -> None:
+        characters = self.game_root / "history" / "characters" / "nicknames.txt"
+        characters.write_text(
+            "nickname_person = { 850.1.1 = { give_nickname = nick_first } }",
+            encoding="utf-8-sig",
+        )
+        self._insert_nickname_catalog("nick_first")
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        load_character_history_candidate(**arguments)
+        characters.write_text(
+            "nickname_person = { 850.1.1 = { give_nickname = nick_missing } }",
+            encoding="utf-8-sig",
+        )
+        with self.assertRaisesRegex(ValueError, "nick_missing"):
+            load_character_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            state = connection.execute(
+                """
+                SELECT active_nickname_id
+                FROM reference.character_baseline_nickname_states
+                WHERE character_id = 'nickname_person'
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual(("nick_first",), state)
+
+    def test_malformed_nickname_preserves_existing_projection(self) -> None:
+        characters = self.game_root / "history" / "characters" / "nicknames.txt"
+        characters.write_text(
+            "nickname_person = { 850.1.1 = { give_nickname = nick_first } }",
+            encoding="utf-8-sig",
+        )
+        self._insert_nickname_catalog("nick_first")
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        load_character_history_candidate(**arguments)
+        characters.write_text(
+            "nickname_person = { 850.1.1 = { remove_nickname = no } }",
+            encoding="utf-8-sig",
+        )
+        with self.assertRaisesRegex(ValueError, "remove_nickname must equal yes"):
+            load_character_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            state = connection.execute(
+                "SELECT active_nickname_id FROM reference.character_baseline_nickname_states"
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual(("nick_first",), state)
+
+    def test_reload_preserves_other_source_group_nickname_rows(self) -> None:
+        self._insert_nickname_catalog("nick_first")
+        arguments = dict(
+            game_root=self.game_root,
+            reference_snapshot_id="scribe_build",
+            baseline_id="scribe_867",
+            database_path=self.database_path,
+        )
+        load_character_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                INSERT INTO reference.character_nickname_events
+                VALUES ('scribe_build', 'alive_person', 'manual', 9000, 1,
+                        '0850-01-01', 'set', 'nick_first', 'manual/test', 1, 1,
+                        'valid', NULL)
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO reference.character_baseline_nickname_states
+                VALUES ('scribe_867', 'alive_person', 'scribe_build',
+                        'nick_first', 'set', '0850-01-01', 'manual', 9000, 1,
+                        'valid', NULL)
+                """
+            )
+        finally:
+            connection.close()
+
+        load_character_history_candidate(**arguments)
+        connection = connect(self.database_path)
+        try:
+            rows = connection.execute(
+                """
+                SELECT
+                  (SELECT count(*) FROM reference.character_nickname_events
+                   WHERE source_group = 'manual'),
+                  (SELECT count(*) FROM reference.character_baseline_nickname_states
+                   WHERE source_group = 'manual')
+                """
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual((1, 1), rows)
+
+    def test_promoted_snapshot_rejects_nickname_replacement(self) -> None:
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                """
+                UPDATE source.reference_snapshots
+                SET review_status = 'promoted'
+                WHERE reference_snapshot_id = 'scribe_build'
+                """
+            )
+        finally:
+            connection.close()
+        with self.assertRaisesRegex(ValueError, "Promoted character history"):
+            load_character_history_candidate(
+                game_root=self.game_root,
+                reference_snapshot_id="scribe_build",
+                baseline_id="scribe_867",
+                database_path=self.database_path,
+            )
+
+    def _insert_nickname_catalog(self, *nickname_ids: str) -> None:
+        connection = connect(self.database_path)
+        try:
+            for source_order, nickname_id in enumerate(nickname_ids, start=1):
+                connection.execute(
+                    """
+                    INSERT INTO reference.localizations
+                    VALUES ('scribe_build', 'english', ?, NULL, ?,
+                            'nicknames.yml', ?, '1.0.0', 'valid')
+                    """,
+                    [nickname_id, nickname_id, source_order],
+                )
+                connection.execute(
+                    """
+                    INSERT INTO reference.nicknames
+                    VALUES ('scribe_build', ?, false, false, 'english', ?, ?,
+                            'common/nicknames/test.txt', ?, ?, ?, '{}',
+                            'nicknames.yml', ?, '1.0.0', 'valid', NULL)
+                    """,
+                    [
+                        nickname_id,
+                        nickname_id,
+                        nickname_id,
+                        source_order,
+                        source_order,
+                        source_order,
+                        source_order,
+                    ],
+                )
+        finally:
+            connection.close()
+
     def test_unresolved_language_effect_preserves_existing_state(self) -> None:
         arguments = dict(
             game_root=self.game_root,

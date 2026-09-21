@@ -12,6 +12,328 @@ from logic.root_database import connect
 
 
 class RootDatabaseTests(unittest.TestCase):
+    def test_bootstraps_character_subject_contract_storage_boundary(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            database_path = Path(temporary_directory) / "tracker.duckdb"
+            connection = connect(database_path)
+            try:
+                catalog_columns = {
+                    row[0]: (row[1], row[2], row[3])
+                    for row in connection.execute(
+                        "DESCRIBE reference.subject_contract_obligations"
+                    ).fetchall()
+                }
+                event_columns = {
+                    row[0]: (row[1], row[2], row[3])
+                    for row in connection.execute(
+                        "DESCRIBE reference.character_subject_contract_events"
+                    ).fetchall()
+                }
+                state_columns = {
+                    row[0]: (row[1], row[2], row[3])
+                    for row in connection.execute(
+                        "DESCRIBE reference.character_baseline_subject_contract_states"
+                    ).fetchall()
+                }
+                self.assertEqual(
+                    {
+                        "reference_snapshot_id": ("VARCHAR", "NO", "PRI"),
+                        "contract_type_id": ("VARCHAR", "NO", "PRI"),
+                        "obligation_id": ("VARCHAR", "NO", "PRI"),
+                        "level_index": ("INTEGER", "NO", "UNI"),
+                        "is_default": ("BOOLEAN", "NO", None),
+                        "contract_type_localization_key": ("VARCHAR", "YES", None),
+                        "contract_type_display_name": ("VARCHAR", "YES", None),
+                        "contract_type_localization_source_path": (
+                            "VARCHAR",
+                            "YES",
+                            None,
+                        ),
+                        "contract_type_localization_source_line": (
+                            "INTEGER",
+                            "YES",
+                            None,
+                        ),
+                        "obligation_localization_key": ("VARCHAR", "YES", None),
+                        "obligation_display_name": ("VARCHAR", "YES", None),
+                        "obligation_localization_source_path": (
+                            "VARCHAR",
+                            "YES",
+                            None,
+                        ),
+                        "obligation_localization_source_line": (
+                            "INTEGER",
+                            "YES",
+                            None,
+                        ),
+                        "definition_source_path": ("VARCHAR", "NO", None),
+                        "definition_source_line_start": ("INTEGER", "NO", None),
+                        "definition_source_line_end": ("INTEGER", "NO", None),
+                        "definition_source_order": ("BIGINT", "NO", None),
+                        "raw_script": ("VARCHAR", "NO", None),
+                        "parser_version": ("VARCHAR", "NO", None),
+                        "validation_status": ("VARCHAR", "NO", None),
+                        "validation_note": ("VARCHAR", "YES", None),
+                    },
+                    catalog_columns,
+                )
+                self.assertEqual(
+                    {
+                        "reference_snapshot_id": ("VARCHAR", "NO", "PRI"),
+                        "subject_character_id": ("VARCHAR", "NO", "PRI"),
+                        "liege_character_id": ("VARCHAR", "YES", None),
+                        "source_group": ("VARCHAR", "NO", "PRI"),
+                        "source_declaration_order": ("BIGINT", "NO", "PRI"),
+                        "source_operation_order": ("INTEGER", "NO", "PRI"),
+                        "effective_date": ("VARCHAR", "NO", "UNI"),
+                        "contract_type_id": ("VARCHAR", "NO", "UNI"),
+                        "obligation_id": ("VARCHAR", "NO", "UNI"),
+                        "level_index": ("INTEGER", "NO", "UNI"),
+                        "branch_status": ("VARCHAR", "NO", None),
+                        "branch_evidence": ("VARCHAR", "YES", None),
+                        "source_path": ("VARCHAR", "NO", None),
+                        "source_line_start": ("INTEGER", "NO", None),
+                        "source_line_end": ("INTEGER", "NO", None),
+                        "validation_status": ("VARCHAR", "NO", None),
+                        "validation_note": ("VARCHAR", "YES", None),
+                    },
+                    event_columns,
+                )
+                self.assertEqual(
+                    {
+                        "baseline_id": ("VARCHAR", "NO", "PRI"),
+                        "subject_character_id": ("VARCHAR", "NO", "PRI"),
+                        "contract_type_id": ("VARCHAR", "NO", "PRI"),
+                        "reference_snapshot_id": ("VARCHAR", "NO", None),
+                        "obligation_id": ("VARCHAR", "NO", None),
+                        "level_index": ("INTEGER", "NO", None),
+                        "liege_character_id": ("VARCHAR", "YES", None),
+                        "effective_date": ("VARCHAR", "NO", None),
+                        "source_group": ("VARCHAR", "NO", None),
+                        "source_declaration_order": ("BIGINT", "NO", None),
+                        "source_operation_order": ("INTEGER", "NO", None),
+                        "validation_status": ("VARCHAR", "NO", None),
+                        "validation_note": ("VARCHAR", "YES", None),
+                    },
+                    state_columns,
+                )
+
+                connection.execute(
+                    """
+                    INSERT INTO source.reference_snapshots
+                    (reference_snapshot_id, game_version, map_profile, review_status)
+                    VALUES
+                        ('snapshot', '1.19.0.6', 'default', 'candidate'),
+                        ('other_snapshot', '1.19.0.6', 'default', 'candidate')
+                    """
+                )
+                connection.execute(
+                    """
+                    INSERT INTO reference.baselines
+                    (baseline_id, reference_snapshot_id, baseline_date, label,
+                     support_status)
+                    VALUES ('baseline', 'snapshot', '0867-01-01', '867', 'candidate')
+                    """
+                )
+                connection.execute(
+                    """
+                    INSERT INTO reference.character_baseline_states
+                    (baseline_id, character_id, sex, sex_status, lifecycle_status,
+                     validation_status)
+                    VALUES ('baseline', 'subject', 'male', 'defaulted', 'alive',
+                            'valid')
+                    """
+                )
+                connection.execute(
+                    """
+                    INSERT INTO reference.subject_contract_obligations
+                    (reference_snapshot_id, contract_type_id, obligation_id,
+                     level_index, is_default, definition_source_path,
+                     definition_source_line_start, definition_source_line_end,
+                     definition_source_order, raw_script, parser_version,
+                     validation_status)
+                    VALUES
+                        ('snapshot', 'administrative_themes',
+                         'admin_theme_military', 2, false,
+                         'common/subject_contracts/administrative.txt', 107, 159,
+                         3, '{}', '1.0.0', 'valid'),
+                        ('snapshot', 'administrative_themes',
+                         'admin_theme_frontier', 3, false,
+                         'common/subject_contracts/administrative.txt', 160, 215,
+                         4, '{}', '1.0.0', 'valid'),
+                        ('other_snapshot', 'administrative_themes',
+                         'admin_theme_military', 2, false,
+                         'common/subject_contracts/administrative.txt', 107, 159,
+                         3, '{}', '1.0.0', 'valid')
+                    """
+                )
+                invalid_catalog_rows = (
+                    """
+                    INSERT INTO reference.subject_contract_obligations
+                    (reference_snapshot_id, contract_type_id, obligation_id,
+                     level_index, is_default, definition_source_path,
+                     definition_source_line_start, definition_source_line_end,
+                     definition_source_order, raw_script, parser_version,
+                     validation_status)
+                    VALUES ('snapshot', 'administrative_themes',
+                            'admin_theme_duplicate', 2, false, 'test.txt', 1, 1,
+                            5, '{}', '1.0.0', 'invalid')
+                    """,
+                    """
+                    INSERT INTO reference.subject_contract_obligations
+                    (reference_snapshot_id, contract_type_id, obligation_id,
+                     level_index, is_default, definition_source_path,
+                     definition_source_line_start, definition_source_line_end,
+                     definition_source_order, raw_script, parser_version,
+                     validation_status)
+                    VALUES ('snapshot', 'special_contract', 'invalid_level', -1,
+                            false, 'test.txt', 1, 1, 1, '{}', '1.0.0', 'invalid')
+                    """,
+                )
+                for statement in invalid_catalog_rows:
+                    with self.assertRaises(duckdb.ConstraintException):
+                        connection.execute(statement)
+
+                connection.execute(
+                    """
+                    INSERT INTO reference.character_subject_contract_events
+                    (reference_snapshot_id, subject_character_id,
+                     liege_character_id, source_group, source_declaration_order,
+                     source_operation_order, effective_date, contract_type_id,
+                     obligation_id, level_index, branch_status, branch_evidence,
+                     source_path, source_line_start, source_line_end,
+                     validation_status)
+                    VALUES
+                        ('snapshot', 'subject', 'liege', 'character_history', 10,
+                         1, '0860-01-01', 'administrative_themes',
+                         'admin_theme_military', 2, 'executed',
+                         'government_allows=administrative', 'history/test.txt',
+                         10, 12, 'valid'),
+                        ('snapshot', 'subject', NULL, 'character_history', 10, 2,
+                         '0861-01-01', 'administrative_themes',
+                         'admin_theme_frontier', 3, 'executed', NULL,
+                         'history/test.txt', 13, 15, 'valid')
+                    """
+                )
+                self.assertEqual(
+                    (2,),
+                    connection.execute(
+                        "SELECT count(*) FROM reference.character_subject_contract_events"
+                    ).fetchone(),
+                )
+                invalid_events = (
+                    """
+                    INSERT INTO reference.character_subject_contract_events
+                    (reference_snapshot_id, subject_character_id, source_group,
+                     source_declaration_order, source_operation_order,
+                     effective_date, contract_type_id, obligation_id, level_index,
+                     branch_status, source_path, source_line_start,
+                     source_line_end, validation_status)
+                    VALUES ('snapshot', 'subject', 'character_history', 11, 1,
+                            '0862-01-01', 'administrative_themes',
+                            'admin_theme_frontier', 2, 'executed', 'test.txt',
+                            1, 1, 'invalid')
+                    """,
+                    """
+                    INSERT INTO reference.character_subject_contract_events
+                    (reference_snapshot_id, subject_character_id, source_group,
+                     source_declaration_order, source_operation_order,
+                     effective_date, contract_type_id, obligation_id, level_index,
+                     branch_status, source_path, source_line_start,
+                     source_line_end, validation_status)
+                    VALUES ('other_snapshot', 'subject', 'character_history', 11,
+                            2, '0862-01-01', 'administrative_themes',
+                            'admin_theme_frontier', 3, 'executed', 'test.txt',
+                            1, 1, 'invalid')
+                    """,
+                    """
+                    INSERT INTO reference.character_subject_contract_events
+                    (reference_snapshot_id, subject_character_id, source_group,
+                     source_declaration_order, source_operation_order,
+                     effective_date, contract_type_id, obligation_id, level_index,
+                     branch_status, source_path, source_line_start,
+                     source_line_end, validation_status)
+                    VALUES ('snapshot', 'subject', 'character_history', 11, 3,
+                            '0862-01-01', 'administrative_themes',
+                            'admin_theme_military', 2, 'inactive', 'test.txt',
+                            1, 1, 'invalid')
+                    """,
+                )
+                for statement in invalid_events:
+                    with self.assertRaises(duckdb.ConstraintException):
+                        connection.execute(statement)
+
+                connection.execute(
+                    """
+                    INSERT INTO reference.character_baseline_subject_contract_states
+                    (baseline_id, subject_character_id, contract_type_id,
+                     reference_snapshot_id, obligation_id, level_index,
+                     liege_character_id, effective_date, source_group,
+                     source_declaration_order, source_operation_order,
+                     validation_status)
+                    VALUES ('baseline', 'subject', 'administrative_themes',
+                            'snapshot', 'admin_theme_frontier', 3, NULL,
+                            '0861-01-01', 'character_history', 10, 2, 'valid')
+                    """
+                )
+                invalid_states = (
+                    """
+                    INSERT INTO reference.character_baseline_subject_contract_states
+                    (baseline_id, subject_character_id, contract_type_id,
+                     reference_snapshot_id, obligation_id, level_index,
+                     effective_date, source_group, source_declaration_order,
+                     source_operation_order, validation_status)
+                    VALUES ('baseline', 'missing_subject',
+                            'administrative_themes', 'snapshot',
+                            'admin_theme_frontier', 3, '0861-01-01',
+                            'character_history', 10, 2, 'invalid')
+                    """,
+                    """
+                    INSERT INTO reference.character_baseline_subject_contract_states
+                    (baseline_id, subject_character_id, contract_type_id,
+                     reference_snapshot_id, obligation_id, level_index,
+                     effective_date, source_group, source_declaration_order,
+                     source_operation_order, validation_status)
+                    VALUES ('baseline', 'subject', 'administrative_themes',
+                            'other_snapshot', 'admin_theme_military', 2,
+                            '0860-01-01', 'character_history', 10, 1, 'invalid')
+                    """,
+                    """
+                    INSERT INTO reference.character_baseline_subject_contract_states
+                    (baseline_id, subject_character_id, contract_type_id,
+                     reference_snapshot_id, obligation_id, level_index,
+                     effective_date, source_group, source_declaration_order,
+                     source_operation_order, validation_status)
+                    VALUES ('baseline', 'subject', 'administrative_themes',
+                            'snapshot', 'admin_theme_military', 2,
+                            '0861-01-01', 'character_history', 10, 2, 'invalid')
+                    """,
+                )
+                for statement in invalid_states:
+                    with self.assertRaises(duckdb.ConstraintException):
+                        connection.execute(statement)
+            finally:
+                connection.close()
+
+            connection = connect(database_path)
+            try:
+                self.assertEqual(
+                    (3, 2, 1),
+                    connection.execute(
+                        """
+                        SELECT
+                            (SELECT count(*)
+                             FROM reference.subject_contract_obligations),
+                            (SELECT count(*)
+                             FROM reference.character_subject_contract_events),
+                            (SELECT count(*)
+                             FROM reference.character_baseline_subject_contract_states)
+                        """
+                    ).fetchone(),
+                )
+            finally:
+                connection.close()
+
     def test_bootstraps_character_nickname_storage_boundary(self) -> None:
         with TemporaryDirectory() as temporary_directory:
             database_path = Path(temporary_directory) / "tracker.duckdb"
@@ -41,16 +363,16 @@ class RootDatabaseTests(unittest.TestCase):
                         "nickname_id": ("VARCHAR", "NO", "PRI"),
                         "is_bad": ("BOOLEAN", "NO", None),
                         "is_prefix": ("BOOLEAN", "NO", None),
-                        "localization_language": ("VARCHAR", "NO", None),
-                        "localization_key": ("VARCHAR", "NO", None),
-                        "display_name": ("VARCHAR", "NO", None),
+                        "localization_language": ("VARCHAR", "YES", None),
+                        "localization_key": ("VARCHAR", "YES", None),
+                        "display_name": ("VARCHAR", "YES", None),
                         "definition_source_path": ("VARCHAR", "NO", None),
                         "definition_source_line_start": ("INTEGER", "NO", None),
                         "definition_source_line_end": ("INTEGER", "NO", None),
                         "definition_source_order": ("BIGINT", "NO", None),
                         "raw_script": ("VARCHAR", "NO", None),
-                        "localization_source_path": ("VARCHAR", "NO", None),
-                        "localization_source_line": ("INTEGER", "NO", None),
+                        "localization_source_path": ("VARCHAR", "YES", None),
+                        "localization_source_line": ("INTEGER", "YES", None),
                         "parser_version": ("VARCHAR", "NO", None),
                         "validation_status": ("VARCHAR", "NO", None),
                         "validation_note": ("VARCHAR", "YES", None),
@@ -152,6 +474,15 @@ class RootDatabaseTests(unittest.TestCase):
                             'nick_test', 'the Test', 'common/nicknames/test.txt',
                             1, 3, 1, '{}', 'localization/english/test.yml', 1,
                             '1.0.0', 'valid', NULL)
+                    """
+                )
+                connection.execute(
+                    """
+                    INSERT INTO reference.nicknames
+                    VALUES ('snapshot', 'nick_orphan', true, false, NULL, NULL,
+                            NULL, 'common/nicknames/test.txt', 4, 4, 2,
+                            '{ is_bad = yes }', NULL, NULL, '1.0.0',
+                            'reviewed_orphan', 'No installed localization')
                     """
                 )
                 with self.assertRaises(duckdb.ConstraintException):
@@ -271,7 +602,7 @@ class RootDatabaseTests(unittest.TestCase):
             connection = connect(database_path)
             try:
                 self.assertEqual(
-                    (1, 2, 1),
+                    (2, 2, 1),
                     connection.execute(
                         """
                         SELECT

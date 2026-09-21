@@ -216,7 +216,8 @@ class PromotionReadinessServiceTests(unittest.TestCase):
         current = {finding.code: finding for finding in current_report.findings}
         self.assertEqual("passed", current["required_parsers"].classification)
         self.assertEqual(len(EXPECTED_PARSERS), current["required_parsers"].subject_count)
-        self.assertIn("installed_character_history@1.8.0", current["required_parsers"].detail)
+        self.assertIn("installed_character_history@1.10.0", current["required_parsers"].detail)
+        self.assertIn("installed_nicknames@1.0.0", current["required_parsers"].detail)
         self.assertEqual("passed", current["source_manifests"].classification)
         self.assertEqual(len(EXPECTED_PARSERS), current["source_manifests"].subject_count)
 
@@ -342,6 +343,80 @@ class PromotionReadinessServiceTests(unittest.TestCase):
         self.assertEqual(1, finding.subject_count)
         self.assertEqual("unknown_feature", finding.detail)
         self.assertEqual(("unknown_feature", "raw_flag", None), requirement)
+
+    def test_nickname_catalog_requires_every_baseline_used_stable_id(self) -> None:
+        connection = connect(self.database_path)
+        try:
+            connection.executemany(
+                """
+                INSERT INTO reference.localizations
+                VALUES ('snapshot', 'english', ?, NULL, ?, 'nicknames.yml', ?,
+                        '1.0.0', 'valid')
+                """,
+                [
+                    ("nick_direct", "the Direct", 2),
+                    ("nick_effect", "the Effect", 3),
+                ],
+            )
+            connection.executemany(
+                """
+                INSERT INTO reference.nicknames
+                VALUES ('snapshot', ?, false, false, 'english', ?, ?,
+                        'common/nicknames/test.txt', ?, ?, ?, '{}',
+                        'nicknames.yml', ?, '1.0.0', 'valid', NULL)
+                """,
+                [
+                    ("nick_direct", "nick_direct", "the Direct", 1, 1, 1, 2),
+                    ("nick_effect", "nick_effect", "the Effect", 2, 2, 2, 3),
+                ],
+            )
+            connection.executemany(
+                """
+                INSERT INTO source.character_history_declarations
+                (reference_snapshot_id, declaration_order, character_id,
+                 effective_date, operation_order, operation_key, value_kind,
+                 scalar_value, raw_script, source_path, source_line_start,
+                 source_line_end, encoding_name, parser_version,
+                 resolution_status, source_block_order)
+                VALUES ('snapshot', ?, ?, '0866-01-01', 1, ?, ?, ?, ?,
+                        'history/characters/test.txt', ?, ?, 'utf-8', '1.8.0',
+                        'preserved', ?)
+                """,
+                [
+                    (1, "1", "give_nickname", "scalar", "nick_direct", "nick_direct", 1, 1, 1),
+                    (2, "2", "effect", "block", None, "{ give_nickname = nick_effect }", 2, 2, 2),
+                ],
+            )
+        finally:
+            connection.close()
+
+        resolved = generate_promotion_readiness_report(
+            "baseline", database_path=self.database_path
+        )
+        resolved_finding = {item.code: item for item in resolved.findings}[
+            "nickname_catalog"
+        ]
+        connection = connect(self.database_path)
+        try:
+            connection.execute(
+                "DELETE FROM reference.nicknames WHERE nickname_id = 'nick_effect'"
+            )
+        finally:
+            connection.close()
+        unresolved = generate_promotion_readiness_report(
+            "baseline", database_path=self.database_path
+        )
+        unresolved_finding = {item.code: item for item in unresolved.findings}[
+            "nickname_catalog"
+        ]
+
+        self.assertEqual(
+            ("passed", 2),
+            (resolved_finding.classification, resolved_finding.subject_count),
+        )
+        self.assertEqual("blocking", unresolved_finding.classification)
+        self.assertEqual(1, unresolved_finding.subject_count)
+        self.assertEqual("nick_effect", unresolved_finding.detail)
 
     def _replace_with_current_parser_runs(self) -> None:
         connection = connect(self.database_path)

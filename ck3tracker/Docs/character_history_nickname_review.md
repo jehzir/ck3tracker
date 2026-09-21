@@ -103,4 +103,6 @@ The event identity must prevent duplicate materialization on reload while allowi
 
 ## Outcome
 
-The evidence decision is complete. The three-table schema is now bootstrapped empty with focused constraint coverage; parser behavior, candidate history rows, readiness, and promotion state remain unchanged. The next bounded implementation step is nickname catalog ingestion only. Parser replay remains a separate later action.
+The reviewed contract is implemented in character-history parser `1.9.0`. All 539 installed direct or direct-effect-child operations materialize as 538 sets and one clear; nested outcomes remain excluded. The 867 projection contains 120 characters across 63 active nickname IDs, with complete source-operation provenance and source-group-scoped replacement.
+
+O01 and O48 are fully resolved. O27's nickname/appearance declaration is normalized, but character `70150` remains warning because a separate same-day prestige body is unresolved. O28 and O29 retain warnings for gold and random witch state. Opaque character subjects fall from 95 to 82 without changing candidate or promotion status.

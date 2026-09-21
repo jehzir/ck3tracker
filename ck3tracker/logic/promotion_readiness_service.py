@@ -10,11 +10,12 @@ from pathlib import Path
 from uuid import uuid4
 
 from logic.root_database import connect
+from logic.title_history_loader import _assignments, _scalar_value
 
 
 EXPECTED_PARSERS = {
     "installed_bookmarks": "1.2.0",
-    "installed_character_history": "1.8.0",
+    "installed_character_history": "1.10.0",
     "installed_cultures": "1.1.0",
     "installed_dynasties": "1.0.0",
     "installed_dynasty_houses": "1.0.0",
@@ -22,6 +23,7 @@ EXPECTED_PARSERS = {
     "installed_governments": "1.0.0",
     "installed_landed_titles": "1.0.0",
     "installed_localization_english": "1.0.0",
+    "installed_nicknames": "1.0.0",
     "installed_title_history": "1.22.0",
 }
 
@@ -637,6 +639,96 @@ def _evaluate(
         "Nonselectable placeholders do not block location selection.",
     )
 
+    invalid_nicknames = _count(
+        connection,
+        """
+        SELECT count(*) FROM reference.nicknames
+        WHERE reference_snapshot_id = ?
+          AND (
+              validation_status NOT IN ('valid', 'reviewed_orphan')
+              OR (
+                  validation_status = 'reviewed_orphan'
+                  AND (
+                      nickname_id <> 'nick_the_bastard_rumoured'
+                      OR localization_language IS NOT NULL
+                      OR localization_key IS NOT NULL
+                      OR display_name IS NOT NULL
+                      OR localization_source_path IS NOT NULL
+                      OR localization_source_line IS NOT NULL
+                  )
+              )
+          )
+        """,
+        [snapshot_id],
+    )
+    nickname_count = _count(
+        connection,
+        "SELECT count(*) FROM reference.nicknames WHERE reference_snapshot_id = ?",
+        [snapshot_id],
+    )
+    baseline_nickname_ids = _baseline_nickname_ids(
+        connection, baseline_id, snapshot_id
+    )
+    valid_nickname_ids = set()
+    if baseline_nickname_ids:
+        valid_nickname_ids = {
+            str(row[0])
+            for row in connection.execute(
+                """
+                SELECT nickname_id FROM reference.nicknames
+                WHERE reference_snapshot_id = ?
+                  AND nickname_id IN (SELECT unnest(?))
+                  AND validation_status = 'valid'
+                  AND localization_language = 'english'
+                  AND localization_key = nickname_id
+                  AND display_name IS NOT NULL
+                  AND localization_source_path IS NOT NULL
+                  AND localization_source_line IS NOT NULL
+                """,
+                [snapshot_id, sorted(baseline_nickname_ids)],
+            ).fetchall()
+        }
+    unresolved_nickname_ids = sorted(baseline_nickname_ids - valid_nickname_ids)
+    nickname_blockers = invalid_nicknames + len(unresolved_nickname_ids)
+    if not nickname_count:
+        nickname_blockers += 1
+    add(
+        "nickname_catalog",
+        "blocking" if nickname_blockers else "passed",
+        nickname_blockers if nickname_blockers else len(baseline_nickname_ids),
+        (
+            "Nickname catalog or baseline usage is unresolved"
+            if nickname_blockers
+            else "Every baseline-used nickname has valid display provenance"
+        ),
+        (
+            ", ".join(unresolved_nickname_ids)
+            if unresolved_nickname_ids
+            else f"{len(baseline_nickname_ids)} baseline-used stable IDs resolve to valid English catalog rows."
+            if nickname_count
+            else "Nickname catalog is not loaded."
+        ),
+    )
+    nickname_orphans = _count(
+        connection,
+        """
+        SELECT count(*) FROM reference.nicknames
+        WHERE reference_snapshot_id = ? AND validation_status = 'reviewed_orphan'
+        """,
+        [snapshot_id],
+    )
+    add(
+        "nickname_catalog_orphans",
+        "informational" if nickname_orphans else "passed",
+        nickname_orphans,
+        (
+            "Reviewed non-localized nickname definitions are preserved"
+            if nickname_orphans
+            else "Every nickname definition has display provenance"
+        ),
+        "Reviewed orphans cannot be used by baseline history and expose no invented display label.",
+    )
+
     wiki_pages = _count(
         connection,
         """
@@ -859,3 +951,38 @@ def _evaluate(
 
 def _count(connection, query: str, parameters: list[object] | None = None) -> int:
     return int(connection.execute(query, parameters or []).fetchone()[0])
+
+
+def _baseline_nickname_ids(
+    connection,
+    baseline_id: str,
+    snapshot_id: str,
+) -> set[str]:
+    rows = connection.execute(
+        """
+        SELECT operation_key, value_kind, scalar_value, raw_script
+        FROM source.character_history_declarations declaration
+        JOIN reference.baselines baseline
+          ON baseline.baseline_id = ?
+         AND baseline.reference_snapshot_id = declaration.reference_snapshot_id
+        WHERE declaration.reference_snapshot_id = ?
+          AND coalesce(
+              try_cast(declaration.effective_date AS DATE),
+              DATE '0001-01-01'
+          ) <= baseline.baseline_date
+          AND declaration.operation_key IN ('give_nickname', 'effect')
+        """,
+        [baseline_id, snapshot_id],
+    ).fetchall()
+    nickname_ids: set[str] = set()
+    for operation_key, value_kind, scalar_value, raw_script in rows:
+        if operation_key == "give_nickname":
+            if value_kind == "scalar" and scalar_value:
+                nickname_ids.add(str(scalar_value))
+            continue
+        if value_kind != "block":
+            continue
+        for assignment in _assignments(str(raw_script)[1:-1]):
+            if assignment.key == "give_nickname" and assignment.value_kind == "scalar":
+                nickname_ids.add(_scalar_value(assignment.raw_value))
+    return nickname_ids
